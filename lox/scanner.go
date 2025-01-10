@@ -1,5 +1,7 @@
 package lox
 
+import "strconv"
+
 type scanner struct {
 	source string
 	tokens []token
@@ -79,6 +81,8 @@ func (s *scanner) scanNextToken() {
 		s.addConditionalToken(tEqual, tEqualEqual)
 	case '"':
 		s.scanString()
+	case '0', '1', '2', '3', '4', '5', '6', '7', '8', '9': // digits
+		s.scanNumber()
 	default:
 		logError(s.line, string(c))
 	}
@@ -107,6 +111,29 @@ func (s *scanner) scanString() {
 	s.addToken(tString, value)
 }
 
+// scan numbers like 1,2, 3.53, etc
+func (s *scanner) scanNumber() {
+	for isDigit(s.peek()) {
+		s.advance()
+	}
+
+	if s.peek() == '.' && isDigit(s.peekNext()) {
+		s.advance()             // consume the "."
+		for isDigit(s.peek()) { // consume digits after the decimal
+			s.advance()
+		}
+	}
+
+	// convert string to float
+	num_str := s.source[s.start:s.curr]
+	num, err := strconv.ParseFloat(num_str, 64)
+	if err != nil {
+		logError(s.line, err.Error())
+		return
+	}
+	s.addToken(tNumber, num)
+}
+
 // these are the characters - !,<,>,= which token type they become depends on if the next character is =
 func (s *scanner) addConditionalToken(solo, withEqual TokenType) {
 	if s.isAtEnd() || s.source[s.curr] != '=' {
@@ -118,16 +145,10 @@ func (s *scanner) addConditionalToken(solo, withEqual TokenType) {
 }
 
 func (s *scanner) addSimpleToken(tokenType TokenType) {
-	s.tokens = append(s.tokens, token{
-		tokenType: tokenType,
-		lexeme:    s.source[s.start:s.curr],
-		literal:   nil,
-		line:      s.line,
-		column:    s.lineChar,
-	})
+	s.addToken(tokenType, nil)
 }
 
-func (s *scanner) addToken(tokenType TokenType, literal string) {
+func (s *scanner) addToken(tokenType TokenType, literal interface{}) {
 	s.tokens = append(s.tokens, token{
 		tokenType: tokenType,
 		lexeme:    s.source[s.start:s.curr],
@@ -145,6 +166,17 @@ func (s *scanner) peek() byte {
 	return s.source[s.curr]
 }
 
+func (s *scanner) peekNext() byte {
+	if s.curr+1 >= len(s.source) {
+		return 0
+	}
+	return s.source[s.curr+1]
+}
+
 func (s *scanner) isAtEnd() bool {
 	return s.curr >= len(s.source)
+}
+
+func isDigit(c byte) bool {
+	return c >= '0' && c <= '9'
 }

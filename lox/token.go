@@ -65,7 +65,7 @@ type token struct {
 func (t token) String() string {
 	literalVal := "null"
 	if t.literal != nil {
-		literalVal = t.literal.(string)
+		literalVal = fmt.Sprintf("%v", t.literal)
 	}
 	return fmt.Sprintf("%s %s %s", t.tokenType, t.lexeme, literalVal)
 }
