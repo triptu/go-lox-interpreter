@@ -96,9 +96,9 @@ func (s *scanner) addConditionalToken(solo, withEqual TokenType) {
 	if s.isAtEnd() || s.source[s.curr] != '=' {
 		s.addSimpleToken(solo)
 	} else {
-		s.addSimpleToken(withEqual)
 		s.curr++
 		s.lineChar++
+		s.addSimpleToken(withEqual)
 	}
 }
 
