@@ -63,11 +63,21 @@ type token struct {
 }
 
 func (t token) String() string {
-	literalVal := "null"
-	if t.literal != nil {
-		literalVal = fmt.Sprintf("%v", t.literal)
+	if t.tokenType == tNumber {
+		f := t.literal.(float64)
+		if f == float64(int(f)) {
+			// add extra zero to integer when printing
+			return fmt.Sprintf("%s %s %.1f", t.tokenType, t.lexeme, f)
+		}
+		// %g to avoid any trailing zeroes
+		return fmt.Sprintf("%s %s %g", t.tokenType, t.lexeme, f)
+	} else {
+		literalVal := "null"
+		if t.literal != nil {
+			literalVal = fmt.Sprintf("%v", t.literal)
+		}
+		return fmt.Sprintf("%s %s %s", t.tokenType, t.lexeme, literalVal)
 	}
-	return fmt.Sprintf("%s %s %s", t.tokenType, t.lexeme, literalVal)
 }
 
 func makeEOFToken(line, column int) token {
