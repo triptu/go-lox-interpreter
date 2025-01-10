@@ -84,10 +84,12 @@ func (s *scanner) scanNextToken() {
 		s.addConditionalToken(tEqual, tEqualEqual)
 	case '"':
 		s.scanString()
-	case '0', '1', '2', '3', '4', '5', '6', '7', '8', '9': // digits
-		s.scanNumber()
 	default:
-		logError(s.line, fmt.Sprintf("Unexpected character: %s", string(c)))
+		if isDigit(c) {
+			s.scanNumber()
+		} else {
+			logError(s.line, fmt.Sprintf("Unexpected character: %s", string(c)))
+		}
 	}
 }
 
