@@ -1,6 +1,9 @@
 package lox
 
-import "strconv"
+import (
+	"fmt"
+	"strconv"
+)
 
 type scanner struct {
 	source string
@@ -84,7 +87,7 @@ func (s *scanner) scanNextToken() {
 	case '0', '1', '2', '3', '4', '5', '6', '7', '8', '9': // digits
 		s.scanNumber()
 	default:
-		logError(s.line, string(c))
+		logError(s.line, fmt.Sprintf("Unexpected character: %s", string(c)))
 	}
 }
 

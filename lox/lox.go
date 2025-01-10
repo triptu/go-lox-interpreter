@@ -9,7 +9,7 @@ var hasError bool
 
 func logError(line int, msg string) {
 	hasError = true
-	fmt.Fprintf(os.Stderr, "[line %d] Error: Unexpected character: %s\n", line, msg)
+	fmt.Fprintf(os.Stderr, "[line %d] Error: %s\n", line, msg)
 }
 
 func RunCode(code []byte) {
