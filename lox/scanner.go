@@ -30,7 +30,7 @@ func createScanner(source string) *scanner {
 }
 
 func (s *scanner) scanTokens() []token {
-	for s.curr < len(s.source) {
+	for !s.isAtEnd() {
 		s.start = s.curr
 		s.scanNextToken()
 	}
@@ -63,12 +63,42 @@ func (s *scanner) scanNextToken() {
 	case ';':
 		s.addSimpleToken(tSemicolon)
 	case '/':
-		s.addSimpleToken(tSlash)
+		if s.peek() == '/' {
+			for !s.isAtEnd() && s.peek() != '\n' { // ignore comments
+				s.curr++
+			}
+		} else {
+			s.addSimpleToken(tSlash)
+		}
 	case '*':
 		s.addSimpleToken(tStar)
+	case ' ', '\t', '\r':
+		// ignore whitespace
+	case '\n':
+		s.line++
+		s.lineChar = 1
+	case '!':
+		s.addConditionalToken(tBang, tBangEqual)
+	case '<':
+		s.addConditionalToken(tLess, tLessEqual)
+	case '>':
+		s.addConditionalToken(tGreater, tGreaterEqual)
+	case '=':
+		s.addConditionalToken(tEqual, tEqualEqual)
 	default:
 		s.hasError = true
 		fmt.Fprintf(os.Stderr, "[line %d] Error: Unexpected character: %s\n", s.line, string(c))
+	}
+}
+
+// these are the characters - !,<,>,= which token type they become depends on if the next character is =
+func (s *scanner) addConditionalToken(solo, withEqual TokenType) {
+	if s.isAtEnd() || s.source[s.curr] != '=' {
+		s.addSimpleToken(solo)
+	} else {
+		s.addSimpleToken(withEqual)
+		s.curr++
+		s.lineChar++
 	}
 }
 
@@ -90,4 +120,16 @@ func (s *scanner) addLiteralToken(tokenType TokenType, literal string) {
 		line:      s.line,
 		column:    s.lineChar,
 	})
+}
+
+// get the next character safely
+func (s *scanner) peek() byte {
+	if s.isAtEnd() {
+		return 0
+	}
+	return s.source[s.curr]
+}
+
+func (s *scanner) isAtEnd() bool {
+	return s.curr >= len(s.source)
 }
