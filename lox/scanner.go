@@ -102,7 +102,7 @@ func (s *scanner) scanString() {
 	}
 
 	if s.isAtEnd() {
-		logError(s.line, "Unterminated string")
+		logError(s.line, "Unterminated string.")
 		return
 	}
 
