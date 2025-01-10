@@ -87,6 +87,8 @@ func (s *scanner) scanNextToken() {
 	default:
 		if isDigit(c) {
 			s.scanNumber()
+		} else if isAlpha(c) {
+			s.scanIdentifier()
 		} else {
 			logError(s.line, fmt.Sprintf("Unexpected character: %s", string(c)))
 		}
@@ -139,6 +141,21 @@ func (s *scanner) scanNumber() {
 	s.addToken(tNumber, num)
 }
 
+// note that some identifiers are reserved keywords
+func (s *scanner) scanIdentifier() {
+	for isAlphaNumeric(s.peek()) {
+		s.advance()
+	}
+
+	identifier := s.source[s.start:s.curr]
+	tokenType, ok := keywords[identifier]
+	if !ok {
+		s.addSimpleToken(tIdentifier)
+	} else {
+		s.addSimpleToken(tokenType)
+	}
+}
+
 // these are the characters - !,<,>,= which token type they become depends on if the next character is =
 func (s *scanner) addConditionalToken(solo, withEqual TokenType) {
 	if s.isAtEnd() || s.source[s.curr] != '=' {
@@ -184,4 +201,12 @@ func (s *scanner) isAtEnd() bool {
 
 func isDigit(c byte) bool {
 	return c >= '0' && c <= '9'
+}
+
+func isAlpha(c byte) bool {
+	return (c >= 'a' && c <= 'z') || (c >= 'A' && c <= 'Z') || c == '_'
+}
+
+func isAlphaNumeric(c byte) bool {
+	return isAlpha(c) || isDigit(c)
 }

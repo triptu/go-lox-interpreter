@@ -54,6 +54,25 @@ const (
 	tEof = "EOF"
 )
 
+var keywords = map[string]TokenType{
+	"and":    tAnd,
+	"class":  tClass,
+	"else":   tElse,
+	"false":  tFalse,
+	"for":    tFor,
+	"fun":    tFun,
+	"if":     tIf,
+	"nil":    tNil,
+	"or":     tOr,
+	"print":  tPrint,
+	"return": tReturn,
+	"super":  tSuper,
+	"this":   tThis,
+	"true":   tTrue,
+	"var":    tVar,
+	"while":  tWhile,
+}
+
 type token struct {
 	tokenType TokenType
 	lexeme    string
