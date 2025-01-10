@@ -18,7 +18,7 @@ func main() {
 
 	command := os.Args[1]
 
-	if command != "tokenize" {
+	if command != "tokenize" && command != "parse" {
 		fmt.Fprintf(os.Stderr, "Unknown command: %s\n", command)
 		os.Exit(1)
 	}
@@ -30,5 +30,9 @@ func main() {
 		os.Exit(1)
 	}
 
-	lox.RunCode(fileContents)
+	if command == "tokenize" {
+		lox.Tokenize(fileContents)
+	} else if command == "parse" {
+		lox.Parse(fileContents)
+	}
 }

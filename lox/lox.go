@@ -12,7 +12,7 @@ func logError(line int, msg string) {
 	fmt.Fprintf(os.Stderr, "[line %d] Error: %s\n", line, msg)
 }
 
-func RunCode(code []byte) {
+func Tokenize(code []byte) {
 	source := string(code)
 	scanner := createScanner(source)
 	tokens := scanner.scanTokens()
@@ -22,4 +22,8 @@ func RunCode(code []byte) {
 	if hasError {
 		os.Exit(65)
 	}
+}
+
+func Parse(code []byte) {
+	fmt.Println("parsing code")
 }
