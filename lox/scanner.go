@@ -1,5 +1,7 @@
 package lox
 
+import "fmt"
+
 type scanner struct {
 	source string
 	tokens []token
@@ -63,7 +65,7 @@ func (s *scanner) scanNextToken() {
 		s.addSimpleToken(tStar)
 	default:
 		s.hasError = true
-		prettyError(s.line, s.lineChar, "Unexpected character")
+		fmt.Printf("[line %d] Error: Unexpected character: %s\n", s.line, string(c))
 	}
 }
 
