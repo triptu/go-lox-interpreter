@@ -1,10 +1,5 @@
 package lox
 
-import (
-	"fmt"
-	"os"
-)
-
 type scanner struct {
 	source string
 	tokens []token
@@ -14,8 +9,6 @@ type scanner struct {
 	curr     int // curr index we're at
 	line     int // the line we're at
 	lineChar int // the char we're at on the current line
-
-	hasError bool
 }
 
 func createScanner(source string) *scanner {
@@ -41,8 +34,7 @@ func (s *scanner) scanTokens() []token {
 
 func (s *scanner) scanNextToken() {
 	c := s.source[s.curr]
-	s.curr++
-	s.lineChar++
+	s.advance()
 	switch c {
 	case '(':
 		s.addSimpleToken(tLeftParen)
@@ -65,7 +57,7 @@ func (s *scanner) scanNextToken() {
 	case '/':
 		if s.peek() == '/' {
 			for !s.isAtEnd() && s.peek() != '\n' { // ignore comments
-				s.curr++
+				s.advance()
 			}
 		} else {
 			s.addSimpleToken(tSlash)
@@ -85,10 +77,34 @@ func (s *scanner) scanNextToken() {
 		s.addConditionalToken(tGreater, tGreaterEqual)
 	case '=':
 		s.addConditionalToken(tEqual, tEqualEqual)
+	case '"':
+		s.scanString()
 	default:
-		s.hasError = true
-		fmt.Fprintf(os.Stderr, "[line %d] Error: Unexpected character: %s\n", s.line, string(c))
+		logError(s.line, string(c))
 	}
+}
+
+func (s *scanner) advance() {
+	s.curr++
+	s.lineChar++
+}
+
+func (s *scanner) scanString() {
+	for !s.isAtEnd() && s.peek() != '"' {
+		s.advance()
+		if s.peek() == '\n' { // strings can be multiline
+			s.line++
+		}
+	}
+
+	if s.isAtEnd() {
+		logError(s.line, "Unterminated string")
+		return
+	}
+
+	s.advance() // skip the closing "
+	value := s.source[s.start+1 : s.curr-1]
+	s.addToken(tString, value)
 }
 
 // these are the characters - !,<,>,= which token type they become depends on if the next character is =
@@ -96,8 +112,7 @@ func (s *scanner) addConditionalToken(solo, withEqual TokenType) {
 	if s.isAtEnd() || s.source[s.curr] != '=' {
 		s.addSimpleToken(solo)
 	} else {
-		s.curr++
-		s.lineChar++
+		s.advance()
 		s.addSimpleToken(withEqual)
 	}
 }
@@ -112,7 +127,7 @@ func (s *scanner) addSimpleToken(tokenType TokenType) {
 	})
 }
 
-func (s *scanner) addLiteralToken(tokenType TokenType, literal string) {
+func (s *scanner) addToken(tokenType TokenType, literal string) {
 	s.tokens = append(s.tokens, token{
 		tokenType: tokenType,
 		lexeme:    s.source[s.start:s.curr],
