@@ -50,6 +50,6 @@ func Evaluate(code []byte) {
 		os.Exit(65)
 	} else {
 		interpreter := interpreter{}
-		fmt.Println(interpreter.evaluate(parsedExpr))
+		fmt.Println(getTokenLiteralStr(interpreter.evaluate(parsedExpr)))
 	}
 }
