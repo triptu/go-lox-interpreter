@@ -12,10 +12,8 @@ func logError(line int, msg string) {
 	fmt.Fprintf(os.Stderr, "[line %d] Error: %s\n", line, msg)
 }
 
-func Tokenize(code []byte) {
-	source := string(code)
-	scanner := createScanner(source)
-	tokens := scanner.scanTokens()
+func PrintTokens(code []byte) {
+	tokens := tokenize(code)
 	for _, token := range tokens {
 		fmt.Println(token)
 	}
@@ -24,7 +22,18 @@ func Tokenize(code []byte) {
 	}
 }
 
+func tokenize(code []byte) []token {
+	source := string(code)
+	scanner := createScanner(source)
+	tokens := scanner.scanTokens()
+	return tokens
+
+}
+
 func Parse(code []byte) {
-	fmt.Println("parsing code")
-	testPrinter()
+	tokens := tokenize(code)
+	parser := newParser[expr[any]](tokens)
+	expr := parser.expression()
+	printer := astPrinter{}
+	printer.print(expr)
 }

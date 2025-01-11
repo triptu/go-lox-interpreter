@@ -31,7 +31,7 @@ func main() {
 	}
 
 	if command == "tokenize" {
-		lox.Tokenize(fileContents)
+		lox.PrintTokens(fileContents)
 	} else if command == "parse" {
 		lox.Parse(fileContents)
 	}
