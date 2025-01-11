@@ -121,6 +121,8 @@ var keywords = map[string]TokenType{
 	"while":  tWhile,
 }
 
+var binaryTokens = []TokenType{tPlus, tStar, tSlash, tGreater, tLess, tEqual, tLessEqual, tGreaterEqual, tBangEqual, tEqualEqual, tAnd, tOr}
+
 type token struct {
 	tokenType TokenType
 	lexeme    string

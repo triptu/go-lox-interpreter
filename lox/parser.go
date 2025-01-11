@@ -168,7 +168,11 @@ func (p *parser) primary() (expr[any], error) {
 			return eGrouping[any]{expression: expr}, nil
 		}
 	default:
-		logError(token.line, "Error at '"+token.lexeme+"': Expect expression.")
+		errStr := "': Expect expression."
+		if arrIncludes(binaryTokens, token.tokenType) {
+			errStr = ": Operator found without left-hand operand."
+		}
+		logError(token.line, "Error at '"+token.lexeme+errStr)
 		p.consumeCascadingErrors()
 		return nil, errors.New("unexpected token: " + token.lexeme)
 	}
@@ -199,8 +203,12 @@ func (p *parser) peekMatch(tokens ...TokenType) bool {
 	if p.isAtEnd() {
 		return false
 	}
-	for _, tokenType := range tokens {
-		if p.tokens[p.curr].tokenType == tokenType {
+	return arrIncludes(tokens, p.tokens[p.curr].tokenType)
+}
+
+func arrIncludes[T comparable](arr []T, item T) bool {
+	for _, v := range arr {
+		if v == item {
 			return true
 		}
 	}
