@@ -24,20 +24,30 @@ func (i interpreter) visitBinary(e eBinary[any]) any {
 			return left.(string) + right.(string)
 		} else if isNumber(left) && isNumber(right) {
 			return left.(float64) + right.(float64)
+		} else {
+			logRuntimeError(e.operator.line, "for plus, operands must be two numbers or two strings.")
 		}
 	case tMinus:
+		validateNumberOperand2(left, right, e.operator)
 		return left.(float64) - right.(float64)
 	case tStar:
+		validateNumberOperand2(left, right, e.operator)
 		return left.(float64) * right.(float64)
 	case tSlash:
+		validateNumberOperand2(left, right, e.operator)
+		validateNonZeroDenom(right.(float64), e.operator)
 		return left.(float64) / right.(float64)
 	case tGreater:
+		validateNumberOperand2(left, right, e.operator)
 		return left.(float64) > right.(float64)
 	case tGreaterEqual:
+		validateNumberOperand2(left, right, e.operator)
 		return left.(float64) >= right.(float64)
 	case tLess:
+		validateNumberOperand2(left, right, e.operator)
 		return left.(float64) < right.(float64)
 	case tLessEqual:
+		validateNumberOperand2(left, right, e.operator)
 		return left.(float64) <= right.(float64)
 	case tEqualEqual:
 		return left == right
@@ -83,6 +93,7 @@ func (i interpreter) visitUnary(e eUnary[any]) any {
 	right := i.evaluate(e.right)
 	switch e.operator.tokenType {
 	case tMinus:
+		validateNumberOperand(right, e.operator)
 		return -right.(float64)
 	case tBang:
 		return !isTruthy(right)
@@ -115,4 +126,22 @@ func isString(value any) bool {
 func isNumber(value any) bool {
 	_, ok := value.(float64)
 	return ok
+}
+
+func validateNumberOperand(num any, operator token) {
+	if !isNumber(num) {
+		logRuntimeError(operator.line, "Operand must be a number for operator: "+operator.lexeme)
+	}
+}
+
+func validateNumberOperand2(num1, num2 any, operator token) {
+	if !isNumber(num1) || !isNumber(num2) {
+		logRuntimeError(operator.line, "Operands must be numbers for operator: "+operator.lexeme)
+	}
+}
+
+func validateNonZeroDenom(denom float64, operator token) {
+	if denom == 0 {
+		logRuntimeError(operator.line, "Division by zero")
+	}
 }

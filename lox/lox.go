@@ -6,10 +6,17 @@ import (
 )
 
 var hasError bool
+var hasRuntimeError bool
 
 func logError(line int, msg string) {
 	hasError = true
 	fmt.Fprintf(os.Stderr, "[line %d] Error: %s\n", line, msg)
+}
+
+func logRuntimeError(line int, msg string) {
+	hasRuntimeError = true
+	fmt.Fprintf(os.Stderr, "[line %d] Runtime Error: %s\n", line, msg)
+	panic("runtime error")
 }
 
 func PrintTokens(code []byte) {
@@ -43,7 +50,20 @@ func Parse(code []byte) {
 }
 
 func Evaluate(code []byte) {
+	defer func() {
+		if r := recover(); r != nil {
+			if !hasRuntimeError {
+				fmt.Println("Recovered from run time error panic, Error: ", r)
+			}
+			os.Exit(70)
+		}
+	}()
+
 	tokens := tokenize(code)
+	if hasError {
+		os.Exit(65)
+	}
+
 	parser := newParser[expr[any]](tokens)
 	parsedExpr := parser.parse()
 	if hasError {
@@ -51,6 +71,9 @@ func Evaluate(code []byte) {
 	} else {
 		interpreter := interpreter{}
 		fmt.Println(getLiteralStr(interpreter.evaluate(parsedExpr)))
+		if hasRuntimeError {
+			os.Exit(70)
+		}
 	}
 }
 
