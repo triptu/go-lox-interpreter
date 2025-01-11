@@ -150,7 +150,7 @@ func getTokenLiteralStr(literal interface{}) string {
 			return fmt.Sprintf("%g", literal) // avoid trailing zeroes
 		}
 	case string:
-		return fmt.Sprintf("%s", literal)
+		return literal
 	default:
 		return fmt.Sprintf("%v", literal)
 	}
