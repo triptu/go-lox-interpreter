@@ -26,4 +26,5 @@ func Tokenize(code []byte) {
 
 func Parse(code []byte) {
 	fmt.Println("parsing code")
+	testPrinter()
 }

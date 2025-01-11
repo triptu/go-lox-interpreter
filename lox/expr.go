@@ -5,83 +5,135 @@ This file contains a lot of struct which are data types to represent different
 expressions in our language.
 */
 
-type expr interface{}
+type expr[R any] interface {
+	accept(exprVisitor[R]) R
+}
 
 /*
 action classes implement this interface defining how they would process each type of expression
 */
 type exprVisitor[R any] interface {
-	visitAssign(eAssign) R
-	visitBinary(eBinary) R
-	visitCall(eCall) R
-	visitGet(eGet) R
-	visitGrouping(eGrouping) R
-	visitLiteral(eLiteral) R
-	visitLogical(eLogical) R
-	visitSet(eSet) R
-	visitSuper(eSuper) R
-	visitThis(eThis) R
-	visitUnary(eUnary) R
-	visitVariable(eVariable) R
+	visitAssign(eAssign[R]) R
+	visitBinary(eBinary[R]) R
+	visitCall(eCall[R]) R
+	visitGet(eGet[R]) R
+	visitGrouping(eGrouping[R]) R
+	visitLiteral(eLiteral[R]) R
+	visitLogical(eLogical[R]) R
+	visitSet(eSet[R]) R
+	visitSuper(eSuper[R]) R
+	visitThis(eThis[R]) R
+	visitUnary(eUnary[R]) R
+	visitVariable(eVariable[R]) R
 }
 
-type eAssign struct {
+type eAssign[R any] struct {
 	name  token
-	value expr
+	value expr[R]
 }
 
-type eBinary struct {
-	left     expr
+type eBinary[R any] struct {
+	left     expr[R]
 	operator token
-	right    expr
+	right    expr[R]
 }
 
-type eCall struct {
-	callee    expr
+type eCall[R any] struct {
+	callee    expr[R]
 	paren     token
-	arguments []expr
+	arguments []expr[R]
 }
 
-type eGet struct {
-	object expr
+type eGet[R any] struct {
+	object expr[R]
 	name   token
 }
 
-type eGrouping struct {
-	expression expr
+type eGrouping[R any] struct {
+	expression expr[R]
 }
 
-type eLiteral struct {
+type eLiteral[R any] struct {
 	value interface{}
 }
 
-type eLogical struct {
-	left     expr
+type eLogical[R any] struct {
+	left     expr[R]
 	operator token
-	right    expr
+	right    expr[R]
 }
 
-type eSet struct {
-	object expr
+type eSet[R any] struct {
+	object expr[R]
 	name   token
-	value  expr
+	value  expr[R]
 }
 
-type eSuper struct {
+type eSuper[R any] struct {
 	keyword token
 	method  token
 }
 
-type eThis struct {
+type eThis[R any] struct {
 	keyword token
 }
 
-type eUnary struct {
+type eUnary[R any] struct {
 	operator token
-	right    expr
+	right    expr[R]
 }
 
 // variable access expression
-type eVariable struct {
+type eVariable[R any] struct {
 	name token
+}
+
+// define accept methods for each type of expression
+
+func (e eAssign[R]) accept(v exprVisitor[R]) R {
+	return v.visitAssign(e)
+}
+
+func (e eBinary[R]) accept(v exprVisitor[R]) R {
+	return v.visitBinary(e)
+}
+
+func (e eCall[R]) accept(v exprVisitor[R]) R {
+	return v.visitCall(e)
+}
+
+func (e eGet[R]) accept(v exprVisitor[R]) R {
+	return v.visitGet(e)
+}
+
+func (e eGrouping[R]) accept(v exprVisitor[R]) R {
+	return v.visitGrouping(e)
+}
+
+func (e eLiteral[R]) accept(v exprVisitor[R]) R {
+	return v.visitLiteral(e)
+}
+
+func (e eLogical[R]) accept(v exprVisitor[R]) R {
+	return v.visitLogical(e)
+}
+
+func (e eSet[R]) accept(v exprVisitor[R]) R {
+	return v.visitSet(e)
+}
+
+func (e eSuper[R]) accept(v exprVisitor[R]) R {
+	return v.visitSuper(e)
+}
+
+func (e eThis[R]) accept(v exprVisitor[R]) R {
+	return v.visitThis(e)
+}
+
+func (e eUnary[R]) accept(v exprVisitor[R]) R {
+	return v.visitUnary(e)
+}
+
+func (e eVariable[R]) accept(v exprVisitor[R]) R {
+	return v.visitVariable(e)
 }
