@@ -37,7 +37,10 @@ func Parse(code []byte) {
 	if hasError {
 		os.Exit(65)
 	} else {
-		printer := astPrinter{}
-		printer.print(parsedExpr)
+		// printer := astPrinter{}
+		// printer.print(parsedExpr)
+
+		interpreter := interpreter{}
+		fmt.Println(interpreter.evaluate(parsedExpr))
 	}
 }

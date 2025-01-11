@@ -1,6 +1,8 @@
 package lox
 
-import "errors"
+import (
+	"errors"
+)
 
 type parser struct {
 	tokens []token
@@ -179,7 +181,7 @@ func (p *parser) primary() (expr[any], error) {
 }
 
 func (p *parser) isAtEnd() bool {
-	return p.curr >= len(p.tokens)
+	return p.tokens[p.curr].tokenType == tEof
 }
 
 // when we hit an issue, we increment till we can perhaps restart the parsing process
