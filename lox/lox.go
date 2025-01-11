@@ -33,7 +33,7 @@ func tokenize(code []byte) []token {
 func Parse(code []byte) {
 	defer func() {
 		if r := recover(); r != nil {
-			fmt.Println("Recovered. Error: ", r)
+			// fmt.Println("Recovered. Error: ", r)
 			if hasError {
 				os.Exit(65)
 			}
