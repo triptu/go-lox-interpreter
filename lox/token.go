@@ -130,12 +130,16 @@ type token struct {
 }
 
 func (t token) String() string {
-	return fmt.Sprintf("%s %s %s", tokenNames[t.tokenType], t.lexeme, getTokenLiteralStr(t.literal))
+	literal := "null"
+	if t.literal != nil {
+		literal = getTokenLiteralStr(t.literal)
+	}
+	return fmt.Sprintf("%s %s %s", tokenNames[t.tokenType], t.lexeme, literal)
 }
 
 func getTokenLiteralStr(literal interface{}) string {
 	if literal == nil {
-		return "null"
+		return "nil"
 	}
 
 	switch literal := literal.(type) {
