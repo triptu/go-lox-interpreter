@@ -50,6 +50,21 @@ func Evaluate(code []byte) {
 		os.Exit(65)
 	} else {
 		interpreter := interpreter{}
-		fmt.Println(getTokenLiteralStr(interpreter.evaluate(parsedExpr)))
+		fmt.Println(getLiteralStr(interpreter.evaluate(parsedExpr)))
+	}
+}
+
+func getLiteralStr(literal interface{}) string {
+	if literal == nil {
+		return "nil"
+	}
+
+	switch literal := literal.(type) {
+	case float64:
+		return fmt.Sprintf("%g", literal) // no extra zeroes
+	case string:
+		return literal
+	default:
+		return fmt.Sprintf("%v", literal)
 	}
 }
