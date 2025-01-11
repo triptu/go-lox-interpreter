@@ -130,18 +130,26 @@ type token struct {
 }
 
 func (t token) String() string {
-	literalVal := "null"
-	if t.tokenType == tNumber {
-		f := t.literal.(float64)
-		if f == float64(int(f)) {
-			literalVal = fmt.Sprintf("%.1f", t.literal) // extra zero for integers
-		} else {
-			literalVal = fmt.Sprintf("%g", t.literal) // avoid trailing zeroes
-		}
-	} else if t.literal != nil {
-		literalVal = fmt.Sprintf("%v", t.literal)
+	return fmt.Sprintf("%s %s %s", tokenNames[t.tokenType], t.lexeme, getTokenLiteralStr(t.literal))
+}
+
+func getTokenLiteralStr(literal interface{}) string {
+	if literal == nil {
+		return "null"
 	}
-	return fmt.Sprintf("%s %s %s", tokenNames[t.tokenType], t.lexeme, literalVal)
+
+	switch literal := literal.(type) {
+	case float64:
+		if literal == float64(int(literal)) { // is integer
+			return fmt.Sprintf("%.1f", literal) // extra zero for integers
+		} else {
+			return fmt.Sprintf("%g", literal) // avoid trailing zeroes
+		}
+	case string:
+		return fmt.Sprintf("%s", literal)
+	default:
+		return fmt.Sprintf("%v", literal)
+	}
 }
 
 func makeEOFToken(line, column int) token {

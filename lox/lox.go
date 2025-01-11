@@ -33,7 +33,7 @@ func tokenize(code []byte) []token {
 func Parse(code []byte) {
 	tokens := tokenize(code)
 	parser := newParser[expr[any]](tokens)
-	expr := parser.expression()
+	parsedExpr := parser.expression()
 	printer := astPrinter{}
-	printer.print(expr)
+	printer.print(parsedExpr)
 }
