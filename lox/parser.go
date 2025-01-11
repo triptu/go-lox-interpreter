@@ -122,7 +122,7 @@ func (p *parser) primary() expr[any] {
 		p.curr++
 		return eGrouping[any]{expression: expr}
 	default:
-		logError(token.line, "Unexpected token: "+token.lexeme)
+		logError(token.line, "Error at '"+token.lexeme+"': Expect expression.")
 		panic("Unexpected token: " + token.lexeme)
 	}
 }
