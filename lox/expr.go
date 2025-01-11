@@ -2,7 +2,8 @@ package lox
 
 /*
 This file contains a lot of struct which are data types to represent different
-expressions in our language.
+expressions in our language. These are basically the nodes of the
+AST(abstract syntax tree) of our language.
 */
 
 type expr[R any] interface {
