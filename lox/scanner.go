@@ -5,6 +5,12 @@ import (
 	"strconv"
 )
 
+/**
+Scanner is responsible for tokenizing the source code. It
+goes through the source character by character to do this. The
+return value is an array of tokens.
+**/
+
 type scanner struct {
 	source string
 	tokens []token
