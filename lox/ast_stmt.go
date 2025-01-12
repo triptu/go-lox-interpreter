@@ -17,6 +17,8 @@ type stmtVisitor interface {
 	visitVarStmt(sVar)
 	// { var a = 3; }
 	visitBlockStmt(sBlock)
+	// if (a == 3) { print "hello"; } else { print "world"; }
+	visitIfStmt(sIf)
 }
 
 type sExpr struct {
@@ -36,6 +38,12 @@ type sBlock struct {
 	statements []stmt
 }
 
+type sIf struct {
+	condition  expr
+	thenBranch stmt
+	elseBranch stmt
+}
+
 func (e sExpr) accept(v stmtVisitor) {
 	v.visitExprStmt(e)
 }
@@ -50,4 +58,8 @@ func (e sVar) accept(v stmtVisitor) {
 
 func (e sBlock) accept(v stmtVisitor) {
 	v.visitBlockStmt(e)
+}
+
+func (e sIf) accept(v stmtVisitor) {
+	v.visitIfStmt(e)
 }

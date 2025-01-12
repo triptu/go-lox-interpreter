@@ -30,9 +30,13 @@ varDecl        → "var" IDENTIFIER ( "=" expression )? ";" ;
 
 statement      → exprStmt
                | printStmt
+               | ifStmt
                | blockStmt ;
+
 exprStmt       → expression ";" ;
 printStmt      → "print" expression ";" ;
+ifStmt         → "if" "(" expression ")" statement
+               ( "else" statement )? ;
 blockStmt      → "{" declaration* "}" ;
 
 (* define expressions in order of precedence *)

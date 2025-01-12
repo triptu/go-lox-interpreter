@@ -101,6 +101,8 @@ func (p *parser) statement() (stmt, *parseError) {
 		return p.printStmt()
 	} else if p.matchIncrement(tLeftBrace) {
 		return p.blockStmt()
+	} else if p.matchIncrement(tIf) {
+		return p.ifStmt()
 	} else {
 		return p.exprStmt()
 	}
@@ -122,6 +124,40 @@ func (p *parser) blockStmt() (stmt, *parseError) {
 	return sBlock{
 		statements: statements,
 	}, err
+}
+
+func (p *parser) ifStmt() (stmt, *parseError) {
+	err := p.consumeToken(tLeftParen, "Expected '(' after 'if'.")
+	if err != nil {
+		return nil, err
+	}
+	condition, err := p.expression()
+	if err != nil {
+		return nil, err
+	}
+	err = p.consumeToken(tRightParen, "Expected ')' after if condition.")
+	if err != nil {
+		return nil, err
+	}
+
+	ifBranch, err := p.statement()
+	if err != nil {
+		return nil, err
+	}
+
+	var elseBranch stmt
+	if p.matchIncrement(tElse) {
+		elseBranch, err = p.statement()
+		if err != nil {
+			return nil, err
+		}
+	}
+
+	return sIf{
+		condition:  condition,
+		thenBranch: ifBranch,
+		elseBranch: elseBranch,
+	}, nil
 }
 
 func (p *parser) blockRawStmts() ([]stmt, *parseError) {

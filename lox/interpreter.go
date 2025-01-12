@@ -38,6 +38,15 @@ func (i interpreter) visitBlockStmt(s sBlock) {
 	i.executeBlock(s.statements, i.env)
 }
 
+func (i interpreter) visitIfStmt(s sIf) {
+	val := i.evaluate(s.condition)
+	if isTruthy(val) {
+		s.thenBranch.accept(i)
+	} else if s.elseBranch != nil {
+		s.elseBranch.accept(i)
+	}
+}
+
 func (i interpreter) executeBlock(statements []stmt, outerEnv *environment) {
 	env := newChildEnvironment(outerEnv)
 	i.env = env
