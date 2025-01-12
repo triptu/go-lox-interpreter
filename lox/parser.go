@@ -49,7 +49,7 @@ func (p *parser) parse() []stmt {
 		if err == nil {
 			statements = append(statements, st)
 		} else {
-			logError(err.line, err.Error())
+			logError(err.line, err.msg)
 			p.consumeCascadingErrors()
 		}
 	}
@@ -62,7 +62,7 @@ parses single line expression in the code file like - "1+2*3"
 func (p *parser) parseExpression() expr {
 	expr, err := p.expression()
 	if err != nil {
-		logError(err.line, err.Error())
+		logError(err.line, err.msg)
 	}
 	return expr
 }

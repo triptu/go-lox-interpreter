@@ -26,7 +26,7 @@ func (e *environment) get(name string) (any, error) {
 	} else if e.outer != nil {
 		return e.outer.get(name)
 	} else {
-		return nil, errors.New("variable not found")
+		return nil, errors.New("not found")
 	}
 }
 

@@ -148,7 +148,7 @@ func (i interpreter) visitUnaryExpr(e eUnary) any {
 func (i interpreter) visitVariableExpr(e eVariable) any {
 	val, err := i.env.get(e.name.lexeme)
 	if err != nil {
-		logRuntimeError(e.name.line, "Variable '"+e.name.lexeme+"' not found")
+		logRuntimeError(e.name.line, "undefined variable '"+e.name.lexeme+"'.")
 	}
 	return val
 }
