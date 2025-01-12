@@ -18,16 +18,16 @@ type stmtVisitor interface {
 }
 
 type sExpr struct {
-	expression expr[any]
+	expression expr
 }
 
 type sPrint struct {
-	expression expr[any]
+	expression expr
 }
 
 type sVar struct {
 	name        token
-	initializer expr[any]
+	initializer expr
 }
 
 func (e sExpr) accept(v stmtVisitor) {

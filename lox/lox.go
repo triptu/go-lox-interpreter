@@ -43,7 +43,7 @@ func tokenize(code []byte) []token {
 
 func Parse(code []byte) {
 	tokens := tokenize(code)
-	parser := newParser[expr[any]](tokens)
+	parser := newParser[expr](tokens)
 	parsedExpr := parser.parseExpression()
 	if hasError {
 		os.Exit(65)
@@ -55,7 +55,7 @@ func Parse(code []byte) {
 
 func Visualize(code []byte) {
 	tokens := tokenize(code)
-	parser := newParser[expr[any]](tokens)
+	parser := newParser[expr](tokens)
 	parsedExpr := parser.parseExpression()
 	if hasError {
 		os.Exit(65)
@@ -83,7 +83,7 @@ func Evaluate(code []byte) {
 		os.Exit(65)
 	}
 
-	parser := newParser[expr[any]](tokens)
+	parser := newParser[expr](tokens)
 	parsedExpr := parser.parseExpression()
 	if hasError {
 		os.Exit(65)
@@ -111,7 +111,7 @@ func Run(code []byte) {
 		os.Exit(65)
 	}
 
-	parser := newParser[expr[any]](tokens)
+	parser := newParser[expr](tokens)
 	statements := parser.parse()
 	if hasError {
 		os.Exit(65)

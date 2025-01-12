@@ -30,7 +30,7 @@ func (e *parseError) Error() string {
 	return fmt.Sprintf("Error at line %d: %s", e.line, e.msg)
 }
 
-func newParser[T expr[any]](tokens []token) *parser {
+func newParser[T expr](tokens []token) *parser {
 	return &parser{
 		tokens: tokens,
 		curr:   0,
@@ -59,7 +59,7 @@ func (p *parser) parse() []stmt {
 /*
 parses single line expression in the code file like - "1+2*3"
 */
-func (p *parser) parseExpression() expr[any] {
+func (p *parser) parseExpression() expr {
 	expr, err := p.expression()
 	if err != nil {
 		logError(err.line, err.Error())
@@ -81,7 +81,7 @@ func (p *parser) varDecl() (stmt, *parseError) {
 	}
 	name := p.tokens[p.curr]
 	p.curr++
-	var e expr[any]
+	var e expr
 	var err *parseError
 	if p.matchIncrement(tEqual) {
 		e, err = p.expression()
@@ -126,25 +126,25 @@ func (p *parser) exprStmt() (stmt, *parseError) {
 	}, err
 }
 
-func (p *parser) expression() (expr[any], *parseError) {
+func (p *parser) expression() (expr, *parseError) {
 	return p.equality()
 }
 
 // ==, !=
-func (p *parser) equality() (expr[any], *parseError) {
+func (p *parser) equality() (expr, *parseError) {
 	return p.binaryOp(p.comparison, tBangEqual, tEqualEqual)
 }
 
 // ==, >=, <=, <, >
-func (p *parser) comparison() (expr[any], *parseError) {
+func (p *parser) comparison() (expr, *parseError) {
 	return p.binaryOp(p.term, tGreater, tGreaterEqual, tLess, tLessEqual)
 }
 
-func (p *parser) term() (expr[any], *parseError) {
+func (p *parser) term() (expr, *parseError) {
 	return p.binaryOp(p.factor, tPlus, tMinus)
 }
 
-func (p *parser) factor() (expr[any], *parseError) {
+func (p *parser) factor() (expr, *parseError) {
 	return p.binaryOp(p.unary, tSlash, tStar)
 }
 
@@ -153,7 +153,7 @@ wrap fun is the next precedence level function, which is wrapping the current op
 for e.g. (4+2)<(3*7), in above the comparison operator is wrapped by term, factor primary on
 both sides. the next precedence level for comparison is term.
 */
-func (p *parser) binaryOp(nextPrecedenceFn func() (expr[any], *parseError), tokens ...TokenType) (expr[any], *parseError) {
+func (p *parser) binaryOp(nextPrecedenceFn func() (expr, *parseError), tokens ...TokenType) (expr, *parseError) {
 	expr, err := nextPrecedenceFn()
 	if err != nil {
 		return nil, err
@@ -169,7 +169,7 @@ func (p *parser) binaryOp(nextPrecedenceFn func() (expr[any], *parseError), toke
 		if err != nil {
 			return nil, err
 		}
-		expr = eBinary[any]{
+		expr = eBinary{
 			left:     expr,
 			operator: operator,
 			right:    right,
@@ -179,7 +179,7 @@ func (p *parser) binaryOp(nextPrecedenceFn func() (expr[any], *parseError), toke
 	return expr, nil
 }
 
-func (p *parser) unary() (expr[any], *parseError) {
+func (p *parser) unary() (expr, *parseError) {
 	if p.peekMatch(tBang, tMinus) {
 		operator := p.tokens[p.curr]
 		p.curr++
@@ -187,7 +187,7 @@ func (p *parser) unary() (expr[any], *parseError) {
 		if err != nil {
 			return nil, err
 		}
-		return eUnary[any]{
+		return eUnary{
 			operator: operator,
 			right:    right,
 		}, nil
@@ -196,19 +196,19 @@ func (p *parser) unary() (expr[any], *parseError) {
 	return p.primary()
 }
 
-func (p *parser) primary() (expr[any], *parseError) {
+func (p *parser) primary() (expr, *parseError) {
 	token := p.tokens[p.curr]
 	p.curr++
 
 	switch token.tokenType {
 	case tTrue:
-		return eLiteral[any]{value: true}, nil
+		return eLiteral{value: true}, nil
 	case tFalse:
-		return eLiteral[any]{value: false}, nil
+		return eLiteral{value: false}, nil
 	case tNil:
-		return eLiteral[any]{value: nil}, nil
+		return eLiteral{value: nil}, nil
 	case tNumber, tString:
-		return eLiteral[any]{value: token.literal}, nil
+		return eLiteral{value: token.literal}, nil
 	case tLeftParen:
 		expr, err := p.expression()
 		if err != nil {
@@ -217,10 +217,10 @@ func (p *parser) primary() (expr[any], *parseError) {
 			return nil, p.parseErrorCurr("Expected ')' after expression")
 		} else {
 			p.curr++ // consume the right paren
-			return eGrouping[any]{expression: expr}, nil
+			return eGrouping{expression: expr}, nil
 		}
 	case tIdentifier: // variable access
-		return eVariable[any]{name: token}, nil
+		return eVariable{name: token}, nil
 	default:
 		errStr := "': Expect expression."
 		if arrIncludes(binaryTokens, token.tokenType) {

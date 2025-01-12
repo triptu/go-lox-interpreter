@@ -6,145 +6,145 @@ expressions in our language. These are basically the nodes of the
 AST(abstract syntax tree) of our language.
 */
 
-type expr[R any] interface {
-	accept(exprVisitor[R]) R
+type expr interface {
+	accept(exprVisitor) any
 }
 
 /*
 action classes implement this interface defining how they would process each type of expression
 */
-type exprVisitor[R any] interface {
+type exprVisitor interface {
 	// a = 3
-	visitAssignExpr(eAssign[R]) R
+	visitAssignExpr(eAssign) any
 	// 1 + 2, 5 * 6, 2 < 3, etc
-	visitBinaryExpr(eBinary[R]) R
+	visitBinaryExpr(eBinary) any
 	// myFunction(1, 2, 3)
-	visitCallExpr(eCall[R]) R
+	visitCallExpr(eCall) any
 	// myObject.myFunction(1, 2, 3)
-	visitGetExpr(eGet[R]) R
+	visitGetExpr(eGet) any
 	// (1, 2, 3)
-	visitGroupingExpr(eGrouping[R]) R
+	visitGroupingExpr(eGrouping) any
 	// 123, "hello", true, false, nil
-	visitLiteralExpr(eLiteral[R]) R
-	visitLogicalExpr(eLogical[R]) R
-	visitSetExpr(eSet[R]) R
+	visitLiteralExpr(eLiteral) any
+	visitLogicalExpr(eLogical) any
+	visitSetExpr(eSet) any
 	// super.method(1, 2, 3)
-	visitSuperExpr(eSuper[R]) R
+	visitSuperExpr(eSuper) any
 	// this
-	visitThisExpr(eThis[R]) R
+	visitThisExpr(eThis) any
 	// -1, !true
-	visitUnaryExpr(eUnary[R]) R
+	visitUnaryExpr(eUnary) any
 	// myVariable (accessing variable)
-	visitVariableExpr(eVariable[R]) R
+	visitVariableExpr(eVariable) any
 }
 
-type eAssign[R any] struct {
+type eAssign struct {
 	name  token
-	value expr[R]
+	value expr
 }
 
-type eBinary[R any] struct {
-	left     expr[R]
+type eBinary struct {
+	left     expr
 	operator token
-	right    expr[R]
+	right    expr
 }
 
-type eCall[R any] struct {
-	callee    expr[R]
+type eCall struct {
+	callee    expr
 	paren     token
-	arguments []expr[R]
+	arguments []expr
 }
 
-type eGet[R any] struct {
-	object expr[R]
+type eGet struct {
+	object expr
 	name   token
 }
 
-type eGrouping[R any] struct {
-	expression expr[R]
+type eGrouping struct {
+	expression expr
 }
 
-type eLiteral[R any] struct {
+type eLiteral struct {
 	value interface{}
 }
 
-type eLogical[R any] struct {
-	left     expr[R]
+type eLogical struct {
+	left     expr
 	operator token
-	right    expr[R]
+	right    expr
 }
 
-type eSet[R any] struct {
-	object expr[R]
+type eSet struct {
+	object expr
 	name   token
-	value  expr[R]
+	value  expr
 }
 
-type eSuper[R any] struct {
+type eSuper struct {
 	keyword token
 	method  token
 }
 
-type eThis[R any] struct {
+type eThis struct {
 	keyword token
 }
 
-type eUnary[R any] struct {
+type eUnary struct {
 	operator token
-	right    expr[R]
+	right    expr
 }
 
 // variable access expression
-type eVariable[R any] struct {
+type eVariable struct {
 	name token
 }
 
 // define accept methods for each type of expression
 
-func (e eAssign[R]) accept(v exprVisitor[R]) R {
+func (e eAssign) accept(v exprVisitor) any {
 	return v.visitAssignExpr(e)
 }
 
-func (e eBinary[R]) accept(v exprVisitor[R]) R {
+func (e eBinary) accept(v exprVisitor) any {
 	return v.visitBinaryExpr(e)
 }
 
-func (e eCall[R]) accept(v exprVisitor[R]) R {
+func (e eCall) accept(v exprVisitor) any {
 	return v.visitCallExpr(e)
 }
 
-func (e eGet[R]) accept(v exprVisitor[R]) R {
+func (e eGet) accept(v exprVisitor) any {
 	return v.visitGetExpr(e)
 }
 
-func (e eGrouping[R]) accept(v exprVisitor[R]) R {
+func (e eGrouping) accept(v exprVisitor) any {
 	return v.visitGroupingExpr(e)
 }
 
-func (e eLiteral[R]) accept(v exprVisitor[R]) R {
+func (e eLiteral) accept(v exprVisitor) any {
 	return v.visitLiteralExpr(e)
 }
 
-func (e eLogical[R]) accept(v exprVisitor[R]) R {
+func (e eLogical) accept(v exprVisitor) any {
 	return v.visitLogicalExpr(e)
 }
 
-func (e eSet[R]) accept(v exprVisitor[R]) R {
+func (e eSet) accept(v exprVisitor) any {
 	return v.visitSetExpr(e)
 }
 
-func (e eSuper[R]) accept(v exprVisitor[R]) R {
+func (e eSuper) accept(v exprVisitor) any {
 	return v.visitSuperExpr(e)
 }
 
-func (e eThis[R]) accept(v exprVisitor[R]) R {
+func (e eThis) accept(v exprVisitor) any {
 	return v.visitThisExpr(e)
 }
 
-func (e eUnary[R]) accept(v exprVisitor[R]) R {
+func (e eUnary) accept(v exprVisitor) any {
 	return v.visitUnaryExpr(e)
 }
 
-func (e eVariable[R]) accept(v exprVisitor[R]) R {
+func (e eVariable) accept(v exprVisitor) any {
 	return v.visitVariableExpr(e)
 }

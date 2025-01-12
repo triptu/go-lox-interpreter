@@ -18,7 +18,7 @@ type visualiseTreeVisitor struct {
 	builder   strings.Builder
 }
 
-func (v *visualiseTreeVisitor) Visualize(e expr[any], outputPath string) error {
+func (v *visualiseTreeVisitor) Visualize(e expr, outputPath string) error {
 	// Generate DOT content
 	e.accept(v)
 	v.builder.WriteString("}\n")
@@ -108,7 +108,7 @@ func openImage(imagePath string) error {
 	return cmd.Run()
 }
 
-func (v *visualiseTreeVisitor) visitAssignExpr(e eAssign[any]) any {
+func (v *visualiseTreeVisitor) visitAssignExpr(e eAssign) any {
 	nodeID := v.getNextNodeID()
 	v.addNode(nodeID, "Assign", fmt.Sprintf("Assign\n%s", e.name.lexeme))
 
@@ -118,7 +118,7 @@ func (v *visualiseTreeVisitor) visitAssignExpr(e eAssign[any]) any {
 	return nodeID
 }
 
-func (v *visualiseTreeVisitor) visitBinaryExpr(e eBinary[any]) any {
+func (v *visualiseTreeVisitor) visitBinaryExpr(e eBinary) any {
 	nodeID := v.getNextNodeID()
 	v.addNode(nodeID, "Binary", fmt.Sprintf("Binary\n%s", e.operator.lexeme))
 
@@ -131,7 +131,7 @@ func (v *visualiseTreeVisitor) visitBinaryExpr(e eBinary[any]) any {
 	return nodeID
 }
 
-func (v *visualiseTreeVisitor) visitCallExpr(e eCall[any]) any {
+func (v *visualiseTreeVisitor) visitCallExpr(e eCall) any {
 	nodeID := v.getNextNodeID()
 	v.addNode(nodeID, "Call", "Call")
 
@@ -146,7 +146,7 @@ func (v *visualiseTreeVisitor) visitCallExpr(e eCall[any]) any {
 	return nodeID
 }
 
-func (v *visualiseTreeVisitor) visitGetExpr(e eGet[any]) any {
+func (v *visualiseTreeVisitor) visitGetExpr(e eGet) any {
 	nodeID := v.getNextNodeID()
 	v.addNode(nodeID, "Get", fmt.Sprintf("Get\n%s", e.name.lexeme))
 
@@ -156,7 +156,7 @@ func (v *visualiseTreeVisitor) visitGetExpr(e eGet[any]) any {
 	return nodeID
 }
 
-func (v *visualiseTreeVisitor) visitGroupingExpr(e eGrouping[any]) any {
+func (v *visualiseTreeVisitor) visitGroupingExpr(e eGrouping) any {
 	nodeID := v.getNextNodeID()
 	v.addNode(nodeID, "Group", "Group")
 
@@ -166,13 +166,13 @@ func (v *visualiseTreeVisitor) visitGroupingExpr(e eGrouping[any]) any {
 	return nodeID
 }
 
-func (v *visualiseTreeVisitor) visitLiteralExpr(e eLiteral[any]) any {
+func (v *visualiseTreeVisitor) visitLiteralExpr(e eLiteral) any {
 	nodeID := v.getNextNodeID()
 	v.addNode(nodeID, "Literal", fmt.Sprintf("Literal\n%v", getTokenLiteralStr(e.value)))
 	return nodeID
 }
 
-func (v *visualiseTreeVisitor) visitLogicalExpr(e eLogical[any]) any {
+func (v *visualiseTreeVisitor) visitLogicalExpr(e eLogical) any {
 	nodeID := v.getNextNodeID()
 	v.addNode(nodeID, "Logical", fmt.Sprintf("Logical\n%s", e.operator.lexeme))
 
@@ -185,7 +185,7 @@ func (v *visualiseTreeVisitor) visitLogicalExpr(e eLogical[any]) any {
 	return nodeID
 }
 
-func (v *visualiseTreeVisitor) visitSetExpr(e eSet[any]) any {
+func (v *visualiseTreeVisitor) visitSetExpr(e eSet) any {
 	nodeID := v.getNextNodeID()
 	v.addNode(nodeID, "Set", fmt.Sprintf("Set\n%s", e.name.lexeme))
 
@@ -198,19 +198,19 @@ func (v *visualiseTreeVisitor) visitSetExpr(e eSet[any]) any {
 	return nodeID
 }
 
-func (v *visualiseTreeVisitor) visitSuperExpr(e eSuper[any]) any {
+func (v *visualiseTreeVisitor) visitSuperExpr(e eSuper) any {
 	nodeID := v.getNextNodeID()
 	v.addNode(nodeID, "Super", fmt.Sprintf("Super\n%s.%s", e.keyword.lexeme, e.method.lexeme))
 	return nodeID
 }
 
-func (v *visualiseTreeVisitor) visitThisExpr(e eThis[any]) any {
+func (v *visualiseTreeVisitor) visitThisExpr(e eThis) any {
 	nodeID := v.getNextNodeID()
 	v.addNode(nodeID, "This", "This")
 	return nodeID
 }
 
-func (v *visualiseTreeVisitor) visitUnaryExpr(e eUnary[any]) any {
+func (v *visualiseTreeVisitor) visitUnaryExpr(e eUnary) any {
 	nodeID := v.getNextNodeID()
 	v.addNode(nodeID, "Unary", fmt.Sprintf("Unary\n%s", e.operator.lexeme))
 
@@ -220,7 +220,7 @@ func (v *visualiseTreeVisitor) visitUnaryExpr(e eUnary[any]) any {
 	return nodeID
 }
 
-func (v *visualiseTreeVisitor) visitVariableExpr(e eVariable[any]) any {
+func (v *visualiseTreeVisitor) visitVariableExpr(e eVariable) any {
 	nodeID := v.getNextNodeID()
 	v.addNode(nodeID, "Variable", fmt.Sprintf("Variable\n%s", e.name.lexeme))
 	return nodeID
