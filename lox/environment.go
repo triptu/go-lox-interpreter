@@ -30,6 +30,17 @@ func (e *environment) get(name string) (any, error) {
 	}
 }
 
-func (e *environment) set(name string, val any) {
+func (e *environment) define(name string, val any) {
 	e.vars[name] = val
+}
+
+func (e *environment) set(name string, val any) error {
+	if _, ok := e.vars[name]; ok {
+		e.vars[name] = val
+		return nil
+	} else if e.outer != nil {
+		return e.outer.set(name, val)
+	} else {
+		return errors.New("not found")
+	}
 }

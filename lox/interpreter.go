@@ -46,7 +46,7 @@ func (i interpreter) visitVarStmt(s sVar) {
 	if s.initializer != nil {
 		val = i.evaluate(s.initializer)
 	}
-	i.env.set(s.name.lexeme, val)
+	i.env.define(s.name.lexeme, val)
 }
 
 /*
@@ -54,7 +54,10 @@ a = 123;
 */
 func (i interpreter) visitAssignExpr(e eAssign) any {
 	val := i.evaluate(e.value)
-	i.env.set(e.name.lexeme, val)
+	err := i.env.set(e.name.lexeme, val)
+	if err != nil {
+		logRuntimeError(e.name.line, "undefined variable '"+e.name.lexeme+"'.")
+	}
 	return val
 }
 

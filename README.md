@@ -34,7 +34,9 @@ exprStmt       → expression ";" ;
 printStmt      → "print" expression ";" ;
 
 (* define expressions in order of precedence *)
-expression     → equality ;
+expression     → assignment ;
+assignment     → IDENTIFIER "=" assignment
+               | equality ;
 equality       → comparison ( ( "!=" | "==" ) comparison )* ;
 comparison     → term ( ( ">" | ">=" | "<" | "<=" ) term )* ;
 term           → factor ( ( "-" | "+" ) factor )* ;

@@ -127,7 +127,38 @@ func (p *parser) exprStmt() (stmt, *parseError) {
 }
 
 func (p *parser) expression() (expr, *parseError) {
-	return p.equality()
+	return p.assignment()
+}
+
+/*
+as assign is right associative, we use recursion than a loop.
+`a = b = c“ should evaluate to `a = (b = c)`
+*/
+func (p *parser) assignment() (expr, *parseError) {
+	expr, err := p.equality()
+	if err != nil {
+		return nil, err
+	}
+
+	if p.peekMatch(tEqual) {
+		equalsToken := p.tokens[p.curr]
+		p.curr++
+		value, err := p.assignment()
+
+		if err != nil {
+			return nil, err
+		}
+		varToken, ok := expr.(eVariable)
+		if !ok {
+			return nil, parseErrorAt(equalsToken, "invalid assignment target.")
+		}
+		return eAssign{
+			name:  varToken.name,
+			value: value,
+		}, nil
+	}
+
+	return expr, nil
 }
 
 // ==, !=
@@ -226,7 +257,7 @@ func (p *parser) primary() (expr, *parseError) {
 		if arrIncludes(binaryTokens, token.tokenType) {
 			errStr = ": Operator found without left-hand operand."
 		}
-		return nil, parseErrorAt(token.line, "Error at '"+token.lexeme+errStr)
+		return nil, parseErrorAt(token, "Error at '"+token.lexeme+errStr)
 	}
 }
 
@@ -291,18 +322,18 @@ func arrIncludes[T comparable](arr []T, item T) bool {
 create a parse error at current token line
 */
 func (p *parser) parseErrorCurr(msg string) *parseError {
-	var line int
+	var t token
 	if !p.isAtEnd() {
-		line = p.tokens[p.curr].line
+		t = p.tokens[p.curr]
 	} else {
-		line = p.tokens[p.curr-1].line
+		t = p.tokens[p.curr-1]
 	}
-	return parseErrorAt(line, msg)
+	return parseErrorAt(t, msg)
 }
 
-func parseErrorAt(line int, msg string) *parseError {
+func parseErrorAt(token token, msg string) *parseError {
 	return &parseError{
-		line: line,
+		line: token.line,
 		msg:  msg,
 	}
 }
