@@ -10,6 +10,9 @@ type interpreter struct {
 	env *environment
 }
 
+var _ exprVisitor[any] = (*interpreter)(nil)
+var _ stmtVisitor = (*interpreter)(nil)
+
 func newInterpreter() *interpreter {
 	return &interpreter{
 		env: newEnvironment(),
@@ -49,13 +52,13 @@ func (i interpreter) visitVarStmt(s sVar) {
 /*
 a = 123;
 */
-func (i interpreter) visitAssign(e eAssign[any]) any {
+func (i interpreter) visitAssignExpr(e eAssign[any]) any {
 	val := i.evaluate(e.value)
 	i.env.set(e.name.lexeme, val)
 	return val
 }
 
-func (i interpreter) visitBinary(e eBinary[any]) any {
+func (i interpreter) visitBinaryExpr(e eBinary[any]) any {
 	left := i.evaluate(e.left)
 	right := i.evaluate(e.right)
 	switch e.operator.tokenType {
@@ -97,39 +100,39 @@ func (i interpreter) visitBinary(e eBinary[any]) any {
 	return nil // unreachable
 }
 
-func (i interpreter) visitCall(e eCall[any]) any {
+func (i interpreter) visitCallExpr(e eCall[any]) any {
 	panic("implement me")
 }
 
-func (i interpreter) visitGet(e eGet[any]) any {
+func (i interpreter) visitGetExpr(e eGet[any]) any {
 	panic("implement me")
 }
 
-func (i interpreter) visitGrouping(e eGrouping[any]) any {
+func (i interpreter) visitGroupingExpr(e eGrouping[any]) any {
 	return i.evaluate(e.expression)
 }
 
-func (i interpreter) visitLiteral(e eLiteral[any]) any {
+func (i interpreter) visitLiteralExpr(e eLiteral[any]) any {
 	return e.value
 }
 
-func (i interpreter) visitLogical(e eLogical[any]) any {
+func (i interpreter) visitLogicalExpr(e eLogical[any]) any {
 	panic("implement me")
 }
 
-func (i interpreter) visitSet(e eSet[any]) any {
+func (i interpreter) visitSetExpr(e eSet[any]) any {
 	panic("implement me")
 }
 
-func (i interpreter) visitSuper(e eSuper[any]) any {
+func (i interpreter) visitSuperExpr(e eSuper[any]) any {
 	panic("implement me")
 }
 
-func (i interpreter) visitThis(e eThis[any]) any {
+func (i interpreter) visitThisExpr(e eThis[any]) any {
 	panic("implement me")
 }
 
-func (i interpreter) visitUnary(e eUnary[any]) any {
+func (i interpreter) visitUnaryExpr(e eUnary[any]) any {
 	right := i.evaluate(e.right)
 	switch e.operator.tokenType {
 	case tMinus:
@@ -142,7 +145,7 @@ func (i interpreter) visitUnary(e eUnary[any]) any {
 	}
 }
 
-func (i interpreter) visitVariable(e eVariable[any]) any {
+func (i interpreter) visitVariableExpr(e eVariable[any]) any {
 	val, err := i.env.get(e.name.lexeme)
 	if err != nil {
 		logRuntimeError(e.name.line, "Variable '"+e.name.lexeme+"' not found")

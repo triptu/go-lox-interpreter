@@ -14,18 +14,28 @@ type expr[R any] interface {
 action classes implement this interface defining how they would process each type of expression
 */
 type exprVisitor[R any] interface {
-	visitAssign(eAssign[R]) R
-	visitBinary(eBinary[R]) R
-	visitCall(eCall[R]) R
-	visitGet(eGet[R]) R
-	visitGrouping(eGrouping[R]) R
-	visitLiteral(eLiteral[R]) R
-	visitLogical(eLogical[R]) R
-	visitSet(eSet[R]) R
-	visitSuper(eSuper[R]) R
-	visitThis(eThis[R]) R
-	visitUnary(eUnary[R]) R
-	visitVariable(eVariable[R]) R
+	// a = 3
+	visitAssignExpr(eAssign[R]) R
+	// 1 + 2, 5 * 6, 2 < 3, etc
+	visitBinaryExpr(eBinary[R]) R
+	// myFunction(1, 2, 3)
+	visitCallExpr(eCall[R]) R
+	// myObject.myFunction(1, 2, 3)
+	visitGetExpr(eGet[R]) R
+	// (1, 2, 3)
+	visitGroupingExpr(eGrouping[R]) R
+	// 123, "hello", true, false, nil
+	visitLiteralExpr(eLiteral[R]) R
+	visitLogicalExpr(eLogical[R]) R
+	visitSetExpr(eSet[R]) R
+	// super.method(1, 2, 3)
+	visitSuperExpr(eSuper[R]) R
+	// this
+	visitThisExpr(eThis[R]) R
+	// -1, !true
+	visitUnaryExpr(eUnary[R]) R
+	// myVariable (accessing variable)
+	visitVariableExpr(eVariable[R]) R
 }
 
 type eAssign[R any] struct {
@@ -92,49 +102,49 @@ type eVariable[R any] struct {
 // define accept methods for each type of expression
 
 func (e eAssign[R]) accept(v exprVisitor[R]) R {
-	return v.visitAssign(e)
+	return v.visitAssignExpr(e)
 }
 
 func (e eBinary[R]) accept(v exprVisitor[R]) R {
-	return v.visitBinary(e)
+	return v.visitBinaryExpr(e)
 }
 
 func (e eCall[R]) accept(v exprVisitor[R]) R {
-	return v.visitCall(e)
+	return v.visitCallExpr(e)
 }
 
 func (e eGet[R]) accept(v exprVisitor[R]) R {
-	return v.visitGet(e)
+	return v.visitGetExpr(e)
 }
 
 func (e eGrouping[R]) accept(v exprVisitor[R]) R {
-	return v.visitGrouping(e)
+	return v.visitGroupingExpr(e)
 }
 
 func (e eLiteral[R]) accept(v exprVisitor[R]) R {
-	return v.visitLiteral(e)
+	return v.visitLiteralExpr(e)
 }
 
 func (e eLogical[R]) accept(v exprVisitor[R]) R {
-	return v.visitLogical(e)
+	return v.visitLogicalExpr(e)
 }
 
 func (e eSet[R]) accept(v exprVisitor[R]) R {
-	return v.visitSet(e)
+	return v.visitSetExpr(e)
 }
 
 func (e eSuper[R]) accept(v exprVisitor[R]) R {
-	return v.visitSuper(e)
+	return v.visitSuperExpr(e)
 }
 
 func (e eThis[R]) accept(v exprVisitor[R]) R {
-	return v.visitThis(e)
+	return v.visitThisExpr(e)
 }
 
 func (e eUnary[R]) accept(v exprVisitor[R]) R {
-	return v.visitUnary(e)
+	return v.visitUnaryExpr(e)
 }
 
 func (e eVariable[R]) accept(v exprVisitor[R]) R {
-	return v.visitVariable(e)
+	return v.visitVariableExpr(e)
 }

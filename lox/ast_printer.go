@@ -16,54 +16,54 @@ func (p astPrinter) print(e expr[any]) {
 	fmt.Println(e.accept(p))
 }
 
-func (p astPrinter) visitAssign(e eAssign[any]) any {
+func (p astPrinter) visitAssignExpr(e eAssign[any]) any {
 	return p.parenthesize("= "+e.name.lexeme, e.value)
 }
 
 /*
 for e.g. "1 + 2" => "(+ 1 2)"
 */
-func (p astPrinter) visitBinary(e eBinary[any]) any {
+func (p astPrinter) visitBinaryExpr(e eBinary[any]) any {
 	return p.parenthesize(e.operator.lexeme, e.left, e.right)
 }
 
-func (p astPrinter) visitCall(e eCall[any]) any {
+func (p astPrinter) visitCallExpr(e eCall[any]) any {
 	return p.parenthesize("call", append([]expr[any]{e.callee}, e.arguments...)...)
 }
 
-func (p astPrinter) visitGet(e eGet[any]) any {
+func (p astPrinter) visitGetExpr(e eGet[any]) any {
 	return p.parenthesize(".", e.object, eLiteral[any]{value: e.name.lexeme})
 }
 
-func (p astPrinter) visitGrouping(e eGrouping[any]) any {
+func (p astPrinter) visitGroupingExpr(e eGrouping[any]) any {
 	return p.parenthesize("group", e.expression)
 }
 
-func (p astPrinter) visitLiteral(e eLiteral[any]) any {
+func (p astPrinter) visitLiteralExpr(e eLiteral[any]) any {
 	return getTokenLiteralStr(e.value)
 }
 
-func (p astPrinter) visitLogical(e eLogical[any]) any {
+func (p astPrinter) visitLogicalExpr(e eLogical[any]) any {
 	return p.parenthesize(e.operator.lexeme, e.left, e.right)
 }
 
-func (p astPrinter) visitSet(e eSet[any]) any {
+func (p astPrinter) visitSetExpr(e eSet[any]) any {
 	return p.parenthesize("=", e.object, eLiteral[any]{value: e.name.lexeme}, e.value)
 }
 
-func (p astPrinter) visitSuper(e eSuper[any]) any {
+func (p astPrinter) visitSuperExpr(e eSuper[any]) any {
 	return p.parenthesize("super " + e.method.lexeme + " " + e.keyword.lexeme)
 }
 
-func (p astPrinter) visitThis(e eThis[any]) any {
+func (p astPrinter) visitThisExpr(e eThis[any]) any {
 	return p.parenthesize(e.keyword.lexeme)
 }
 
-func (p astPrinter) visitUnary(e eUnary[any]) any {
+func (p astPrinter) visitUnaryExpr(e eUnary[any]) any {
 	return p.parenthesize(e.operator.lexeme, e.right)
 }
 
-func (p astPrinter) visitVariable(e eVariable[any]) any {
+func (p astPrinter) visitVariableExpr(e eVariable[any]) any {
 	return e.name.lexeme
 }
 

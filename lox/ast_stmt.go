@@ -9,8 +9,11 @@ type stmt interface {
 }
 
 type stmtVisitor interface {
+	// a = 3;
 	visitExprStmt(sExpr)
+	// print "hello";
 	visitPrintStmt(sPrint)
+	// var a = 3; (initializer is optional)
 	visitVarStmt(sVar)
 }
 

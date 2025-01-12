@@ -108,7 +108,7 @@ func openImage(imagePath string) error {
 	return cmd.Run()
 }
 
-func (v *visualiseTreeVisitor) visitAssign(e eAssign[any]) any {
+func (v *visualiseTreeVisitor) visitAssignExpr(e eAssign[any]) any {
 	nodeID := v.getNextNodeID()
 	v.addNode(nodeID, "Assign", fmt.Sprintf("Assign\n%s", e.name.lexeme))
 
@@ -118,7 +118,7 @@ func (v *visualiseTreeVisitor) visitAssign(e eAssign[any]) any {
 	return nodeID
 }
 
-func (v *visualiseTreeVisitor) visitBinary(e eBinary[any]) any {
+func (v *visualiseTreeVisitor) visitBinaryExpr(e eBinary[any]) any {
 	nodeID := v.getNextNodeID()
 	v.addNode(nodeID, "Binary", fmt.Sprintf("Binary\n%s", e.operator.lexeme))
 
@@ -131,7 +131,7 @@ func (v *visualiseTreeVisitor) visitBinary(e eBinary[any]) any {
 	return nodeID
 }
 
-func (v *visualiseTreeVisitor) visitCall(e eCall[any]) any {
+func (v *visualiseTreeVisitor) visitCallExpr(e eCall[any]) any {
 	nodeID := v.getNextNodeID()
 	v.addNode(nodeID, "Call", "Call")
 
@@ -146,7 +146,7 @@ func (v *visualiseTreeVisitor) visitCall(e eCall[any]) any {
 	return nodeID
 }
 
-func (v *visualiseTreeVisitor) visitGet(e eGet[any]) any {
+func (v *visualiseTreeVisitor) visitGetExpr(e eGet[any]) any {
 	nodeID := v.getNextNodeID()
 	v.addNode(nodeID, "Get", fmt.Sprintf("Get\n%s", e.name.lexeme))
 
@@ -156,7 +156,7 @@ func (v *visualiseTreeVisitor) visitGet(e eGet[any]) any {
 	return nodeID
 }
 
-func (v *visualiseTreeVisitor) visitGrouping(e eGrouping[any]) any {
+func (v *visualiseTreeVisitor) visitGroupingExpr(e eGrouping[any]) any {
 	nodeID := v.getNextNodeID()
 	v.addNode(nodeID, "Group", "Group")
 
@@ -166,13 +166,13 @@ func (v *visualiseTreeVisitor) visitGrouping(e eGrouping[any]) any {
 	return nodeID
 }
 
-func (v *visualiseTreeVisitor) visitLiteral(e eLiteral[any]) any {
+func (v *visualiseTreeVisitor) visitLiteralExpr(e eLiteral[any]) any {
 	nodeID := v.getNextNodeID()
 	v.addNode(nodeID, "Literal", fmt.Sprintf("Literal\n%v", getTokenLiteralStr(e.value)))
 	return nodeID
 }
 
-func (v *visualiseTreeVisitor) visitLogical(e eLogical[any]) any {
+func (v *visualiseTreeVisitor) visitLogicalExpr(e eLogical[any]) any {
 	nodeID := v.getNextNodeID()
 	v.addNode(nodeID, "Logical", fmt.Sprintf("Logical\n%s", e.operator.lexeme))
 
@@ -185,7 +185,7 @@ func (v *visualiseTreeVisitor) visitLogical(e eLogical[any]) any {
 	return nodeID
 }
 
-func (v *visualiseTreeVisitor) visitSet(e eSet[any]) any {
+func (v *visualiseTreeVisitor) visitSetExpr(e eSet[any]) any {
 	nodeID := v.getNextNodeID()
 	v.addNode(nodeID, "Set", fmt.Sprintf("Set\n%s", e.name.lexeme))
 
@@ -198,19 +198,19 @@ func (v *visualiseTreeVisitor) visitSet(e eSet[any]) any {
 	return nodeID
 }
 
-func (v *visualiseTreeVisitor) visitSuper(e eSuper[any]) any {
+func (v *visualiseTreeVisitor) visitSuperExpr(e eSuper[any]) any {
 	nodeID := v.getNextNodeID()
 	v.addNode(nodeID, "Super", fmt.Sprintf("Super\n%s.%s", e.keyword.lexeme, e.method.lexeme))
 	return nodeID
 }
 
-func (v *visualiseTreeVisitor) visitThis(e eThis[any]) any {
+func (v *visualiseTreeVisitor) visitThisExpr(e eThis[any]) any {
 	nodeID := v.getNextNodeID()
 	v.addNode(nodeID, "This", "This")
 	return nodeID
 }
 
-func (v *visualiseTreeVisitor) visitUnary(e eUnary[any]) any {
+func (v *visualiseTreeVisitor) visitUnaryExpr(e eUnary[any]) any {
 	nodeID := v.getNextNodeID()
 	v.addNode(nodeID, "Unary", fmt.Sprintf("Unary\n%s", e.operator.lexeme))
 
@@ -220,7 +220,7 @@ func (v *visualiseTreeVisitor) visitUnary(e eUnary[any]) any {
 	return nodeID
 }
 
-func (v *visualiseTreeVisitor) visitVariable(e eVariable[any]) any {
+func (v *visualiseTreeVisitor) visitVariableExpr(e eVariable[any]) any {
 	nodeID := v.getNextNodeID()
 	v.addNode(nodeID, "Variable", fmt.Sprintf("Variable\n%s", e.name.lexeme))
 	return nodeID
