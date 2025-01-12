@@ -96,6 +96,34 @@ func Evaluate(code []byte) {
 	}
 }
 
+func Run(code []byte) {
+	defer func() {
+		if r := recover(); r != nil {
+			if !hasRuntimeError {
+				fmt.Println("Recovered from run time error panic, Error: ", r)
+			}
+			os.Exit(70)
+		}
+	}()
+
+	tokens := tokenize(code)
+	if hasError {
+		os.Exit(65)
+	}
+
+	parser := newParser[expr[any]](tokens)
+	_ = parser.parse()
+	if hasError {
+		os.Exit(65)
+	} else {
+		// interpreter := interpreter{}
+		// fmt.Println(getLiteralStr(interpreter.evaluate(parsedExpr)))
+		if hasRuntimeError {
+			os.Exit(70)
+		}
+	}
+}
+
 func getLiteralStr(literal interface{}) string {
 	if literal == nil {
 		return "nil"

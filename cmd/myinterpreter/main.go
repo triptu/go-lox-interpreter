@@ -18,11 +18,6 @@ func main() {
 
 	command := os.Args[1]
 
-	if command != "tokenize" && command != "parse" && command != "evaluate" && command != "visualize" {
-		fmt.Fprintf(os.Stderr, "Unknown command: %s\n", command)
-		os.Exit(1)
-	}
-
 	filename := os.Args[2]
 	fileContents, err := os.ReadFile(filename)
 	if err != nil {
@@ -38,5 +33,10 @@ func main() {
 		lox.Evaluate(fileContents)
 	} else if command == "visualize" {
 		lox.Visualize(fileContents)
+	} else if command == "run" {
+		lox.Run(fileContents)
+	} else {
+		fmt.Fprintf(os.Stderr, "Unknown command: %s\n", command)
+		os.Exit(1)
 	}
 }
