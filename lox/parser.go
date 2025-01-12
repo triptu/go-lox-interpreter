@@ -1,7 +1,7 @@
 package lox
 
 import (
-	"errors"
+	"fmt"
 )
 
 /*
@@ -19,6 +19,15 @@ nodes.
 type parser struct {
 	tokens []token
 	curr   int
+}
+
+type parseError struct {
+	line int
+	msg  string
+}
+
+func (e *parseError) Error() string {
+	return fmt.Sprintf("Error at line %d: %s", e.line, e.msg)
 }
 
 func newParser[T expr[any]](tokens []token) *parser {
@@ -39,6 +48,9 @@ func (p *parser) parse() []stmt[any] {
 		st, err := p.statement()
 		if err == nil {
 			statements = append(statements, st)
+		} else {
+			logError(err.line, err.Error())
+			p.consumeCascadingErrors()
 		}
 	}
 	return statements
@@ -48,11 +60,14 @@ func (p *parser) parse() []stmt[any] {
 parses single line expression in the code file like - "1+2*3"
 */
 func (p *parser) parseExpression() expr[any] {
-	expr, _ := p.expression()
+	expr, err := p.expression()
+	if err != nil {
+		logError(err.line, err.Error())
+	}
 	return expr
 }
 
-func (p *parser) statement() (stmt[any], error) {
+func (p *parser) statement() (stmt[any], *parseError) {
 	if p.matchIncrement(tPrint) {
 		return p.printStmt()
 	} else {
@@ -60,39 +75,47 @@ func (p *parser) statement() (stmt[any], error) {
 	}
 }
 
-func (p *parser) printStmt() (stmt[any], error) {
+func (p *parser) printStmt() (stmt[any], *parseError) {
 	expr, err := p.expression()
+	if err != nil {
+		return nil, err
+	}
+	err = p.consumeSemicolon()
 	return sPrint[any]{
 		expression: expr,
 	}, err
 }
 
-func (p *parser) exprStmt() (stmt[any], error) {
+func (p *parser) exprStmt() (stmt[any], *parseError) {
 	expr, err := p.expression()
+	if err != nil {
+		return nil, err
+	}
+	err = p.consumeSemicolon()
 	return sExpr[any]{
 		expression: expr,
 	}, err
 }
 
-func (p *parser) expression() (expr[any], error) {
+func (p *parser) expression() (expr[any], *parseError) {
 	return p.equality()
 }
 
 // ==, !=
-func (p *parser) equality() (expr[any], error) {
+func (p *parser) equality() (expr[any], *parseError) {
 	return p.binaryOp(p.comparison, tBangEqual, tEqualEqual)
 }
 
 // ==, >=, <=, <, >
-func (p *parser) comparison() (expr[any], error) {
+func (p *parser) comparison() (expr[any], *parseError) {
 	return p.binaryOp(p.term, tGreater, tGreaterEqual, tLess, tLessEqual)
 }
 
-func (p *parser) term() (expr[any], error) {
+func (p *parser) term() (expr[any], *parseError) {
 	return p.binaryOp(p.factor, tPlus, tMinus)
 }
 
-func (p *parser) factor() (expr[any], error) {
+func (p *parser) factor() (expr[any], *parseError) {
 	return p.binaryOp(p.unary, tSlash, tStar)
 }
 
@@ -101,7 +124,7 @@ wrap fun is the next precedence level function, which is wrapping the current op
 for e.g. (4+2)<(3*7), in above the comparison operator is wrapped by term, factor primary on
 both sides. the next precedence level for comparison is term.
 */
-func (p *parser) binaryOp(nextPrecedenceFn func() (expr[any], error), tokens ...TokenType) (expr[any], error) {
+func (p *parser) binaryOp(nextPrecedenceFn func() (expr[any], *parseError), tokens ...TokenType) (expr[any], *parseError) {
 	expr, err := nextPrecedenceFn()
 	if err != nil {
 		return nil, err
@@ -127,7 +150,7 @@ func (p *parser) binaryOp(nextPrecedenceFn func() (expr[any], error), tokens ...
 	return expr, nil
 }
 
-func (p *parser) unary() (expr[any], error) {
+func (p *parser) unary() (expr[any], *parseError) {
 	if p.peekMatch(tBang, tMinus) {
 		operator := p.tokens[p.curr]
 		p.curr++
@@ -144,7 +167,7 @@ func (p *parser) unary() (expr[any], error) {
 	return p.primary()
 }
 
-func (p *parser) primary() (expr[any], error) {
+func (p *parser) primary() (expr[any], *parseError) {
 	token := p.tokens[p.curr]
 	p.curr++
 
@@ -162,9 +185,7 @@ func (p *parser) primary() (expr[any], error) {
 		if err != nil {
 			return nil, err
 		} else if !p.peekMatch(tRightParen) {
-			logError(p.tokens[p.curr].line, "Expected ')' after expression")
-			p.consumeCascadingErrors()
-			return nil, errors.New("expected ')' after expression")
+			return nil, p.parseErrorCurr("Expected ')' after expression")
 		} else {
 			p.curr++ // consume the right paren
 			return eGrouping[any]{expression: expr}, nil
@@ -174,9 +195,7 @@ func (p *parser) primary() (expr[any], error) {
 		if arrIncludes(binaryTokens, token.tokenType) {
 			errStr = ": Operator found without left-hand operand."
 		}
-		logError(token.line, "Error at '"+token.lexeme+errStr)
-		p.consumeCascadingErrors()
-		return nil, errors.New("unexpected token: " + token.lexeme)
+		return nil, parseErrorAt(token.line, "Error at '"+token.lexeme+errStr)
 	}
 }
 
@@ -197,6 +216,18 @@ func (p *parser) consumeCascadingErrors() {
 		}
 
 		p.curr++
+	}
+}
+
+/*
+semicolons must be present at the end of every statement
+*/
+func (p *parser) consumeSemicolon() *parseError {
+	if p.peekMatch(tSemicolon) {
+		p.curr++
+		return nil
+	} else {
+		return p.parseErrorCurr("Expected ';' after expression")
 	}
 }
 
@@ -223,4 +254,24 @@ func arrIncludes[T comparable](arr []T, item T) bool {
 		}
 	}
 	return false
+}
+
+/*
+create a parse error at current token line
+*/
+func (p *parser) parseErrorCurr(msg string) *parseError {
+	var line int
+	if !p.isAtEnd() {
+		line = p.tokens[p.curr].line
+	} else {
+		line = p.tokens[p.curr-1].line
+	}
+	return parseErrorAt(line, msg)
+}
+
+func parseErrorAt(line int, msg string) *parseError {
+	return &parseError{
+		line: line,
+		msg:  msg,
+	}
 }
