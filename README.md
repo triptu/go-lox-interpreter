@@ -19,6 +19,14 @@
   its precedence level or higher.
 
 ```ebnf
+(* program is basically a list of statements *)
+program        → statement* EOF ;
+statement      → exprStmt
+               | printStmt ;
+exprStmt       → expression ";" ;
+printStmt      → "print" expression ";" ;
+
+(* define expressions in order of precedence *)
 expression     → equality ;
 equality       → comparison ( ( "!=" | "==" ) comparison )* ;
 comparison     → term ( ( ">" | ">=" | "<" | "<=" ) term )* ;

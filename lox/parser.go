@@ -33,12 +33,45 @@ parses in a loop, when an error happens, we try to jump to next sane location
 in the code, in a way that we avoid cascading errors while still reporting as
 many useful errors as possible to the user.
 */
-func (p *parser) parse() expr[any] {
-	var expr expr[any]
+func (p *parser) parse() []stmt[any] {
+	var statements []stmt[any]
 	for !p.isAtEnd() {
-		expr, _ = p.expression()
+		st, err := p.statement()
+		if err == nil {
+			statements = append(statements, st)
+		}
 	}
+	return statements
+}
+
+/*
+parses single line expression in the code file like - "1+2*3"
+*/
+func (p *parser) parseExpression() expr[any] {
+	expr, _ := p.expression()
 	return expr
+}
+
+func (p *parser) statement() (stmt[any], error) {
+	if p.matchIncrement(tPrint) {
+		return p.printStmt()
+	} else {
+		return p.exprStmt()
+	}
+}
+
+func (p *parser) printStmt() (stmt[any], error) {
+	expr, err := p.expression()
+	return sPrint[any]{
+		expression: expr,
+	}, err
+}
+
+func (p *parser) exprStmt() (stmt[any], error) {
+	expr, err := p.expression()
+	return sExpr[any]{
+		expression: expr,
+	}, err
 }
 
 func (p *parser) expression() (expr[any], error) {
@@ -165,6 +198,14 @@ func (p *parser) consumeCascadingErrors() {
 
 		p.curr++
 	}
+}
+
+func (p *parser) matchIncrement(token TokenType) bool {
+	if !p.isAtEnd() && p.tokens[p.curr].tokenType == token {
+		p.curr++
+		return true
+	}
+	return false
 }
 
 // checks if the current token matches any of the given tokens
