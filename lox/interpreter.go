@@ -140,7 +140,20 @@ func (i interpreter) visitBinaryExpr(e eBinary) any {
 }
 
 func (i interpreter) visitCallExpr(e eCall) any {
-	panic("implement me")
+	callee := i.evaluate(e.callee)
+	var args []any
+	for _, arg := range e.arguments {
+		args = append(args, i.evaluate(arg))
+	}
+	callee2, ok := callee.(callable)
+	if !ok {
+		logRuntimeError(e.paren.line, "Can only call functions and classes.")
+	}
+	if len(args) != callee2.arity() {
+		logRuntimeError(e.paren.line,
+			fmt.Sprintf("Expected %d arguments but got %d.", callee2.arity(), len(args)))
+	}
+	return callee2.call(i, args)
 }
 
 func (i interpreter) visitGetExpr(e eGet) any {

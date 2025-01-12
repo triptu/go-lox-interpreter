@@ -394,7 +394,55 @@ func (p *parser) unary() (expr, *parseError) {
 		}, nil
 	}
 
-	return p.primary()
+	return p.call()
+}
+
+func (p *parser) call() (expr, *parseError) {
+	expr, err := p.primary()
+	if err != nil {
+		return nil, err
+	}
+	for {
+		if p.matchIncrement(tLeftParen) {
+			expr, err = p.finishCall(expr)
+			if err != nil {
+				return nil, err
+			}
+		} else {
+			break
+		}
+	}
+	return expr, nil
+}
+
+func (p *parser) finishCall(callee expr) (expr, *parseError) {
+	var arguments []expr
+	hasNext := !p.peekMatch(tRightParen)
+	for hasNext {
+		arg, err := p.expression()
+		if err != nil {
+			return nil, err
+		}
+		arguments = append(arguments, arg)
+		hasNext = p.matchIncrement(tComma)
+	}
+
+	if !p.peekMatch(tRightParen) {
+		return nil, parseErrorAt(p.tokens[p.curr], "expected ')' after arguments")
+	}
+	paren := p.tokens[p.curr]
+	p.curr++
+
+	if len(arguments) >= 255 {
+		// just log, not any big error to stop the parsing process itself
+		logError(paren.line, "can't have more than 255 arguments to a function.")
+	}
+
+	return eCall{
+		callee:    callee,
+		paren:     paren,
+		arguments: arguments,
+	}, nil
 }
 
 func (p *parser) primary() (expr, *parseError) {

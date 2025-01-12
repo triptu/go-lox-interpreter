@@ -56,10 +56,16 @@ comparison     → term ( ( ">" | ">=" | "<" | "<=" ) term )* ;
 term           → factor ( ( "-" | "+" ) factor )* ;
 factor         → unary ( ( "/" | "*" ) unary )* ;
 unary          → ( "!" | "-" ) unary
-               | primary ;
+               | call ;
+(* If there are no parentheses, this parses a bare primary expression. *)
+(* Otherwise, there can be multiple layers of calls, like abc()() *)
+call           → primary ( "(" arguments? ")" )* ;
 primary        → NUMBER | STRING | "true" | "false" | "nil"
                | "(" expression ")" 
                | IDENTIFIER ;
+
+(* helper rules *)
+arguments      → expression ( "," expression )* ;
 ```
 
 

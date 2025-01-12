@@ -54,7 +54,7 @@ type eBinary struct {
 
 type eCall struct {
 	callee    expr
-	paren     token
+	paren     token // stored only for error reporting
 	arguments []expr
 }
 
