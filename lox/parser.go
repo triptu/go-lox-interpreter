@@ -105,6 +105,8 @@ func (p *parser) statement() (stmt, *parseError) {
 		return p.ifStmt()
 	} else if p.matchIncrement(tWhile) {
 		return p.whileStmt()
+	} else if p.matchIncrement(tFor) {
+		return p.forStmt()
 	} else {
 		return p.exprStmt()
 	}
@@ -185,6 +187,64 @@ func (p *parser) whileStmt() (stmt, *parseError) {
 		condition: condition,
 		body:      body,
 	}, err
+}
+
+/*
+for is implemented in terms of while. a new block is created with initializer
+as the first statement. Condition is put in white condition and updater is added
+with while's body in a block attached to while's body.
+*/
+func (p *parser) forStmt() (stmt, *parseError) {
+	err := p.consumeToken(tLeftParen, "Expected '(' after 'while'.")
+	if err != nil {
+		return nil, err
+	}
+
+	var statements []stmt
+	if !p.matchIncrement(tSemicolon) {
+		initializer, err := p.declaration()
+		if err != nil {
+			return nil, err
+		}
+		statements = append(statements, initializer)
+	}
+
+	condition, err := p.expression()
+	if err != nil {
+		return nil, err
+	}
+	err = p.consumeSemicolon()
+	if err != nil {
+		return nil, err
+	}
+
+	var updater expr
+	if !p.peekMatch(tRightParen) {
+		updater, err = p.expression()
+		if err != nil {
+			return nil, err
+		}
+	}
+
+	err = p.consumeToken(tRightParen, "Expected ')' after while condition.")
+	if err != nil {
+		return nil, err
+	}
+
+	body, err := p.statement()
+	if err != nil {
+		return nil, err
+	}
+
+	if updater != nil {
+		body = sBlock{[]stmt{body, sExpr{expression: updater}}}
+	}
+
+	statements = append(statements, sWhile{
+		condition: condition,
+		body:      body,
+	})
+	return sBlock{statements}, nil
 }
 
 func (p *parser) blockRawStmts() ([]stmt, *parseError) {

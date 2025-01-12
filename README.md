@@ -32,6 +32,7 @@ statement      → exprStmt
                | printStmt
                | ifStmt
                | whileStmt
+               | forStmt
                | blockStmt ;
 
 exprStmt       → expression ";" ;
@@ -39,6 +40,9 @@ printStmt      → "print" expression ";" ;
 ifStmt         → "if" "(" expression ")" statement
                ( "else" statement )? ;
 whileStmt      → "while" "(" expression ")" statement ;
+forStmt        -> "for" "(" (varDecl | exprStmt | ";")
+               expression? ";" 
+               expression? ")" statement ;
 blockStmt      → "{" declaration* "}" ;
 
 (* define expressions in order of precedence *)
