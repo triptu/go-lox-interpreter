@@ -200,22 +200,26 @@ func (p *parser) forStmt() (stmt, *parseError) {
 		return nil, err
 	}
 
-	var statements []stmt
+	var initializer stmt
 	if !p.matchIncrement(tSemicolon) {
-		initializer, err := p.declaration()
+		initializer, err = p.declaration()
 		if err != nil {
 			return nil, err
 		}
-		statements = append(statements, initializer)
 	}
 
-	condition, err := p.expression()
-	if err != nil {
-		return nil, err
-	}
-	err = p.consumeSemicolon()
-	if err != nil {
-		return nil, err
+	var condition expr
+	if p.matchIncrement(tSemicolon) {
+		condition = eLiteral{value: true}
+	} else {
+		condition, err = p.expression()
+		if err != nil {
+			return nil, err
+		}
+		err = p.consumeSemicolon()
+		if err != nil {
+			return nil, err
+		}
 	}
 
 	var updater expr
@@ -239,12 +243,16 @@ func (p *parser) forStmt() (stmt, *parseError) {
 	if updater != nil {
 		body = sBlock{[]stmt{body, sExpr{expression: updater}}}
 	}
-
-	statements = append(statements, sWhile{
+	whileSt := sWhile{
 		condition: condition,
 		body:      body,
-	})
-	return sBlock{statements}, nil
+	}
+
+	if initializer == nil {
+		return whileSt, nil
+	} else {
+		return sBlock{[]stmt{initializer, whileSt}}, nil
+	}
 }
 
 func (p *parser) blockRawStmts() ([]stmt, *parseError) {
