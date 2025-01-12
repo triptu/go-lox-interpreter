@@ -1,10 +1,27 @@
 package lox
 
+import "fmt"
+
 /*
 Interpreter also implements the visitor interface for the AST nodes.
 */
 
 type interpreter struct {
+}
+
+func (i interpreter) interpret(statements []stmt) {
+	for _, st := range statements {
+		st.accept(i)
+	}
+}
+
+func (i interpreter) visitExprStmt(s sExpr) {
+	i.evaluate(s.expression)
+}
+
+func (i interpreter) visitPrintStmt(s sPrint) {
+	val := i.evaluate(s.expression)
+	fmt.Println(getLiteralStr(val))
 }
 
 func (i interpreter) evaluate(expr expr[any]) any {

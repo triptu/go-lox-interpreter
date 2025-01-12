@@ -4,27 +4,27 @@ package lox
 Defines the statement nodes of the AST. A program is a list of statements.
 */
 
-type stmt[R any] interface {
-	accept(stmtVisitor[R]) R
+type stmt interface {
+	accept(stmtVisitor)
 }
 
-type stmtVisitor[R any] interface {
-	visitExprStmt(sExpr[R]) R
-	visitPrintStmt(sPrint[R]) R
+type stmtVisitor interface {
+	visitExprStmt(sExpr)
+	visitPrintStmt(sPrint)
 }
 
-type sExpr[R any] struct {
-	expression expr[R]
+type sExpr struct {
+	expression expr[any]
 }
 
-type sPrint[R any] struct {
-	expression expr[R]
+type sPrint struct {
+	expression expr[any]
 }
 
-func (e sExpr[R]) accept(v stmtVisitor[R]) R {
-	return v.visitExprStmt(e)
+func (e sExpr) accept(v stmtVisitor) {
+	v.visitExprStmt(e)
 }
 
-func (e sPrint[R]) accept(v stmtVisitor[R]) R {
-	return v.visitPrintStmt(e)
+func (e sPrint) accept(v stmtVisitor) {
+	v.visitPrintStmt(e)
 }

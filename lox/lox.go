@@ -112,12 +112,12 @@ func Run(code []byte) {
 	}
 
 	parser := newParser[expr[any]](tokens)
-	_ = parser.parse()
+	statements := parser.parse()
 	if hasError {
 		os.Exit(65)
 	} else {
-		// interpreter := interpreter{}
-		// fmt.Println(getLiteralStr(interpreter.evaluate(parsedExpr)))
+		interpreter := interpreter{}
+		interpreter.interpret(statements)
 		if hasRuntimeError {
 			os.Exit(70)
 		}

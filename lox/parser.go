@@ -42,8 +42,8 @@ parses in a loop, when an error happens, we try to jump to next sane location
 in the code, in a way that we avoid cascading errors while still reporting as
 many useful errors as possible to the user.
 */
-func (p *parser) parse() []stmt[any] {
-	var statements []stmt[any]
+func (p *parser) parse() []stmt {
+	var statements []stmt
 	for !p.isAtEnd() {
 		st, err := p.statement()
 		if err == nil {
@@ -67,7 +67,7 @@ func (p *parser) parseExpression() expr[any] {
 	return expr
 }
 
-func (p *parser) statement() (stmt[any], *parseError) {
+func (p *parser) statement() (stmt, *parseError) {
 	if p.matchIncrement(tPrint) {
 		return p.printStmt()
 	} else {
@@ -75,24 +75,24 @@ func (p *parser) statement() (stmt[any], *parseError) {
 	}
 }
 
-func (p *parser) printStmt() (stmt[any], *parseError) {
+func (p *parser) printStmt() (stmt, *parseError) {
 	expr, err := p.expression()
 	if err != nil {
 		return nil, err
 	}
 	err = p.consumeSemicolon()
-	return sPrint[any]{
+	return sPrint{
 		expression: expr,
 	}, err
 }
 
-func (p *parser) exprStmt() (stmt[any], *parseError) {
+func (p *parser) exprStmt() (stmt, *parseError) {
 	expr, err := p.expression()
 	if err != nil {
 		return nil, err
 	}
 	err = p.consumeSemicolon()
-	return sExpr[any]{
+	return sExpr{
 		expression: expr,
 	}, err
 }
