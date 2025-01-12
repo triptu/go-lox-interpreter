@@ -5,6 +5,10 @@ import (
 	"os"
 )
 
+/*
+This is the entry point for Lox exposing public methods for different functionalities.
+*/
+
 var hasError bool
 var hasRuntimeError bool
 

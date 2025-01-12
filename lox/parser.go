@@ -10,7 +10,7 @@ import (
 like literal don't reference anyother node. While non-leaf nodes reference other
 nodes.
 - The way the tree is built is by calling the methods in order of their precedence. We
-  start by calling the lowest precedence method, which in turn calls the next highest
+  start by calling the lowest precedence method, which in turn calls the next higher
   precdence method, and so on. If the higher predence method actually finds the operator
   it represents, it creates a new node, putting the operator as parent and left/right as the
   expression nodes coming from its recursive down calls.
