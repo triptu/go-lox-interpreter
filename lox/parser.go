@@ -133,8 +133,8 @@ func (p *parser) blockRawStmts() ([]stmt, *parseError) {
 		}
 		statements = append(statements, st)
 	}
-	p.consumeToken(tRightBrace, "Expected '}' after block")
-	return statements, nil
+	err := p.consumeToken(tRightBrace, "Expected '}' after block")
+	return statements, err
 }
 
 func (p *parser) exprStmt() (stmt, *parseError) {
