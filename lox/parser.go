@@ -4,6 +4,18 @@ import (
 	"errors"
 )
 
+/*
+- The parser makes the AST which can be recursively evaluated by the interpreter.
+- Every expression from operators to literal is a node in the AST. The leaf nodes
+like literal don't reference anyother node. While non-leaf nodes reference other
+nodes.
+- The way the tree is built is by calling the methods in order of their precedence. We
+  start by calling the lowest precedence method, which in turn calls the next highest
+  precdence method, and so on. If the higher predence method actually finds the operator
+  it represents, it creates a new node, putting the operator as parent and left/right as the
+  expression nodes coming from its recursive down calls.
+*/
+
 type parser struct {
 	tokens []token
 	curr   int
@@ -35,85 +47,40 @@ func (p *parser) expression() (expr[any], error) {
 
 // ==, !=
 func (p *parser) equality() (expr[any], error) {
-	expr, err := p.comparison()
-	if err != nil {
-		return nil, err
-	}
-
-	for p.peekMatch(tEqualEqual, tBangEqual) {
-		operator := p.tokens[p.curr]
-		p.curr++
-		right, err := p.comparison()
-		if err != nil {
-			return nil, err
-		}
-		expr = eBinary[any]{
-			left:     expr,
-			operator: operator,
-			right:    right,
-		}
-	}
-
-	return expr, nil
+	return p.binaryOp(p.comparison, tBangEqual, tEqualEqual)
 }
 
 // ==, >=, <=, <, >
 func (p *parser) comparison() (expr[any], error) {
-	expr, err := p.term()
-	if err != nil {
-		return nil, err
-	}
-
-	for p.peekMatch(tGreater, tGreaterEqual, tLess, tLessEqual) {
-		operator := p.tokens[p.curr]
-		p.curr++
-		right, err := p.term()
-		if err != nil {
-			return nil, err
-		}
-		expr = eBinary[any]{
-			left:     expr,
-			operator: operator,
-			right:    right,
-		}
-	}
-
-	return expr, nil
+	return p.binaryOp(p.term, tGreater, tGreaterEqual, tLess, tLessEqual)
 }
 
 func (p *parser) term() (expr[any], error) {
-	expr, err := p.factor()
-	if err != nil {
-		return nil, err
-	}
-
-	for p.peekMatch(tMinus, tPlus) {
-		operator := p.tokens[p.curr]
-		p.curr++
-		right, err := p.factor()
-		if err != nil {
-			return nil, err
-		}
-		expr = eBinary[any]{
-			left:     expr,
-			operator: operator,
-			right:    right,
-		}
-	}
-
-	return expr, nil
+	return p.binaryOp(p.factor, tPlus, tMinus)
 }
 
 func (p *parser) factor() (expr[any], error) {
-	expr, err := p.unary()
+	return p.binaryOp(p.unary, tSlash, tStar)
+}
+
+/*
+wrap fun is the next precedence level function, which is wrapping the current operator.
+for e.g. (4+2)<(3*7), in above the comparison operator is wrapped by term, factor primary on
+both sides. the next precedence level for comparison is term.
+*/
+func (p *parser) binaryOp(nextPrecedenceFn func() (expr[any], error), tokens ...TokenType) (expr[any], error) {
+	expr, err := nextPrecedenceFn()
 	if err != nil {
 		return nil, err
 	}
 
-	for p.peekMatch(tSlash, tStar) {
+	// match all operator on the same level
+	// notice how this is also making these operators left associative
+	// as the newer op encountered on right keeps on becoming a new parent
+	for p.peekMatch(tokens...) {
 		operator := p.tokens[p.curr]
 		p.curr++
-		right, err := p.unary()
+		right, err := nextPrecedenceFn()
 		if err != nil {
 			return nil, err
 		}
