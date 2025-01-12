@@ -53,6 +53,21 @@ func Parse(code []byte) {
 	}
 }
 
+func Visualize(code []byte) {
+	tokens := tokenize(code)
+	parser := newParser[expr[any]](tokens)
+	parsedExpr := parser.parse()
+	if hasError {
+		os.Exit(65)
+	} else {
+		visualizer := NewVisualiseTreeVisitor()
+		output_path := "tests/ast_tree"
+		if err := visualizer.Visualize(parsedExpr, output_path); err != nil {
+			fmt.Printf("Failed to visualize AST: %v\n", err)
+		}
+	}
+}
+
 func Evaluate(code []byte) {
 	defer func() {
 		if r := recover(); r != nil {

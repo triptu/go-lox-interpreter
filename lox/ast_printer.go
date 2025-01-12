@@ -78,22 +78,3 @@ func (p astPrinter) parenthesize(name string, exprs ...expr[any]) any {
 	sb.WriteString(")")
 	return sb.String()
 }
-
-func testPrinter() {
-	p := astPrinter{}
-	expr := eBinary[any]{
-		left: eUnary[any]{
-			operator: token{tokenType: tMinus, lexeme: "-"},
-			right: eLiteral[any]{
-				value: 123,
-			},
-		},
-		operator: token{tokenType: tStar, lexeme: "*"},
-		right: eGrouping[any]{
-			expression: eLiteral[any]{
-				value: 45.67,
-			},
-		},
-	}
-	p.print(expr)
-}
