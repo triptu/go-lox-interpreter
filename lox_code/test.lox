@@ -1,0 +1,5 @@
+var hello=5;
+var baz;
+var quz;
+hello = baz = quz = hello * 2;
+print hello;

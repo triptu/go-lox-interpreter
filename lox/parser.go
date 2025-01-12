@@ -201,7 +201,7 @@ func (p *parser) assignment() (expr, *parseError) {
 	if p.peekMatch(tEqual) {
 		equalsToken := p.tokens[p.curr]
 		p.curr++
-		value, err := p.logicOr()
+		value, err := p.assignment()
 
 		if err != nil {
 			return nil, err
