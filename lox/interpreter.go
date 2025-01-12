@@ -47,6 +47,16 @@ func (i interpreter) visitIfStmt(s sIf) {
 	}
 }
 
+func (i interpreter) visitWhileStmt(s sWhile) {
+	for {
+		val := i.evaluate(s.condition)
+		if !isTruthy(val) {
+			break
+		}
+		s.body.accept(i)
+	}
+}
+
 func (i interpreter) executeBlock(statements []stmt, outerEnv *environment) {
 	env := newChildEnvironment(outerEnv)
 	i.env = env

@@ -103,6 +103,8 @@ func (p *parser) statement() (stmt, *parseError) {
 		return p.blockStmt()
 	} else if p.matchIncrement(tIf) {
 		return p.ifStmt()
+	} else if p.matchIncrement(tWhile) {
+		return p.whileStmt()
 	} else {
 		return p.exprStmt()
 	}
@@ -131,10 +133,12 @@ func (p *parser) ifStmt() (stmt, *parseError) {
 	if err != nil {
 		return nil, err
 	}
+
 	condition, err := p.expression()
 	if err != nil {
 		return nil, err
 	}
+
 	err = p.consumeToken(tRightParen, "Expected ')' after if condition.")
 	if err != nil {
 		return nil, err
@@ -158,6 +162,29 @@ func (p *parser) ifStmt() (stmt, *parseError) {
 		thenBranch: ifBranch,
 		elseBranch: elseBranch,
 	}, nil
+}
+
+func (p *parser) whileStmt() (stmt, *parseError) {
+	err := p.consumeToken(tLeftParen, "Expected '(' after 'while'.")
+	if err != nil {
+		return nil, err
+	}
+
+	condition, err := p.expression()
+	if err != nil {
+		return nil, err
+	}
+
+	err = p.consumeToken(tRightParen, "Expected ')' after while condition.")
+	if err != nil {
+		return nil, err
+	}
+
+	body, err := p.statement()
+	return sWhile{
+		condition: condition,
+		body:      body,
+	}, err
 }
 
 func (p *parser) blockRawStmts() ([]stmt, *parseError) {

@@ -31,12 +31,14 @@ varDecl        → "var" IDENTIFIER ( "=" expression )? ";" ;
 statement      → exprStmt
                | printStmt
                | ifStmt
+               | whileStmt
                | blockStmt ;
 
 exprStmt       → expression ";" ;
 printStmt      → "print" expression ";" ;
 ifStmt         → "if" "(" expression ")" statement
                ( "else" statement )? ;
+whileStmt      → "while" "(" expression ")" statement ;
 blockStmt      → "{" declaration* "}" ;
 
 (* define expressions in order of precedence *)

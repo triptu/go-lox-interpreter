@@ -19,6 +19,8 @@ type stmtVisitor interface {
 	visitBlockStmt(sBlock)
 	// if (a == 3) { print "hello"; } else { print "world"; }
 	visitIfStmt(sIf)
+	// while (a == 3) { print "hello"; a = a + 1; }
+	visitWhileStmt(sWhile)
 }
 
 type sExpr struct {
@@ -44,6 +46,11 @@ type sIf struct {
 	elseBranch stmt
 }
 
+type sWhile struct {
+	condition expr
+	body      stmt
+}
+
 func (e sExpr) accept(v stmtVisitor) {
 	v.visitExprStmt(e)
 }
@@ -62,4 +69,8 @@ func (e sBlock) accept(v stmtVisitor) {
 
 func (e sIf) accept(v stmtVisitor) {
 	v.visitIfStmt(e)
+}
+
+func (e sWhile) accept(v stmtVisitor) {
+	v.visitWhileStmt(e)
 }
