@@ -1,0 +1,34 @@
+print "one";
+print true;
+print 2 + 1;
+var a = 5;
+var b = 10;
+print a + b;
+
+var hello = 65;
+var baz;
+var quz;
+
+hello = 10;
+hello = baz = quz = hello * 2;
+print hello;
+print baz;
+print baz;
+
+{
+    var world = "before";
+    print world;
+}
+{
+    var world = "after";
+    print world;
+}
+
+{
+    var hello = 88;
+    {
+        var foo = 88;
+        print foo;
+    }
+    print hello;
+}
