@@ -21,7 +21,7 @@ func newInterpreter() *interpreter {
 
 func (i interpreter) interpret(statements []stmt) {
 	for _, st := range statements {
-		st.accept(i)
+		i.execute(st)
 	}
 }
 
@@ -41,9 +41,9 @@ func (i interpreter) visitBlockStmt(s sBlock) {
 func (i interpreter) visitIfStmt(s sIf) {
 	val := i.evaluate(s.condition)
 	if isTruthy(val) {
-		s.thenBranch.accept(i)
+		i.execute(s.thenBranch)
 	} else if s.elseBranch != nil {
-		s.elseBranch.accept(i)
+		i.execute(s.elseBranch)
 	}
 }
 
@@ -53,7 +53,7 @@ func (i interpreter) visitWhileStmt(s sWhile) {
 		if !isTruthy(val) {
 			break
 		}
-		s.body.accept(i)
+		i.execute(s.body)
 	}
 }
 
@@ -61,9 +61,13 @@ func (i interpreter) executeBlock(statements []stmt, outerEnv *environment) {
 	env := newChildEnvironment(outerEnv)
 	i.env = env
 	for _, st := range statements {
-		st.accept(i)
+		i.execute(st)
 	}
 	i.env = outerEnv
+}
+
+func (i interpreter) execute(stmt stmt) {
+	stmt.accept(i)
 }
 
 func (i interpreter) evaluate(expr expr) any {
