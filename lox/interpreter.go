@@ -142,7 +142,12 @@ func (i interpreter) visitLiteralExpr(e eLiteral) any {
 }
 
 func (i interpreter) visitLogicalExpr(e eLogical) any {
-	panic("implement me")
+	left := i.evaluate(e.left)
+	if (e.operator.tokenType == tOr && isTruthy(left)) ||
+		(e.operator.tokenType == tAnd && !isTruthy(left)) {
+		return left
+	}
+	return i.evaluate(e.right)
 }
 
 func (i interpreter) visitSetExpr(e eSet) any {

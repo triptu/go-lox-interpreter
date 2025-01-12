@@ -193,7 +193,7 @@ as assign is right associative, we use recursion than a loop.
 `a = b = c“ should evaluate to `a = (b = c)`
 */
 func (p *parser) assignment() (expr, *parseError) {
-	expr, err := p.equality()
+	expr, err := p.logicOr()
 	if err != nil {
 		return nil, err
 	}
@@ -201,7 +201,7 @@ func (p *parser) assignment() (expr, *parseError) {
 	if p.peekMatch(tEqual) {
 		equalsToken := p.tokens[p.curr]
 		p.curr++
-		value, err := p.assignment()
+		value, err := p.logicOr()
 
 		if err != nil {
 			return nil, err
@@ -217,6 +217,14 @@ func (p *parser) assignment() (expr, *parseError) {
 	}
 
 	return expr, nil
+}
+
+func (p *parser) logicOr() (expr, *parseError) {
+	return p.binaryOp(p.logicAnd, tOr)
+}
+
+func (p *parser) logicAnd() (expr, *parseError) {
+	return p.binaryOp(p.equality, tAnd)
 }
 
 // ==, !=
@@ -238,7 +246,7 @@ func (p *parser) factor() (expr, *parseError) {
 }
 
 /*
-wrap fun is the next precedence level function, which is wrapping the current operator.
+nextPrecedenceFn fun is the next precedence level function, which is wrapping the current operator.
 for e.g. (4+2)<(3*7), in above the comparison operator is wrapped by term, factor primary on
 both sides. the next precedence level for comparison is term.
 */
@@ -258,10 +266,19 @@ func (p *parser) binaryOp(nextPrecedenceFn func() (expr, *parseError), tokens ..
 		if err != nil {
 			return nil, err
 		}
-		expr = eBinary{
-			left:     expr,
-			operator: operator,
-			right:    right,
+
+		if tokens[0] == tOr || tokens[0] == tAnd {
+			expr = eLogical{
+				left:     expr,
+				operator: operator,
+				right:    right,
+			}
+		} else {
+			expr = eBinary{
+				left:     expr,
+				operator: operator,
+				right:    right,
+			}
 		}
 	}
 

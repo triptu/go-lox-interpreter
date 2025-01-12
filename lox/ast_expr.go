@@ -26,6 +26,9 @@ type exprVisitor interface {
 	visitGroupingExpr(eGrouping) any
 	// 123, "hello", true, false, nil
 	visitLiteralExpr(eLiteral) any
+	// true or false, "abcd" and "efgh"
+	// these are not coupled with binary as whether the right expression is evaluated
+	// depends on the left expression's evaluation
 	visitLogicalExpr(eLogical) any
 	visitSetExpr(eSet) any
 	// super.method(1, 2, 3)
