@@ -45,7 +45,7 @@ many useful errors as possible to the user.
 func (p *parser) parse() []stmt {
 	var statements []stmt
 	for !p.isAtEnd() {
-		st, err := p.statement()
+		st, err := p.declaration()
 		if err == nil {
 			statements = append(statements, st)
 		} else {
@@ -65,6 +65,35 @@ func (p *parser) parseExpression() expr[any] {
 		logError(err.line, err.Error())
 	}
 	return expr
+}
+
+func (p *parser) declaration() (stmt, *parseError) {
+	if p.matchIncrement(tVar) {
+		return p.varDecl()
+	} else {
+		return p.statement()
+	}
+}
+
+func (p *parser) varDecl() (stmt, *parseError) {
+	if !p.peekMatch(tIdentifier) {
+		return nil, p.parseErrorCurr("Expected identifier after 'var'")
+	}
+	name := p.tokens[p.curr]
+	p.curr++
+	var e expr[any]
+	var err *parseError
+	if p.matchIncrement(tEqual) {
+		e, err = p.expression()
+	}
+	if err != nil {
+		return nil, err
+	}
+	err = p.consumeSemicolon()
+	return sVar{
+		name:        name,
+		initializer: e,
+	}, err
 }
 
 func (p *parser) statement() (stmt, *parseError) {
@@ -190,6 +219,8 @@ func (p *parser) primary() (expr[any], *parseError) {
 			p.curr++ // consume the right paren
 			return eGrouping[any]{expression: expr}, nil
 		}
+	case tIdentifier: // variable access
+		return eVariable[any]{name: token}, nil
 	default:
 		errStr := "': Expect expression."
 		if arrIncludes(binaryTokens, token.tokenType) {

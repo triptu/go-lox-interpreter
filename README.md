@@ -20,7 +20,14 @@
 
 ```ebnf
 (* program is basically a list of statements *)
-program        → statement* EOF ;
+program        → declaration* EOF ;
+
+(* declare variables, classes and functions *)
+declaration    → varDecl
+               | statement ;
+
+varDecl        → "var" IDENTIFIER ( "=" expression )? ";" ;
+
 statement      → exprStmt
                | printStmt ;
 exprStmt       → expression ";" ;
@@ -35,7 +42,8 @@ factor         → unary ( ( "/" | "*" ) unary )* ;
 unary          → ( "!" | "-" ) unary
                | primary ;
 primary        → NUMBER | STRING | "true" | "false" | "nil"
-               | "(" expression ")" ;
+               | "(" expression ")" 
+               | IDENTIFIER ;
 ```
 
 

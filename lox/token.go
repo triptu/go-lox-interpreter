@@ -126,7 +126,7 @@ var binaryTokens = []TokenType{tPlus, tStar, tSlash, tGreater, tLess, tEqual, tL
 type token struct {
 	tokenType TokenType
 	lexeme    string
-	literal   interface{}
+	literal   interface{} // present for number and string
 	line      int
 	column    int
 }

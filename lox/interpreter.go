@@ -7,6 +7,13 @@ Interpreter also implements the visitor interface for the AST nodes.
 */
 
 type interpreter struct {
+	env *environment
+}
+
+func newInterpreter() *interpreter {
+	return &interpreter{
+		env: newEnvironment(),
+	}
 }
 
 func (i interpreter) interpret(statements []stmt) {
@@ -28,8 +35,24 @@ func (i interpreter) evaluate(expr expr[any]) any {
 	return expr.accept(i)
 }
 
+/*
+var a = 123;
+*/
+func (i interpreter) visitVarStmt(s sVar) {
+	var val any
+	if s.initializer != nil {
+		val = i.evaluate(s.initializer)
+	}
+	i.env.set(s.name.lexeme, val)
+}
+
+/*
+a = 123;
+*/
 func (i interpreter) visitAssign(e eAssign[any]) any {
-	panic("implement me")
+	val := i.evaluate(e.value)
+	i.env.set(e.name.lexeme, val)
+	return val
 }
 
 func (i interpreter) visitBinary(e eBinary[any]) any {
@@ -120,7 +143,11 @@ func (i interpreter) visitUnary(e eUnary[any]) any {
 }
 
 func (i interpreter) visitVariable(e eVariable[any]) any {
-	panic("implement me")
+	val, err := i.env.get(e.name.lexeme)
+	if err != nil {
+		logRuntimeError(e.name.line, "Variable '"+e.name.lexeme+"' not found")
+	}
+	return val
 }
 
 func isTruthy(value any) bool {

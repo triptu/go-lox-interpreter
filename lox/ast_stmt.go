@@ -11,6 +11,7 @@ type stmt interface {
 type stmtVisitor interface {
 	visitExprStmt(sExpr)
 	visitPrintStmt(sPrint)
+	visitVarStmt(sVar)
 }
 
 type sExpr struct {
@@ -21,10 +22,19 @@ type sPrint struct {
 	expression expr[any]
 }
 
+type sVar struct {
+	name        token
+	initializer expr[any]
+}
+
 func (e sExpr) accept(v stmtVisitor) {
 	v.visitExprStmt(e)
 }
 
 func (e sPrint) accept(v stmtVisitor) {
 	v.visitPrintStmt(e)
+}
+
+func (e sVar) accept(v stmtVisitor) {
+	v.visitVarStmt(e)
 }
