@@ -99,6 +99,8 @@ func (p *parser) varDecl() (stmt, *parseError) {
 func (p *parser) statement() (stmt, *parseError) {
 	if p.matchIncrement(tPrint) {
 		return p.printStmt()
+	} else if p.matchIncrement(tLeftBrace) {
+		return p.blockStmt()
 	} else {
 		return p.exprStmt()
 	}
@@ -113,6 +115,26 @@ func (p *parser) printStmt() (stmt, *parseError) {
 	return sPrint{
 		expression: expr,
 	}, err
+}
+
+func (p *parser) blockStmt() (stmt, *parseError) {
+	statements, err := p.blockRawStmts()
+	return sBlock{
+		statements: statements,
+	}, err
+}
+
+func (p *parser) blockRawStmts() ([]stmt, *parseError) {
+	var statements []stmt
+	for !p.isAtEnd() && !p.peekMatch(tRightBrace) {
+		st, err := p.declaration()
+		if err != nil {
+			return nil, err
+		}
+		statements = append(statements, st)
+	}
+	p.consumeToken(tRightBrace, "Expected '}' after block")
+	return statements, nil
 }
 
 func (p *parser) exprStmt() (stmt, *parseError) {
@@ -285,11 +307,15 @@ func (p *parser) consumeCascadingErrors() {
 semicolons must be present at the end of every statement
 */
 func (p *parser) consumeSemicolon() *parseError {
-	if p.peekMatch(tSemicolon) {
+	return p.consumeToken(tSemicolon, "Expected ';' after expression")
+}
+
+func (p *parser) consumeToken(token TokenType, errMsg string) *parseError {
+	if p.peekMatch(token) {
 		p.curr++
 		return nil
 	} else {
-		return p.parseErrorCurr("Expected ';' after expression")
+		return p.parseErrorCurr(errMsg)
 	}
 }
 

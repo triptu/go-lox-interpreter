@@ -15,20 +15,28 @@ print hello;
 print baz;
 print baz;
 
+var a = "global a";
+var b = "global b";
+var c = "global c";
 {
-    var world = "before";
-    print world;
+  var a = "outer a";
+  var b = "outer b";
+  {
+    var a = "inner a";
+    print a;
+    print b;
+    print c;
+  }
+  print a;
+  print b;
+  print c;
 }
-{
-    var world = "after";
-    print world;
-}
+print a;
+print b;
+print c;
 
+var a = 1;
 {
-    var hello = 88;
-    {
-        var foo = 88;
-        print foo;
-    }
-    print hello;
+  var a = a + 2;
+  print a;
 }

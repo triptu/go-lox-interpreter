@@ -15,6 +15,8 @@ type stmtVisitor interface {
 	visitPrintStmt(sPrint)
 	// var a = 3; (initializer is optional)
 	visitVarStmt(sVar)
+	// { var a = 3; }
+	visitBlockStmt(sBlock)
 }
 
 type sExpr struct {
@@ -30,6 +32,10 @@ type sVar struct {
 	initializer expr
 }
 
+type sBlock struct {
+	statements []stmt
+}
+
 func (e sExpr) accept(v stmtVisitor) {
 	v.visitExprStmt(e)
 }
@@ -40,4 +46,8 @@ func (e sPrint) accept(v stmtVisitor) {
 
 func (e sVar) accept(v stmtVisitor) {
 	v.visitVarStmt(e)
+}
+
+func (e sBlock) accept(v stmtVisitor) {
+	v.visitBlockStmt(e)
 }

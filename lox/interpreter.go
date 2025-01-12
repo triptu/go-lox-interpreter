@@ -34,6 +34,19 @@ func (i interpreter) visitPrintStmt(s sPrint) {
 	fmt.Println(getLiteralStr(val))
 }
 
+func (i interpreter) visitBlockStmt(s sBlock) {
+	i.executeBlock(s.statements, i.env)
+}
+
+func (i interpreter) executeBlock(statements []stmt, outerEnv *environment) {
+	env := newChildEnvironment(outerEnv)
+	i.env = env
+	for _, st := range statements {
+		st.accept(i)
+	}
+	i.env = outerEnv
+}
+
 func (i interpreter) evaluate(expr expr) any {
 	return expr.accept(i)
 }

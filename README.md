@@ -29,9 +29,11 @@ declaration    → varDecl
 varDecl        → "var" IDENTIFIER ( "=" expression )? ";" ;
 
 statement      → exprStmt
-               | printStmt ;
+               | printStmt
+               | blockStmt ;
 exprStmt       → expression ";" ;
 printStmt      → "print" expression ";" ;
+blockStmt      → "{" declaration* "}" ;
 
 (* define expressions in order of precedence *)
 expression     → assignment ;

@@ -20,6 +20,13 @@ func newEnvironment() *environment {
 	}
 }
 
+func newChildEnvironment(outer *environment) *environment {
+	return &environment{
+		outer: outer,
+		vars:  make(map[string]any),
+	}
+}
+
 func (e *environment) get(name string) (any, error) {
 	if val, ok := e.vars[name]; ok {
 		return val, nil
