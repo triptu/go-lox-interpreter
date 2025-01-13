@@ -2,19 +2,19 @@ package lox
 
 import (
 	"fmt"
-	"time"
 )
 
 type callable interface {
 	arity() int // number of arguments needed
 	call(interpreter interpreter, arguments []any) (any, error)
+	String() string
 }
 
-const nativeFnStr = "<native fn>"
+type nativeFunction struct {
+	arityCnt int
+	fn       func(interpreter, []any) (any, error)
+}
 
-// define some native functions
-type nativeClock struct{}
-type nativePrint struct{}
 type loxFunction struct {
 	declaration sFunction
 }
@@ -27,34 +27,19 @@ func (r returnAsError) Error() string {
 	return fmt.Sprintf("return statement with value %v", r.value)
 }
 
-var _ callable = nativeClock{} // assert interface adherence
-var _ callable = nativePrint{} // assert interface adherence
-var _ callable = loxFunction{} // assert interface adherence
+var _ callable = nativeFunction{} // assert interface adherence
+var _ callable = loxFunction{}    // assert interface adherence
 
-func (n nativeClock) arity() int {
-	return 0
+func (n nativeFunction) arity() int {
+	return n.arityCnt
 }
 
-func (n nativeClock) call(i interpreter, arguments []any) (any, error) {
-	timeInt := time.Now().UnixMilli() / 1000
-	return float64(timeInt), nil
+func (n nativeFunction) call(i interpreter, arguments []any) (any, error) {
+	return n.fn(i, arguments)
 }
 
-func (n nativeClock) String() string {
-	return nativeFnStr
-}
-
-func (n nativePrint) arity() int {
-	return 1
-}
-
-func (n nativePrint) call(i interpreter, arguments []any) (any, error) {
-	fmt.Println(arguments[0])
-	return nil, nil
-}
-
-func (n nativePrint) String() string {
-	return nativeFnStr
+func (n nativeFunction) String() string {
+	return "<native function>"
 }
 
 func (n loxFunction) arity() int {
