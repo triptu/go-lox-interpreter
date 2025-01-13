@@ -463,7 +463,7 @@ func (p *parser) primary() (expr, *parseError) {
 		if err != nil {
 			return nil, err
 		} else if !p.peekMatch(tRightParen) {
-			return nil, p.parseErrorCurr("Expected ')' after expression")
+			return nil, p.parseErrorPrev("Expected ')' after expression")
 		} else {
 			p.curr++ // consume the right paren
 			return eGrouping{expression: expr}, nil
@@ -506,12 +506,12 @@ func (p *parser) consumeSemicolon() *parseError {
 	return p.consumeToken(tSemicolon, "Expected ';' after expression")
 }
 
-func (p *parser) consumeToken(token TokenType, errMsg string) *parseError {
-	if p.peekMatch(token) {
+func (p *parser) consumeToken(tokenType TokenType, errMsg string) *parseError {
+	if p.peekMatch(tokenType) {
 		p.curr++
 		return nil
 	} else {
-		return p.parseErrorCurr(errMsg)
+		return p.parseErrorPrev(errMsg)
 	}
 }
 
@@ -551,6 +551,13 @@ func (p *parser) parseErrorCurr(msg string) *parseError {
 		t = p.tokens[p.curr-1]
 	}
 	return parseErrorAt(t, msg)
+}
+
+/*
+create a parse error at prev token line
+*/
+func (p *parser) parseErrorPrev(msg string) *parseError {
+	return parseErrorAt(p.tokens[p.curr-1], msg)
 }
 
 func parseErrorAt(token token, msg string) *parseError {

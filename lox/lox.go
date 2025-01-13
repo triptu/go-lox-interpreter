@@ -14,7 +14,7 @@ var hasRuntimeError bool
 
 func logError(line int, msg string) {
 	hasError = true
-	fmt.Fprintf(os.Stderr, "[line %d] Error: %s\n", line, msg)
+	fmt.Printf("[line %d] Error: %s\n", line, msg)
 }
 
 func logRuntimeError(line int, msg string) {

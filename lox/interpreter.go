@@ -7,15 +7,20 @@ Interpreter also implements the visitor interface for the AST nodes.
 */
 
 type interpreter struct {
-	env *environment
+	globals *environment // permanent reference to the global environment
+	env     *environment // reference to the environment of the current scope/block
 }
 
 var _ exprVisitor = (*interpreter)(nil)
 var _ stmtVisitor = (*interpreter)(nil)
 
 func newInterpreter() *interpreter {
+	globals := newEnvironment()
+	globals.define("clock", nativeClock{}) // a native language provided function
+	globals.define("print", nativePrint{})
 	return &interpreter{
-		env: newEnvironment(),
+		globals: globals,
+		env:     globals,
 	}
 }
 

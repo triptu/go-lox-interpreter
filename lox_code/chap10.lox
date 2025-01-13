@@ -1,4 +1,4 @@
-print "native clock function"
+print "test - native clock function";
 
 // Countdown from 3 seconds
 var startTime = clock();
