@@ -1,6 +1,8 @@
 package lox
 
-import "fmt"
+import (
+	"fmt"
+)
 
 /*
 Interpreter also implements the visitor interface for the AST nodes.
@@ -125,8 +127,9 @@ func (i interpreter) visitBinaryExpr(e eBinary) (any, error) {
 	right := getJustVal(i.evaluate(e.right))
 	switch e.operator.tokenType {
 	case tPlus:
-		if isString(left) && isString(right) {
-			return left.(string) + right.(string), nil
+		if isString(left) || isString(right) {
+			// if either side is string, convert the other side to string as well
+			return getLiteralStr(left) + getLiteralStr(right), nil
 		} else if isNumber(left) && isNumber(right) {
 			return left.(float64) + right.(float64), nil
 		} else {
