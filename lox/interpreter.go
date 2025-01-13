@@ -52,6 +52,10 @@ func (i interpreter) visitIfStmt(s sIf) {
 	}
 }
 
+func (i interpreter) visitFunctionStmt(s sFunction) {
+	i.env.define(s.name.lexeme, loxFunction{s})
+}
+
 func (i interpreter) visitWhileStmt(s sWhile) {
 	for {
 		val := i.evaluate(s.condition)

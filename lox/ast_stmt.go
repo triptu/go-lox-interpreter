@@ -21,6 +21,8 @@ type stmtVisitor interface {
 	visitIfStmt(sIf)
 	// while (a == 3) { print "hello"; a = a + 1; }
 	visitWhileStmt(sWhile)
+	// fun foo() { print "hello"; }
+	visitFunctionStmt(sFunction)
 }
 
 type sExpr struct {
@@ -51,6 +53,12 @@ type sWhile struct {
 	body      stmt
 }
 
+type sFunction struct {
+	name       token
+	parameters []token
+	body       []stmt
+}
+
 func (e sExpr) accept(v stmtVisitor) {
 	v.visitExprStmt(e)
 }
@@ -73,4 +81,8 @@ func (e sIf) accept(v stmtVisitor) {
 
 func (e sWhile) accept(v stmtVisitor) {
 	v.visitWhileStmt(e)
+}
+
+func (e sFunction) accept(v stmtVisitor) {
+	v.visitFunctionStmt(e)
 }

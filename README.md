@@ -24,9 +24,14 @@ program        → declaration* EOF ;
 
 (* declare variables, classes and functions *)
 declaration    → varDecl
+               | funDecl
                | statement ;
 
 varDecl        → "var" IDENTIFIER ( "=" expression )? ";" ;
+funDecl        → "fun" function ;
+function       → IDENTIFIER "(" parameters? ")" block ;
+parameters     → IDENTIFIER ( "," IDENTIFIER )* ;
+
 
 statement      → exprStmt
                | printStmt

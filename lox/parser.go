@@ -70,30 +70,72 @@ func (p *parser) parseExpression() expr {
 func (p *parser) declaration() (stmt, *parseError) {
 	if p.matchIncrement(tVar) {
 		return p.varDecl()
+	} else if p.matchIncrement(tFun) {
+		return p.funDecl("function")
 	} else {
 		return p.statement()
 	}
 }
 
 func (p *parser) varDecl() (stmt, *parseError) {
-	if !p.peekMatch(tIdentifier) {
-		return nil, p.parseErrorCurr("Expected identifier after 'var'")
+	name, err := p.consumeToken(tIdentifier, "Expected identifier after 'var'")
+	if err != nil {
+		return nil, err
 	}
-	name := p.tokens[p.curr]
-	p.curr++
 	var e expr
-	var err *parseError
 	if p.matchIncrement(tEqual) {
 		e, err = p.expression()
 	}
 	if err != nil {
 		return nil, err
 	}
-	err = p.consumeSemicolon()
+	err = p.eatSemicolon()
 	return sVar{
 		name:        name,
 		initializer: e,
 	}, err
+}
+
+/*
+kind is either "function" or "method"
+*/
+func (p *parser) funDecl(kind string) (stmt, *parseError) {
+	name, err := p.consumeToken(tIdentifier, "expected "+kind+"name")
+	if err != nil {
+		return nil, err
+	}
+	err = p.eatToken(tLeftParen, "expected '(' after "+kind+" name")
+	if err != nil {
+		return nil, err
+	}
+
+	var parameters []token
+	hasMore := !p.peekMatch(tRightParen)
+	for hasMore {
+		param, err := p.consumeToken(tIdentifier, "expected parameter name")
+		if err != nil {
+			return nil, err
+		}
+		parameters = append(parameters, param)
+		hasMore = p.matchIncrement(tComma)
+	}
+	err = p.eatToken(tRightParen, "expected ')' after parameters")
+	if err != nil {
+		return nil, err
+	}
+	err = p.eatToken(tLeftBrace, "expected '{' before "+kind+" body")
+	if err != nil {
+		return nil, err
+	}
+	block, err := p.blockRawStmts()
+	if err != nil {
+		return nil, err
+	}
+	return sFunction{
+		name:       name,
+		parameters: parameters,
+		body:       block,
+	}, nil
 }
 
 func (p *parser) statement() (stmt, *parseError) {
@@ -117,7 +159,7 @@ func (p *parser) printStmt() (stmt, *parseError) {
 	if err != nil {
 		return nil, err
 	}
-	err = p.consumeSemicolon()
+	err = p.eatSemicolon()
 	return sPrint{
 		expression: expr,
 	}, err
@@ -131,7 +173,7 @@ func (p *parser) blockStmt() (stmt, *parseError) {
 }
 
 func (p *parser) ifStmt() (stmt, *parseError) {
-	err := p.consumeToken(tLeftParen, "Expected '(' after 'if'.")
+	err := p.eatToken(tLeftParen, "Expected '(' after 'if'.")
 	if err != nil {
 		return nil, err
 	}
@@ -141,7 +183,7 @@ func (p *parser) ifStmt() (stmt, *parseError) {
 		return nil, err
 	}
 
-	err = p.consumeToken(tRightParen, "Expected ')' after if condition.")
+	err = p.eatToken(tRightParen, "Expected ')' after if condition.")
 	if err != nil {
 		return nil, err
 	}
@@ -167,7 +209,7 @@ func (p *parser) ifStmt() (stmt, *parseError) {
 }
 
 func (p *parser) whileStmt() (stmt, *parseError) {
-	err := p.consumeToken(tLeftParen, "Expected '(' after 'while'.")
+	err := p.eatToken(tLeftParen, "Expected '(' after 'while'.")
 	if err != nil {
 		return nil, err
 	}
@@ -177,7 +219,7 @@ func (p *parser) whileStmt() (stmt, *parseError) {
 		return nil, err
 	}
 
-	err = p.consumeToken(tRightParen, "Expected ')' after while condition.")
+	err = p.eatToken(tRightParen, "Expected ')' after while condition.")
 	if err != nil {
 		return nil, err
 	}
@@ -195,7 +237,7 @@ as the first statement. Condition is put in white condition and updater is added
 with while's body in a block attached to while's body.
 */
 func (p *parser) forStmt() (stmt, *parseError) {
-	err := p.consumeToken(tLeftParen, "Expected '(' after 'while'.")
+	err := p.eatToken(tLeftParen, "Expected '(' after 'while'.")
 	if err != nil {
 		return nil, err
 	}
@@ -216,7 +258,7 @@ func (p *parser) forStmt() (stmt, *parseError) {
 		if err != nil {
 			return nil, err
 		}
-		err = p.consumeSemicolon()
+		err = p.eatSemicolon()
 		if err != nil {
 			return nil, err
 		}
@@ -230,7 +272,7 @@ func (p *parser) forStmt() (stmt, *parseError) {
 		}
 	}
 
-	err = p.consumeToken(tRightParen, "Expected ')' after while condition.")
+	err = p.eatToken(tRightParen, "Expected ')' after while condition.")
 	if err != nil {
 		return nil, err
 	}
@@ -255,6 +297,10 @@ func (p *parser) forStmt() (stmt, *parseError) {
 	}
 }
 
+/*
+gives an array of all statements in a block.
+Assumes that the "{" has already been consumed.
+*/
 func (p *parser) blockRawStmts() ([]stmt, *parseError) {
 	var statements []stmt
 	for !p.isAtEnd() && !p.peekMatch(tRightBrace) {
@@ -264,7 +310,7 @@ func (p *parser) blockRawStmts() ([]stmt, *parseError) {
 		}
 		statements = append(statements, st)
 	}
-	err := p.consumeToken(tRightBrace, "Expected '}' after block")
+	err := p.eatToken(tRightBrace, "Expected '}' after block")
 	return statements, err
 }
 
@@ -273,7 +319,7 @@ func (p *parser) exprStmt() (stmt, *parseError) {
 	if err != nil {
 		return nil, err
 	}
-	err = p.consumeSemicolon()
+	err = p.eatSemicolon()
 	return sExpr{
 		expression: expr,
 	}, err
@@ -417,21 +463,20 @@ func (p *parser) call() (expr, *parseError) {
 
 func (p *parser) finishCall(callee expr) (expr, *parseError) {
 	var arguments []expr
-	hasNext := !p.peekMatch(tRightParen)
-	for hasNext {
+	hasMore := !p.peekMatch(tRightParen)
+	for hasMore {
 		arg, err := p.expression()
 		if err != nil {
 			return nil, err
 		}
 		arguments = append(arguments, arg)
-		hasNext = p.matchIncrement(tComma)
+		hasMore = p.matchIncrement(tComma)
 	}
 
-	if !p.peekMatch(tRightParen) {
-		return nil, parseErrorAt(p.tokens[p.curr], "expected ')' after arguments")
+	paren, err := p.consumeToken(tRightParen, "expected ')' after arguments")
+	if err != nil {
+		return nil, err
 	}
-	paren := p.tokens[p.curr]
-	p.curr++
 
 	if len(arguments) >= 255 {
 		// just log, not any big error to stop the parsing process itself
@@ -500,18 +545,26 @@ func (p *parser) consumeCascadingErrors() {
 }
 
 /*
-semicolons must be present at the end of every statement
+semicolons must be present at the end of every statement, but
+we don't actually care about them
 */
-func (p *parser) consumeSemicolon() *parseError {
-	return p.consumeToken(tSemicolon, "Expected ';' after expression")
+func (p *parser) eatSemicolon() *parseError {
+	return p.eatToken(tSemicolon, "Expected ';' after expression")
 }
 
-func (p *parser) consumeToken(tokenType TokenType, errMsg string) *parseError {
-	if p.peekMatch(tokenType) {
-		p.curr++
-		return nil
+/*
+read and forget about the token, if it's not what we expect though, return an error
+*/
+func (p *parser) eatToken(tokenType TokenType, errMsg string) *parseError {
+	_, err := p.consumeToken(tokenType, errMsg)
+	return err
+}
+
+func (p *parser) consumeToken(tokenType TokenType, errMsg string) (token, *parseError) {
+	if p.matchIncrement(tokenType) {
+		return p.tokens[p.curr-1], nil
 	} else {
-		return p.parseErrorPrev(errMsg)
+		return token{}, p.parseErrorPrev(errMsg)
 	}
 }
 
@@ -538,19 +591,6 @@ func arrIncludes[T comparable](arr []T, item T) bool {
 		}
 	}
 	return false
-}
-
-/*
-create a parse error at current token line
-*/
-func (p *parser) parseErrorCurr(msg string) *parseError {
-	var t token
-	if !p.isAtEnd() {
-		t = p.tokens[p.curr]
-	} else {
-		t = p.tokens[p.curr-1]
-	}
-	return parseErrorAt(t, msg)
 }
 
 /*
