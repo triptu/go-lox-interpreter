@@ -61,7 +61,8 @@ func (i interpreter) visitIfStmt(s sIf) error {
 }
 
 func (i interpreter) visitFunctionStmt(s sFunction) error {
-	i.env.define(s.name.lexeme, loxFunction{s})
+	// note that we also attach the env active at the time of function declaration
+	i.env.define(s.name.lexeme, loxFunction{declaration: s, closure: i.env})
 	return nil
 }
 

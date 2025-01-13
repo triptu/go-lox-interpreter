@@ -17,6 +17,7 @@ type nativeFunction struct {
 
 type loxFunction struct {
 	declaration sFunction
+	closure     *environment
 }
 
 type returnAsError struct {
@@ -47,7 +48,7 @@ func (n loxFunction) arity() int {
 }
 
 func (n loxFunction) call(i interpreter, arguments []any) (any, error) {
-	env := newChildEnvironment(i.globals)
+	env := newChildEnvironment(n.closure)
 	for i, param := range n.declaration.parameters {
 		env.define(param.lexeme, arguments[i])
 	}
