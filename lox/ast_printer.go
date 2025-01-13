@@ -16,65 +16,66 @@ func (p astPrinter) print(e expr) {
 	fmt.Println(e.accept(p))
 }
 
-func (p astPrinter) visitAssignExpr(e eAssign) any {
+func (p astPrinter) visitAssignExpr(e eAssign) (any, error) {
 	return p.parenthesize("= "+e.name.lexeme, e.value)
 }
 
 /*
 for e.g. "1 + 2" => "(+ 1 2)"
 */
-func (p astPrinter) visitBinaryExpr(e eBinary) any {
+func (p astPrinter) visitBinaryExpr(e eBinary) (any, error) {
 	return p.parenthesize(e.operator.lexeme, e.left, e.right)
 }
 
-func (p astPrinter) visitCallExpr(e eCall) any {
+func (p astPrinter) visitCallExpr(e eCall) (any, error) {
 	return p.parenthesize("call", append([]expr{e.callee}, e.arguments...)...)
 }
 
-func (p astPrinter) visitGetExpr(e eGet) any {
+func (p astPrinter) visitGetExpr(e eGet) (any, error) {
 	return p.parenthesize(".", e.object, eLiteral{value: e.name.lexeme})
 }
 
-func (p astPrinter) visitGroupingExpr(e eGrouping) any {
+func (p astPrinter) visitGroupingExpr(e eGrouping) (any, error) {
 	return p.parenthesize("group", e.expression)
 }
 
-func (p astPrinter) visitLiteralExpr(e eLiteral) any {
-	return getTokenLiteralStr(e.value)
+func (p astPrinter) visitLiteralExpr(e eLiteral) (any, error) {
+	return getTokenLiteralStr(e.value), nil
 }
 
-func (p astPrinter) visitLogicalExpr(e eLogical) any {
+func (p astPrinter) visitLogicalExpr(e eLogical) (any, error) {
 	return p.parenthesize(e.operator.lexeme, e.left, e.right)
 }
 
-func (p astPrinter) visitSetExpr(e eSet) any {
+func (p astPrinter) visitSetExpr(e eSet) (any, error) {
 	return p.parenthesize("=", e.object, eLiteral{value: e.name.lexeme}, e.value)
 }
 
-func (p astPrinter) visitSuperExpr(e eSuper) any {
+func (p astPrinter) visitSuperExpr(e eSuper) (any, error) {
 	return p.parenthesize("super " + e.method.lexeme + " " + e.keyword.lexeme)
 }
 
-func (p astPrinter) visitThisExpr(e eThis) any {
+func (p astPrinter) visitThisExpr(e eThis) (any, error) {
 	return p.parenthesize(e.keyword.lexeme)
 }
 
-func (p astPrinter) visitUnaryExpr(e eUnary) any {
+func (p astPrinter) visitUnaryExpr(e eUnary) (any, error) {
 	return p.parenthesize(e.operator.lexeme, e.right)
 }
 
-func (p astPrinter) visitVariableExpr(e eVariable) any {
-	return e.name.lexeme
+func (p astPrinter) visitVariableExpr(e eVariable) (any, error) {
+	return e.name.lexeme, nil
 }
 
-func (p astPrinter) parenthesize(name string, exprs ...expr) any {
+func (p astPrinter) parenthesize(name string, exprs ...expr) (any, error) {
 	var sb strings.Builder
 	sb.WriteString("(")
 	sb.WriteString(name)
 	for _, expr := range exprs {
 		sb.WriteString(" ")
-		sb.WriteString(expr.accept(p).(string))
+		evald, _ := expr.accept(p)
+		sb.WriteString(evald.(string))
 	}
 	sb.WriteString(")")
-	return sb.String()
+	return sb.String(), nil
 }

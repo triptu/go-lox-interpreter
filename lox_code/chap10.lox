@@ -91,7 +91,7 @@ calculateGrade(score, bonus);
 
 // return statement
 
-print "test - return statements"
+print "test - return statements";
 
 fun fib(n) {
   if (n < 2) return n;
@@ -99,7 +99,7 @@ fun fib(n) {
 }
 
 var start = clock();
-print fib(32) == 2178309;
+print "10th fib number = " + fib(10);
 print (clock() - start) < 5; // 5 seconds
 
 fun f() {

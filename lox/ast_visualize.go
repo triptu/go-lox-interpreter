@@ -108,120 +108,124 @@ func openImage(imagePath string) error {
 	return cmd.Run()
 }
 
-func (v *visualiseTreeVisitor) visitAssignExpr(e eAssign) any {
+func (v *visualiseTreeVisitor) visitAssignExpr(e eAssign) (any, error) {
 	nodeID := v.getNextNodeID()
 	v.addNode(nodeID, "Assign", fmt.Sprintf("Assign\n%s", e.name.lexeme))
 
-	valueID := e.value.accept(v).(string)
+	valueID := getVal(e.value.accept(v)).(string)
 	v.addEdge(nodeID, valueID)
 
-	return nodeID
+	return nodeID, nil
 }
 
-func (v *visualiseTreeVisitor) visitBinaryExpr(e eBinary) any {
+func (v *visualiseTreeVisitor) visitBinaryExpr(e eBinary) (any, error) {
 	nodeID := v.getNextNodeID()
 	v.addNode(nodeID, "Binary", fmt.Sprintf("Binary\n%s", e.operator.lexeme))
 
-	leftID := e.left.accept(v).(string)
-	rightID := e.right.accept(v).(string)
+	leftID := getVal(e.left.accept(v)).(string)
+	rightID := getVal(e.right.accept(v)).(string)
 
 	v.addEdge(nodeID, leftID)
 	v.addEdge(nodeID, rightID)
 
-	return nodeID
+	return nodeID, nil
 }
 
-func (v *visualiseTreeVisitor) visitCallExpr(e eCall) any {
+func (v *visualiseTreeVisitor) visitCallExpr(e eCall) (any, error) {
 	nodeID := v.getNextNodeID()
 	v.addNode(nodeID, "Call", "Call")
 
-	calleeID := e.callee.accept(v).(string)
+	calleeID := getVal(e.callee.accept(v)).(string)
 	v.addEdge(nodeID, calleeID)
 
 	for _, arg := range e.arguments {
-		argID := arg.accept(v).(string)
+		argID := getVal(arg.accept(v)).(string)
 		v.addEdge(nodeID, argID)
 	}
 
-	return nodeID
+	return nodeID, nil
 }
 
-func (v *visualiseTreeVisitor) visitGetExpr(e eGet) any {
+func (v *visualiseTreeVisitor) visitGetExpr(e eGet) (any, error) {
 	nodeID := v.getNextNodeID()
 	v.addNode(nodeID, "Get", fmt.Sprintf("Get\n%s", e.name.lexeme))
 
-	objectID := e.object.accept(v).(string)
+	objectID := getVal(e.object.accept(v)).(string)
 	v.addEdge(nodeID, objectID)
 
-	return nodeID
+	return nodeID, nil
 }
 
-func (v *visualiseTreeVisitor) visitGroupingExpr(e eGrouping) any {
+func (v *visualiseTreeVisitor) visitGroupingExpr(e eGrouping) (any, error) {
 	nodeID := v.getNextNodeID()
 	v.addNode(nodeID, "Group", "Group")
 
-	exprID := e.expression.accept(v).(string)
+	exprID := getVal(e.expression.accept(v)).(string)
 	v.addEdge(nodeID, exprID)
 
-	return nodeID
+	return nodeID, nil
 }
 
-func (v *visualiseTreeVisitor) visitLiteralExpr(e eLiteral) any {
+func (v *visualiseTreeVisitor) visitLiteralExpr(e eLiteral) (any, error) {
 	nodeID := v.getNextNodeID()
 	v.addNode(nodeID, "Literal", fmt.Sprintf("Literal\n%v", getTokenLiteralStr(e.value)))
-	return nodeID
+	return nodeID, nil
 }
 
-func (v *visualiseTreeVisitor) visitLogicalExpr(e eLogical) any {
+func (v *visualiseTreeVisitor) visitLogicalExpr(e eLogical) (any, error) {
 	nodeID := v.getNextNodeID()
 	v.addNode(nodeID, "Logical", fmt.Sprintf("Logical\n%s", e.operator.lexeme))
 
-	leftID := e.left.accept(v).(string)
-	rightID := e.right.accept(v).(string)
+	leftID := getVal(e.left.accept(v)).(string)
+	rightID := getVal(e.right.accept(v)).(string)
 
 	v.addEdge(nodeID, leftID)
 	v.addEdge(nodeID, rightID)
 
-	return nodeID
+	return nodeID, nil
 }
 
-func (v *visualiseTreeVisitor) visitSetExpr(e eSet) any {
+func (v *visualiseTreeVisitor) visitSetExpr(e eSet) (any, error) {
 	nodeID := v.getNextNodeID()
 	v.addNode(nodeID, "Set", fmt.Sprintf("Set\n%s", e.name.lexeme))
 
-	objectID := e.object.accept(v).(string)
-	valueID := e.value.accept(v).(string)
+	objectID := getVal(e.object.accept(v)).(string)
+	valueID := getVal(e.value.accept(v)).(string)
 
 	v.addEdge(nodeID, objectID)
 	v.addEdge(nodeID, valueID)
 
-	return nodeID
+	return nodeID, nil
 }
 
-func (v *visualiseTreeVisitor) visitSuperExpr(e eSuper) any {
+func (v *visualiseTreeVisitor) visitSuperExpr(e eSuper) (any, error) {
 	nodeID := v.getNextNodeID()
 	v.addNode(nodeID, "Super", fmt.Sprintf("Super\n%s.%s", e.keyword.lexeme, e.method.lexeme))
-	return nodeID
+	return nodeID, nil
 }
 
-func (v *visualiseTreeVisitor) visitThisExpr(e eThis) any {
+func (v *visualiseTreeVisitor) visitThisExpr(e eThis) (any, error) {
 	nodeID := v.getNextNodeID()
 	v.addNode(nodeID, "This", "This")
-	return nodeID
+	return nodeID, nil
 }
 
-func (v *visualiseTreeVisitor) visitUnaryExpr(e eUnary) any {
+func (v *visualiseTreeVisitor) visitUnaryExpr(e eUnary) (any, error) {
 	nodeID := v.getNextNodeID()
 	v.addNode(nodeID, "Unary", fmt.Sprintf("Unary\n%s", e.operator.lexeme))
 
-	rightID := e.right.accept(v).(string)
+	rightID := getVal(e.right.accept(v)).(string)
 	v.addEdge(nodeID, rightID)
 
-	return nodeID
+	return nodeID, nil
 }
 
-func (v *visualiseTreeVisitor) visitVariableExpr(e eVariable) any {
+func (v *visualiseTreeVisitor) visitVariableExpr(e eVariable) (any, error) {
 	nodeID := v.getNextNodeID()
 	v.addNode(nodeID, "Variable", fmt.Sprintf("Variable\n%s", e.name.lexeme))
-	return nodeID
+	return nodeID, nil
+}
+
+func getVal(val any, _ error) any {
+	return val
 }

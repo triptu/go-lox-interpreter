@@ -5,26 +5,26 @@ Defines the statement nodes of the AST. A program is a list of statements.
 */
 
 type stmt interface {
-	accept(stmtVisitor)
+	accept(stmtVisitor) error
 }
 
 type stmtVisitor interface {
 	// a = 3;
-	visitExprStmt(sExpr)
+	visitExprStmt(sExpr) error
 	// print "hello";
-	visitPrintStmt(sPrint)
+	visitPrintStmt(sPrint) error
 	// var a = 3; (initializer is optional)
-	visitVarStmt(sVar)
+	visitVarStmt(sVar) error
 	// { var a = 3; }
-	visitBlockStmt(sBlock)
+	visitBlockStmt(sBlock) error
 	// if (a == 3) { print "hello"; } else { print "world"; }
-	visitIfStmt(sIf)
+	visitIfStmt(sIf) error
 	// while (a == 3) { print "hello"; a = a + 1; }
-	visitWhileStmt(sWhile)
+	visitWhileStmt(sWhile) error
 	// fun foo() { print "hello"; }
-	visitFunctionStmt(sFunction)
+	visitFunctionStmt(sFunction) error
 	// return 7;
-	visitReturnStmt(sReturn)
+	visitReturnStmt(sReturn) error
 }
 
 type sExpr struct {
@@ -65,34 +65,34 @@ type sReturn struct {
 	value expr
 }
 
-func (e sExpr) accept(v stmtVisitor) {
-	v.visitExprStmt(e)
+func (e sExpr) accept(v stmtVisitor) error {
+	return v.visitExprStmt(e)
 }
 
-func (e sPrint) accept(v stmtVisitor) {
-	v.visitPrintStmt(e)
+func (e sPrint) accept(v stmtVisitor) error {
+	return v.visitPrintStmt(e)
 }
 
-func (e sVar) accept(v stmtVisitor) {
-	v.visitVarStmt(e)
+func (e sVar) accept(v stmtVisitor) error {
+	return v.visitVarStmt(e)
 }
 
-func (e sBlock) accept(v stmtVisitor) {
-	v.visitBlockStmt(e)
+func (e sBlock) accept(v stmtVisitor) error {
+	return v.visitBlockStmt(e)
 }
 
-func (e sIf) accept(v stmtVisitor) {
-	v.visitIfStmt(e)
+func (e sIf) accept(v stmtVisitor) error {
+	return v.visitIfStmt(e)
 }
 
-func (e sWhile) accept(v stmtVisitor) {
-	v.visitWhileStmt(e)
+func (e sWhile) accept(v stmtVisitor) error {
+	return v.visitWhileStmt(e)
 }
 
-func (e sFunction) accept(v stmtVisitor) {
-	v.visitFunctionStmt(e)
+func (e sFunction) accept(v stmtVisitor) error {
+	return v.visitFunctionStmt(e)
 }
 
-func (e sReturn) accept(v stmtVisitor) {
-	v.visitReturnStmt(e)
+func (e sReturn) accept(v stmtVisitor) error {
+	return v.visitReturnStmt(e)
 }

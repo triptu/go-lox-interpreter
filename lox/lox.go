@@ -90,7 +90,8 @@ func Evaluate(code []byte) {
 		os.Exit(65)
 	} else {
 		interpreter := newInterpreter()
-		fmt.Println(getLiteralStr(interpreter.evaluate(parsedExpr)))
+		val, _ := interpreter.evaluate(parsedExpr)
+		fmt.Println(getLiteralStr(val))
 		if hasRuntimeError {
 			os.Exit(70)
 		}

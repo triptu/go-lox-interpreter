@@ -7,7 +7,7 @@ AST(abstract syntax tree) of our language.
 */
 
 type expr interface {
-	accept(exprVisitor) any
+	accept(exprVisitor) (any, error)
 }
 
 /*
@@ -15,30 +15,30 @@ action classes implement this interface defining how they would process each typ
 */
 type exprVisitor interface {
 	// a = 3
-	visitAssignExpr(eAssign) any
+	visitAssignExpr(eAssign) (any, error)
 	// 1 + 2, 5 * 6, 2 < 3, etc
-	visitBinaryExpr(eBinary) any
+	visitBinaryExpr(eBinary) (any, error)
 	// myFunction(1, 2, 3)
-	visitCallExpr(eCall) any
+	visitCallExpr(eCall) (any, error)
 	// myObject.myFunction(1, 2, 3)
-	visitGetExpr(eGet) any
+	visitGetExpr(eGet) (any, error)
 	// (1, 2, 3)
-	visitGroupingExpr(eGrouping) any
+	visitGroupingExpr(eGrouping) (any, error)
 	// 123, "hello", true, false, nil
-	visitLiteralExpr(eLiteral) any
+	visitLiteralExpr(eLiteral) (any, error)
 	// true or false, "abcd" and "efgh"
 	// these are not coupled with binary as whether the right expression is evaluated
 	// depends on the left expression's evaluation
-	visitLogicalExpr(eLogical) any
-	visitSetExpr(eSet) any
+	visitLogicalExpr(eLogical) (any, error)
+	visitSetExpr(eSet) (any, error)
 	// super.method(1, 2, 3)
-	visitSuperExpr(eSuper) any
+	visitSuperExpr(eSuper) (any, error)
 	// this
-	visitThisExpr(eThis) any
+	visitThisExpr(eThis) (any, error)
 	// -1, !true
-	visitUnaryExpr(eUnary) any
+	visitUnaryExpr(eUnary) (any, error)
 	// myVariable (accessing variable)
-	visitVariableExpr(eVariable) any
+	visitVariableExpr(eVariable) (any, error)
 }
 
 type eAssign struct {
@@ -104,50 +104,50 @@ type eVariable struct {
 
 // define accept methods for each type of expression
 
-func (e eAssign) accept(v exprVisitor) any {
+func (e eAssign) accept(v exprVisitor) (any, error) {
 	return v.visitAssignExpr(e)
 }
 
-func (e eBinary) accept(v exprVisitor) any {
+func (e eBinary) accept(v exprVisitor) (any, error) {
 	return v.visitBinaryExpr(e)
 }
 
-func (e eCall) accept(v exprVisitor) any {
+func (e eCall) accept(v exprVisitor) (any, error) {
 	return v.visitCallExpr(e)
 }
 
-func (e eGet) accept(v exprVisitor) any {
+func (e eGet) accept(v exprVisitor) (any, error) {
 	return v.visitGetExpr(e)
 }
 
-func (e eGrouping) accept(v exprVisitor) any {
+func (e eGrouping) accept(v exprVisitor) (any, error) {
 	return v.visitGroupingExpr(e)
 }
 
-func (e eLiteral) accept(v exprVisitor) any {
+func (e eLiteral) accept(v exprVisitor) (any, error) {
 	return v.visitLiteralExpr(e)
 }
 
-func (e eLogical) accept(v exprVisitor) any {
+func (e eLogical) accept(v exprVisitor) (any, error) {
 	return v.visitLogicalExpr(e)
 }
 
-func (e eSet) accept(v exprVisitor) any {
+func (e eSet) accept(v exprVisitor) (any, error) {
 	return v.visitSetExpr(e)
 }
 
-func (e eSuper) accept(v exprVisitor) any {
+func (e eSuper) accept(v exprVisitor) (any, error) {
 	return v.visitSuperExpr(e)
 }
 
-func (e eThis) accept(v exprVisitor) any {
+func (e eThis) accept(v exprVisitor) (any, error) {
 	return v.visitThisExpr(e)
 }
 
-func (e eUnary) accept(v exprVisitor) any {
+func (e eUnary) accept(v exprVisitor) (any, error) {
 	return v.visitUnaryExpr(e)
 }
 
-func (e eVariable) accept(v exprVisitor) any {
+func (e eVariable) accept(v exprVisitor) (any, error) {
 	return v.visitVariableExpr(e)
 }
