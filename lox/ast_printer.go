@@ -13,7 +13,8 @@ type astPrinter struct {
 }
 
 func (p astPrinter) print(e expr) {
-	fmt.Println(e.accept(p))
+	val, _ := e.accept(p)
+	fmt.Println(val)
 }
 
 func (p astPrinter) visitAssignExpr(e eAssign) (any, error) {
