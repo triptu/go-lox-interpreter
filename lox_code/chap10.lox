@@ -99,7 +99,8 @@ fun fib(n) {
 }
 
 var start = clock();
-print "10th fib number = " + fib(10);
+print "10th fib number = ";
+print fib(10);
 print (clock() - start) < 5; // 5 seconds
 
 fun f() {
