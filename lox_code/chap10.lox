@@ -44,6 +44,8 @@ while (!completed) {
 
 // user defined functions
 
+print "test - user defined functions";
+
 fun foo() {
   print 7;
 }
@@ -62,4 +64,60 @@ fun cumulative_sum() {
 }
 
 cumulative_sum();
+
+// with arguments
+
+fun calculateGrade(score, bonus) {
+  var finalScore = score + bonus;
+
+  if (finalScore >= 90) {
+    print "A";
+  } else if (finalScore >= 80) {
+    print "B";
+  } else if (finalScore >= 70) {
+    print "C";
+  } else if (finalScore >= 60) {
+    print "D";
+  } else {
+    print "F";
+  }
+}
+
+var score = 81;
+var bonus = 3;
+print "Grade for given score is: ";
+calculateGrade(score, bonus);
+
+
+// return statement
+
+print "test - return statements"
+
+fun fib(n) {
+  if (n < 2) return n;
+  return fib(n - 2) + fib(n - 1);
+}
+
+var start = clock();
+print fib(32) == 2178309;
+print (clock() - start) < 5; // 5 seconds
+
+fun f() {
+  if (false) return "no"; else return "ok";
+}
+
+print f();
+
+fun f() {
+  while (!true) return "ok";
+}
+
+print f();
+
+fun f() {
+  return;
+  print "bad";
+}
+
+print f();
 

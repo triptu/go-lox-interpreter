@@ -29,7 +29,7 @@ declaration    → varDecl
 
 varDecl        → "var" IDENTIFIER ( "=" expression )? ";" ;
 funDecl        → "fun" function ;
-function       → IDENTIFIER "(" parameters? ")" block ;
+function       → IDENTIFIER "(" parameters? ")" blockStmt ;
 parameters     → IDENTIFIER ( "," IDENTIFIER )* ;
 
 
@@ -38,6 +38,7 @@ statement      → exprStmt
                | ifStmt
                | whileStmt
                | forStmt
+               | returnStmt
                | blockStmt ;
 
 exprStmt       → expression ";" ;
@@ -45,10 +46,11 @@ printStmt      → "print" expression ";" ;
 ifStmt         → "if" "(" expression ")" statement
                ( "else" statement )? ;
 whileStmt      → "while" "(" expression ")" statement ;
-forStmt        -> "for" "(" (varDecl | exprStmt | ";")
+forStmt        → "for" "(" (varDecl | exprStmt | ";")
                expression? ";" 
                expression? ")" statement ;
 blockStmt      → "{" declaration* "}" ;
+returnStmt     → "return" expression? ";" ;
 
 (* define expressions in order of precedence *)
 expression     → assignment ;

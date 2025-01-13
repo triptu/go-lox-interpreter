@@ -165,6 +165,9 @@ func (i interpreter) visitCallExpr(e eCall) any {
 	return callee2.call(i, args)
 }
 
+func (i interpreter) visitReturnStmt(s sReturn) {
+}
+
 func (i interpreter) visitGetExpr(e eGet) any {
 	panic("implement me")
 }

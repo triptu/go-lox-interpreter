@@ -23,6 +23,8 @@ type stmtVisitor interface {
 	visitWhileStmt(sWhile)
 	// fun foo() { print "hello"; }
 	visitFunctionStmt(sFunction)
+	// return 7;
+	visitReturnStmt(sReturn)
 }
 
 type sExpr struct {
@@ -59,6 +61,10 @@ type sFunction struct {
 	body       []stmt
 }
 
+type sReturn struct {
+	value expr
+}
+
 func (e sExpr) accept(v stmtVisitor) {
 	v.visitExprStmt(e)
 }
@@ -85,4 +91,8 @@ func (e sWhile) accept(v stmtVisitor) {
 
 func (e sFunction) accept(v stmtVisitor) {
 	v.visitFunctionStmt(e)
+}
+
+func (e sReturn) accept(v stmtVisitor) {
+	v.visitReturnStmt(e)
 }

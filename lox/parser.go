@@ -149,6 +149,8 @@ func (p *parser) statement() (stmt, *parseError) {
 		return p.whileStmt()
 	} else if p.matchIncrement(tFor) {
 		return p.forStmt()
+	} else if p.matchIncrement(tReturn) {
+		return p.returnStmt()
 	} else {
 		return p.exprStmt()
 	}
@@ -295,6 +297,25 @@ func (p *parser) forStmt() (stmt, *parseError) {
 	} else {
 		return sBlock{[]stmt{initializer, whileSt}}, nil
 	}
+}
+
+/*
+note that just "return ;" is a valid statement, in which case returned
+value would be nil
+*/
+func (p *parser) returnStmt() (stmt, *parseError) {
+	var value expr
+	var err *parseError
+	if !p.peekMatch(tSemicolon) {
+		value, err = p.expression()
+		if err != nil {
+			return nil, err
+		}
+	}
+	err = p.eatSemicolon()
+	return sReturn{
+		value: value,
+	}, err
 }
 
 /*
