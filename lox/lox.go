@@ -3,6 +3,7 @@ package lox
 import (
 	"fmt"
 	"os"
+	"strconv"
 )
 
 /*
@@ -131,7 +132,7 @@ func getLiteralStr(literal interface{}) string {
 
 	switch literal := literal.(type) {
 	case float64:
-		return fmt.Sprintf("%g", literal) // no extra zeroes
+		return strconv.FormatFloat(literal, 'f', -1, 64)
 	case string:
 		return literal
 	default:

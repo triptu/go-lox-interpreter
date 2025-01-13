@@ -1,5 +1,9 @@
 print "test - native clock function";
 
+print clock() + 75;
+print clock() / 1000;
+
+
 // Countdown from 3 seconds
 var startTime = clock();
 var totalDuration = 3; // 3 seconds countdown
