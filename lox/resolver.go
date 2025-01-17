@@ -1,5 +1,14 @@
 package lox
 
+// enum to track if we're inside a function
+type functionType int
+
+const (
+	fNone = iota
+	fFunction
+	fMethod
+)
+
 type resolver struct {
 	// Binding is split into two phases: declaration and definition.
 	// for each variable, in the scope it is part of, when it's declared we add it as
@@ -8,8 +17,9 @@ type resolver struct {
 	// which is being declared.
 	// there is no global scope, as if variable isn't part of any local scope, it's
 	// obviously part of the global scope.
-	scopes      []map[string]bool // stack of nested lexical scopes
-	interpreter *interpreter
+	scopes       []map[string]bool // stack of nested lexical scopes
+	interpreter  *interpreter
+	currFunction functionType
 }
 
 var _ exprVisitor = (*resolver)(nil)
@@ -17,8 +27,9 @@ var _ stmtVisitor = (*resolver)(nil)
 
 func newResolver(interpreter *interpreter) *resolver {
 	return &resolver{
-		scopes:      []map[string]bool{},
-		interpreter: interpreter,
+		scopes:       []map[string]bool{},
+		interpreter:  interpreter,
+		currFunction: fNone,
 	}
 }
 
@@ -169,7 +180,7 @@ func (r *resolver) visitFunctionStmt(stmt sFunction) error {
 	// we define right away, as it's legal for the function to reference itself for recursion
 	r.define(stmt.name.lexeme)
 
-	err := r.resolveFunction(stmt)
+	err := r.resolveFunction(stmt, fFunction)
 	return err
 }
 
@@ -184,6 +195,10 @@ func (r *resolver) visitPrintStmt(stmt sPrint) error {
 }
 
 func (r *resolver) visitReturnStmt(stmt sReturn) error {
+	if r.currFunction == fNone {
+		return parseErrorAt(stmt.keyword, "return statement outside of function")
+	}
+
 	if stmt.value != nil {
 		_, err := r.resolveExpr(stmt.value)
 		return err
@@ -211,7 +226,9 @@ func (r *resolver) visitWhileStmt(stmt sWhile) error {
 	return r.resolveStmt(stmt.body)
 }
 
-func (r *resolver) resolveFunction(function sFunction) error {
+func (r *resolver) resolveFunction(function sFunction, funcType functionType) error {
+	enclosingFunction := r.currFunction
+	r.currFunction = funcType
 	r.beginScope()
 	for _, param := range function.parameters {
 		if err := r.declare(param); err != nil {
@@ -221,6 +238,7 @@ func (r *resolver) resolveFunction(function sFunction) error {
 	}
 	r.resolveStmts(function.body)
 	r.endScope()
+	r.currFunction = enclosingFunction
 	return nil
 }
 

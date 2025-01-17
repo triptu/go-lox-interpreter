@@ -306,6 +306,7 @@ value would be nil
 func (p *parser) returnStmt() (stmt, *parseError) {
 	var value expr
 	var err *parseError
+	returnToken := p.tokens[p.curr-1] // the token for the keyword "return"
 	if !p.peekMatch(tSemicolon) {
 		value, err = p.expression()
 		if err != nil {
@@ -314,7 +315,8 @@ func (p *parser) returnStmt() (stmt, *parseError) {
 	}
 	err = p.eatSemicolon()
 	return sReturn{
-		value: value,
+		keyword: returnToken,
+		value:   value,
 	}, err
 }
 

@@ -62,7 +62,8 @@ type sFunction struct {
 }
 
 type sReturn struct {
-	value expr
+	keyword token
+	value   expr
 }
 
 func (e sExpr) accept(v stmtVisitor) error {
