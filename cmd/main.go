@@ -4,15 +4,13 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/codecrafters-io/interpreter-starter-go/lox"
+	"golox/lox"
 )
 
 func main() {
-	// You can use print statements as follows for debugging, they'll be visible when running tests.
-	// fmt.Fprintln(os.Stderr, "Logs from your program will appear here!")
-
 	if len(os.Args) < 3 {
-		fmt.Fprintln(os.Stderr, "Usage: ./your_program.sh tokenize <filename>")
+		fmt.Fprintln(os.Stderr, "Usage: ./your_program.sh <command> <filename>")
+		fmt.Fprintln(os.Stderr, "Commands available: tokenize, parse, evaluate, visualize, run")
 		os.Exit(1)
 	}
 
