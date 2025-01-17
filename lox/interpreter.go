@@ -10,9 +10,9 @@ Interpreter also implements the visitor interface for the AST nodes.
 */
 
 type interpreter struct {
-	globals *environment // permanent reference to the global environment
-	env     *environment // reference to the environment of the current scope/block
-	locals  map[expr]int
+	globals *environment  // permanent reference to the global environment
+	env     *environment  // reference to the environment of the current scope/block
+	locals  map[token]int // store the scope depth for each variable token usage
 }
 
 var _ exprVisitor = (*interpreter)(nil)
@@ -23,6 +23,7 @@ func newInterpreter() *interpreter {
 	defineNativeFunctions(globals)
 	return &interpreter{
 		globals: globals,
+		locals:  make(map[token]int),
 		env:     globals,
 	}
 }
@@ -37,8 +38,8 @@ func (i interpreter) interpret(statements []stmt) error {
 }
 
 // store the depth of the scope where the variable was found
-func (i interpreter) resolve(e expr, depth int) {
-	i.locals[e] = depth
+func (i interpreter) storeResolvedDepth(name token, depth int) {
+	i.locals[name] = depth
 }
 
 func (i interpreter) visitExprStmt(s sExpr) error {
@@ -127,7 +128,7 @@ a = 123;
 */
 func (i interpreter) visitAssignExpr(e eAssign) (any, error) {
 	val := getJustVal(i.evaluate(e.value))
-	dist, exists := i.locals[e]
+	dist, exists := i.locals[e.name]
 	var err error
 	if exists {
 		err = i.env.setAt(dist, e.name.lexeme, val)
@@ -255,15 +256,15 @@ func (i interpreter) visitUnaryExpr(e eUnary) (any, error) {
 }
 
 func (i interpreter) visitVariableExpr(e eVariable) (any, error) {
-	val, err := i.lookUpVariable(e.name, e)
+	val, err := i.lookUpVariable(e.name)
 	if err != nil {
 		logRuntimeError(e.name.line, "undefined variable '"+e.name.lexeme+"'.")
 	}
 	return val, err
 }
 
-func (i interpreter) lookUpVariable(name token, e expr) (any, error) {
-	dist, exists := i.locals[e]
+func (i interpreter) lookUpVariable(name token) (any, error) {
+	dist, exists := i.locals[name]
 	varName := name.lexeme
 	if exists {
 		return i.env.getAt(dist, varName)

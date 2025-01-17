@@ -98,7 +98,7 @@ func (r *resolver) visitVariableExpr(expr eVariable) (any, error) {
 			return nil, parseErrorAt(expr.name, "can't read local variable in its own initializer")
 		}
 	}
-	r.resolveLocal(expr, expr.name)
+	r.resolveLocal(expr.name)
 	return nil, nil
 }
 
@@ -106,7 +106,7 @@ func (r *resolver) visitAssignExpr(expr eAssign) (any, error) {
 	if _, err := r.resolveExpr(expr.value); err != nil {
 		return nil, err
 	}
-	r.resolveLocal(expr, expr.name)
+	r.resolveLocal(expr.name)
 	return nil, nil
 }
 
@@ -284,14 +284,14 @@ func (r *resolver) peekScope() map[string]bool {
 	return r.scopes[len(r.scopes)-1]
 }
 
-func (r *resolver) resolveLocal(e expr, exprName token) {
-	name := exprName.lexeme // variable/function/class name
-
+// the exprName token here is one of tVariable or tAssign
+func (r *resolver) resolveLocal(exprName token) {
+	varName := exprName.lexeme // variable name
 	for i := len(r.scopes) - 1; i >= 0; i-- {
-		if _, exists := r.scopes[i][name]; exists {
+		if _, exists := r.scopes[i][varName]; exists {
 			// number of scopes between the current innermost scope and the scope where the variable was found
 			depth := len(r.scopes) - 1 - i
-			r.interpreter.resolve(e, depth)
+			r.interpreter.storeResolvedDepth(exprName, depth)
 			return
 		}
 	}
