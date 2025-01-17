@@ -38,6 +38,7 @@ type exprVisitor interface {
 	// -1, !true
 	visitUnaryExpr(eUnary) (any, error)
 	// myVariable (accessing variable)
+	// a + b;
 	visitVariableExpr(eVariable) (any, error)
 }
 

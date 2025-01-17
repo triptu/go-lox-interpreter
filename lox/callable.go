@@ -53,6 +53,8 @@ func (n loxFunction) call(i interpreter, arguments []any) (any, error) {
 		env.define(param.lexeme, arguments[i])
 	}
 
+	// note that in the parsing stage, we've stored the function's body as
+	// a list of statements, and not as a block.
 	err := i.executeBlock(n.declaration.body, env)
 	if err != nil {
 		if _, ok := err.(returnAsError); ok {

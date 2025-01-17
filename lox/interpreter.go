@@ -12,6 +12,7 @@ Interpreter also implements the visitor interface for the AST nodes.
 type interpreter struct {
 	globals *environment // permanent reference to the global environment
 	env     *environment // reference to the environment of the current scope/block
+	locals  map[expr]int
 }
 
 var _ exprVisitor = (*interpreter)(nil)
@@ -33,6 +34,11 @@ func (i interpreter) interpret(statements []stmt) error {
 		}
 	}
 	return nil
+}
+
+// store the depth of the scope where the variable was found
+func (i interpreter) resolve(e expr, depth int) {
+	i.locals[e] = depth
 }
 
 func (i interpreter) visitExprStmt(s sExpr) error {
@@ -60,6 +66,11 @@ func (i interpreter) visitIfStmt(s sIf) error {
 	return nil
 }
 
+/*
+function declaration - fun abc() {...}
+we just store the function in env here, and use it when the function is
+actually called. The current env is also bound to the function as closure.
+*/
 func (i interpreter) visitFunctionStmt(s sFunction) error {
 	// note that we also attach the env active at the time of function declaration
 	i.env.define(s.name.lexeme, loxFunction{declaration: s, closure: i.env})
@@ -116,7 +127,13 @@ a = 123;
 */
 func (i interpreter) visitAssignExpr(e eAssign) (any, error) {
 	val := getJustVal(i.evaluate(e.value))
-	err := i.env.set(e.name.lexeme, val)
+	dist, exists := i.locals[e]
+	var err error
+	if exists {
+		err = i.env.setAt(dist, e.name.lexeme, val)
+	} else {
+		err = i.globals.set(e.name.lexeme, val)
+	}
 	if err != nil {
 		logRuntimeError(e.name.line, "undefined variable '"+e.name.lexeme+"'.")
 	}
@@ -238,11 +255,21 @@ func (i interpreter) visitUnaryExpr(e eUnary) (any, error) {
 }
 
 func (i interpreter) visitVariableExpr(e eVariable) (any, error) {
-	val, err := i.env.get(e.name.lexeme)
+	val, err := i.lookUpVariable(e.name, e)
 	if err != nil {
 		logRuntimeError(e.name.line, "undefined variable '"+e.name.lexeme+"'.")
 	}
 	return val, err
+}
+
+func (i interpreter) lookUpVariable(name token, e expr) (any, error) {
+	dist, exists := i.locals[e]
+	varName := name.lexeme
+	if exists {
+		return i.env.getAt(dist, varName)
+	} else {
+		return i.globals.get(varName)
+	}
 }
 
 func isTruthy(value any) bool {

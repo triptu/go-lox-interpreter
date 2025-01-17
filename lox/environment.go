@@ -27,6 +27,11 @@ func newChildEnvironment(outer *environment) *environment {
 	}
 }
 
+// when the variable is defined for the first time in current scope
+func (e *environment) define(name string, val any) {
+	e.vars[name] = val
+}
+
 func (e *environment) get(name string) (any, error) {
 	if val, ok := e.vars[name]; ok {
 		return val, nil
@@ -35,10 +40,6 @@ func (e *environment) get(name string) (any, error) {
 	} else {
 		return nil, errors.New("not found")
 	}
-}
-
-func (e *environment) define(name string, val any) {
-	e.vars[name] = val
 }
 
 func (e *environment) set(name string, val any) error {
@@ -50,4 +51,21 @@ func (e *environment) set(name string, val any) error {
 	} else {
 		return errors.New("not found")
 	}
+}
+
+func (e *environment) getAt(depth int, name string) (any, error) {
+	return e.ancestor(depth).get(name)
+}
+
+func (e *environment) setAt(depth int, name string, val any) error {
+	return e.ancestor(depth).set(name, val)
+}
+
+func (e *environment) ancestor(depth int) *environment {
+	env := e
+	for depth > 0 {
+		env = env.outer
+		depth--
+	}
+	return env
 }

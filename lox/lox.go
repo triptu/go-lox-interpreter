@@ -119,6 +119,13 @@ func Run(code []byte) {
 		os.Exit(65)
 	} else {
 		interpreter := newInterpreter()
+
+		resolver := newResolver(interpreter)
+		resolver.resolve(statements)
+		if hasError {
+			os.Exit(65)
+		}
+
 		interpreter.interpret(statements)
 		if hasRuntimeError {
 			os.Exit(70)
