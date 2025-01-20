@@ -41,9 +41,9 @@ func (r *resolver) resolveStmts(stmts []stmt) {
 	for _, s := range stmts {
 		if err := r.resolveStmt(s); err != nil {
 			if pErr, ok := err.(*parseError); ok {
-				logError(pErr.line, pErr.msg)
+				logParseError(pErr.token, pErr.msg)
 			} else {
-				logError(0, err.Error())
+				logParseError(token{}, err.Error())
 			}
 		}
 	}

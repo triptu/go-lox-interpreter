@@ -22,12 +22,12 @@ type parser struct {
 }
 
 type parseError struct {
-	line int
-	msg  string
+	token token
+	msg   string
 }
 
 func (e *parseError) Error() string {
-	return fmt.Sprintf("Error at line %d: %s", e.line, e.msg)
+	return fmt.Sprintf("Error at line %v: %s", e.token, e.msg)
 }
 
 func newParser[T expr](tokens []token) *parser {
@@ -49,7 +49,7 @@ func (p *parser) parse() []stmt {
 		if err == nil {
 			statements = append(statements, st)
 		} else {
-			logError(err.line, err.msg)
+			logParseError(err.token, err.msg)
 			p.consumeCascadingErrors()
 		}
 	}
@@ -62,7 +62,7 @@ parses single line expression in the code file like - "1+2*3"
 func (p *parser) parseExpression() expr {
 	expr, err := p.expression()
 	if err != nil {
-		logError(err.line, err.msg)
+		logParseError(err.token, err.msg)
 	}
 	return expr
 }
@@ -120,7 +120,7 @@ func (p *parser) funDecl(kind string) (stmt, *parseError) {
 		parameters = append(parameters, param)
 		if len(parameters) > 255 {
 			// just log, not any big error to stop the parsing process itself
-			logError(token.line, fmt.Sprintf("Error at '%s': Can't have more than 255 parameters.", token.lexeme))
+			logParseError(token, fmt.Sprintf("Error at '%s': Can't have more than 255 parameters.", token.lexeme))
 		}
 		hasMore = p.matchIncrement(tComma)
 	}
@@ -508,7 +508,7 @@ func (p *parser) finishCall(callee expr) (expr, *parseError) {
 		arguments = append(arguments, arg)
 		if len(arguments) > 255 {
 			// just log, not any big error to stop the parsing process itself
-			logError(token.line, fmt.Sprintf("Error at '%s': Can't have more than 255 arguments.", token.lexeme))
+			logParseError(token, fmt.Sprintf("Error at '%s': Can't have more than 255 arguments.", token.lexeme))
 		}
 		hasMore = p.matchIncrement(tComma)
 	}
@@ -630,7 +630,7 @@ func arrIncludes[T comparable](arr []T, item T) bool {
 
 func parseErrorAt(token token, msg string) *parseError {
 	return &parseError{
-		line: token.line,
-		msg:  "Error at '" + token.lexeme + "': " + msg,
+		token: token,
+		msg:   "Error at '" + token.lexeme + "': " + msg,
 	}
 }

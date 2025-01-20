@@ -22,7 +22,8 @@ expectedErrorPattern = re.compile(r"// (Error.*)")
 # for when errors from both interpreters are different
 errorLinePattern = re.compile(r"// \[((java|c) )?line (\d+)\] (Error.*)")
 expectedRuntimeErrorPattern = re.compile(r"// expect runtime error: (.+)")
-syntaxErrorPattern = re.compile(r"\[.*line (\d+)\] (Error.+)")
+# matches optional column number and ignores it, not making part of the capture group
+syntaxErrorPattern = re.compile(r"\[.*line (\d+)(?::\d+)?\] (Error.+)")
 stackTracePattern = re.compile(r"\[line (\d+)\]")
 nonTestPattern = re.compile(r"// nontest")
 
@@ -835,7 +836,7 @@ class Test:
         for line in error_lines:
             match = syntaxErrorPattern.search(line)
             if match:
-                error = line
+                error = f"[line {match.group(1)}] {match.group(2)}"
                 if error in self.compile_errors:
                     found_errors.add(error)
                 else:

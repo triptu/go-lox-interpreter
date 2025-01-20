@@ -96,7 +96,7 @@ func (s *scanner) scanNextToken() {
 		} else if isAlpha(c) {
 			s.scanIdentifier()
 		} else {
-			logError(s.line, fmt.Sprintf("Error: Unexpected character."))
+			logScanError(s.line, fmt.Sprintf("Error: Unexpected character."))
 		}
 	}
 }
@@ -115,7 +115,7 @@ func (s *scanner) scanString() {
 	}
 
 	if s.isAtEnd() {
-		logError(s.line, "Error: Unterminated string.")
+		logScanError(s.line, "Error: Unterminated string.")
 		return
 	}
 
@@ -141,7 +141,7 @@ func (s *scanner) scanNumber() {
 	num_str := s.source[s.start:s.curr]
 	num, err := strconv.ParseFloat(num_str, 64)
 	if err != nil {
-		logError(s.line, "Error: " + err.Error())
+		logScanError(s.line, "Error: "+err.Error())
 		return
 	}
 	s.addToken(tNumber, num)

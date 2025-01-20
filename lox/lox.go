@@ -13,9 +13,14 @@ This is the entry point for Lox exposing public methods for different functional
 var hasError bool
 var hasRuntimeError bool
 
-func logError(line int, msg string) {
+func logScanError(line int, msg string) {
 	hasError = true
-	fmt.Fprintf(os.Stderr, "[line %d] %s\n", line, msg)
+	fmt.Fprintf(os.Stderr, "[line %d:10] %s\n", line, msg)
+}
+
+func logParseError(token token, msg string) {
+	hasError = true
+	fmt.Fprintf(os.Stderr, "[line %d:%d] %s\n", token.line, token.column, msg)
 }
 
 func logRuntimeError(line int, msg string) {
@@ -25,7 +30,6 @@ func logRuntimeError(line int, msg string) {
 	fmt.Fprintf(os.Stderr, "[line %d] %s\n", line, msg)
 	panic("runtime error")
 }
-
 
 func PrintTokens(code []byte) {
 	tokens := tokenize(code)
