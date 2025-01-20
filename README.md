@@ -1,5 +1,19 @@
 # Lox Interpreter in Go
 
+## Running tests
+
+```sh
+python test.py <suite_name> <filter_path>
+```
+
+example
+
+```sh
+> python test.py golox
+> python test.py chap10_functions
+```
+
+`golox` runs all tests. Or else you can filter tests upto a specific chapter.
 
 ## Grammar for the lox language
 
