@@ -1,4 +1,39 @@
-# Lox Interpreter in Go
+# [Lox](https://craftinginterpreters.com/the-lox-language.html) Interpreter in Go
+
+## Running the program
+
+### Tokenize
+
+Prints the tokens array for the source code.
+
+```sh
+./run.sh tokenize <filename>
+```
+
+### Parse
+
+Parses the tokens array and prints the AST. This is not very clean, the AST is printed as a complicated looking string in the form `(<operator> <left> <right>)`. It's better to use the visualiser to see the AST.
+
+```sh
+./run.sh parse <filename>
+```
+
+### Visualise
+
+Visualises the AST by creating a DOT file and then generating a PNG image with Graphviz.
+
+```sh
+./run.sh visualize <filename>
+```
+
+### Evaluate
+
+Evaluates the AST and prints the result.
+
+```sh
+./run.sh evaluate <filename>
+```
+
 
 ## Running tests
 
@@ -90,36 +125,3 @@ arguments      → expression ( "," expression )* ;
 ```
 
 
-## Running the program
-
-### Tokenize
-
-Prints the tokens array for the source code.
-
-```sh
-./run.sh tokenize <filename>
-```
-
-### Parse
-
-Parses the tokens array and prints the AST. This is not very clean, the AST is printed as a complicated looking string in the form `(<operator> <left> <right>)`. It's better to use the visualiser to see the AST.
-
-```sh
-./run.sh parse <filename>
-```
-
-### Visualise
-
-Visualises the AST by creating a DOT file and then generating a PNG image with Graphviz.
-
-```sh
-./run.sh visualize <filename>
-```
-
-### Evaluate
-
-Evaluates the AST and prints the result.
-
-```sh
-./run.sh evaluate <filename>
-```
