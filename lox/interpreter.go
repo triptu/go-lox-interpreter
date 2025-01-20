@@ -77,6 +77,18 @@ func (i interpreter) visitFunctionStmt(s sFunction) error {
 	return nil
 }
 
+/*
+class declaration - class abc() {}
+we do it in two stages - defining and then setting so the class can be referenced
+in its own methods
+*/
+func (i interpreter) visitClassStmt(s sClass) error {
+	i.env.define(s.name.lexeme, nil)
+	klass := loxClass{declaration: s, name: s.name.lexeme, closure: i.env}
+	i.env.set(s.name.lexeme, klass)
+	return nil
+}
+
 func (i interpreter) visitWhileStmt(s sWhile) error {
 	for {
 		val := getJustVal(i.evaluate(s.condition))

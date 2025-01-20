@@ -72,10 +72,12 @@ example
 program        → declaration* EOF ;
 
 (* declare variables, classes and functions *)
-declaration    → varDecl
+declaration    → classDecl
+               | varDecl
                | funDecl
                | statement ;
 
+classDecl      → "class" IDENTIFIER "{" function* "}" ;
 varDecl        → "var" IDENTIFIER ( "=" expression )? ";" ;
 funDecl        → "fun" function ;
 function       → IDENTIFIER "(" parameters? ")" blockStmt ;

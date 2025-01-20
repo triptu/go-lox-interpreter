@@ -45,19 +45,19 @@ func (n nativeFunction) String() string {
 	return "<native fn>"
 }
 
-func (n loxFunction) arity() int {
-	return len(n.declaration.parameters)
+func (f loxFunction) arity() int {
+	return len(f.declaration.parameters)
 }
 
-func (n loxFunction) call(i interpreter, arguments []any) (any, error) {
-	env := newChildEnvironment(n.closure)
-	for i, param := range n.declaration.parameters {
+func (f loxFunction) call(i interpreter, arguments []any) (any, error) {
+	env := newChildEnvironment(f.closure)
+	for i, param := range f.declaration.parameters {
 		env.define(param.lexeme, arguments[i])
 	}
 
 	// note that in the parsing stage, we've stored the function's body as
 	// a list of statements, and not as a block.
-	err := i.executeBlock(n.declaration.body, env)
+	err := i.executeBlock(f.declaration.body, env)
 	if err != nil {
 		if _, ok := err.(returnAsError); ok {
 			return err.(returnAsError).value, nil
@@ -67,8 +67,8 @@ func (n loxFunction) call(i interpreter, arguments []any) (any, error) {
 	return nil, nil
 }
 
-func (n loxFunction) String() string {
-	return fmt.Sprintf("<fn %s>", n.declaration.name.lexeme)
+func (f loxFunction) String() string {
+	return fmt.Sprintf("<fn %s>", f.declaration.name.lexeme)
 }
 
 /*

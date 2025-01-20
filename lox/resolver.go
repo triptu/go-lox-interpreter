@@ -226,6 +226,12 @@ func (r *resolver) visitWhileStmt(stmt sWhile) error {
 	return r.resolveStmt(stmt.body)
 }
 
+func (r *resolver) visitClassStmt(stmt sClass) error {
+	r.declare(stmt.name)
+	r.define(stmt.name.lexeme)
+	return nil
+}
+
 func (r *resolver) resolveFunction(function sFunction, funcType functionType) error {
 	enclosingFunction := r.currFunction
 	r.currFunction = funcType

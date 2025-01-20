@@ -25,6 +25,8 @@ type stmtVisitor interface {
 	visitFunctionStmt(sFunction) error
 	// return 7;
 	visitReturnStmt(sReturn) error
+	// class Foo { fun bar() { print "hello"; } }
+	visitClassStmt(sClass) error
 }
 
 type sExpr struct {
@@ -53,6 +55,11 @@ type sIf struct {
 type sWhile struct {
 	condition expr
 	body      stmt
+}
+
+type sClass struct {
+	name    token
+	methods []sFunction
 }
 
 type sFunction struct {
@@ -96,4 +103,8 @@ func (e sFunction) accept(v stmtVisitor) error {
 
 func (e sReturn) accept(v stmtVisitor) error {
 	return v.visitReturnStmt(e)
+}
+
+func (e sClass) accept(v stmtVisitor) error {
+	return v.visitClassStmt(e)
 }

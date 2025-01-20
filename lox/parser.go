@@ -69,15 +69,17 @@ func (p *parser) parseExpression() expr {
 
 func (p *parser) declaration() (stmt, *parseError) {
 	if p.matchIncrement(tVar) {
-		return p.varDecl()
+		return p.vardeclaration()
+	} else if p.matchIncrement(tClass) {
+		return p.classdeclaration()
 	} else if p.matchIncrement(tFun) {
-		return p.funDecl("function")
+		return p.fundeclaration("function")
 	} else {
 		return p.statement()
 	}
 }
 
-func (p *parser) varDecl() (stmt, *parseError) {
+func (p *parser) vardeclaration() (stmt, *parseError) {
 	name, err := p.consumeToken(tIdentifier, "Expect variable name.")
 	if err != nil {
 		return nil, err
@@ -99,7 +101,7 @@ func (p *parser) varDecl() (stmt, *parseError) {
 /*
 kind is either "function" or "method"
 */
-func (p *parser) funDecl(kind string) (stmt, *parseError) {
+func (p *parser) fundeclaration(kind string) (stmt, *parseError) {
 	name, err := p.consumeToken(tIdentifier, "Expect "+kind+"name.")
 	if err != nil {
 		return nil, err
@@ -140,6 +142,33 @@ func (p *parser) funDecl(kind string) (stmt, *parseError) {
 		name:       name,
 		parameters: parameters,
 		body:       block,
+	}, nil
+}
+
+func (p *parser) classdeclaration() (stmt, *parseError) {
+	name, err := p.consumeToken(tIdentifier, "Expect class name.")
+	if err != nil {
+		return nil, err
+	}
+	err = p.eatToken(tLeftBrace, "Expect '{' before class body.")
+	if err != nil {
+		return nil, err
+	}
+	var methods []sFunction
+	for !p.peekMatch(tRightBrace) && !p.isAtEnd() {
+		method, err := p.fundeclaration("method")
+		if err != nil {
+			return nil, err
+		}
+		methods = append(methods, method.(sFunction))
+	}
+	err = p.eatToken(tRightBrace, "Expect '}' after class body.")
+	if err != nil {
+		return nil, err
+	}
+	return sClass{
+		name:    name,
+		methods: methods,
 	}, nil
 }
 
@@ -252,7 +281,7 @@ func (p *parser) forStmt() (stmt, *parseError) {
 	var initializer stmt
 	if !p.matchIncrement(tSemicolon) {
 		if p.matchIncrement(tVar) {
-			initializer, err = p.varDecl()
+			initializer, err = p.vardeclaration()
 			if err != nil {
 				return nil, err
 			}
