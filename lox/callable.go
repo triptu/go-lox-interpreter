@@ -40,7 +40,7 @@ func (n nativeFunction) call(i interpreter, arguments []any) (any, error) {
 }
 
 func (n nativeFunction) String() string {
-	return "<native function>"
+	return "<native fn>"
 }
 
 func (n loxFunction) arity() int {

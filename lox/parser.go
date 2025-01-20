@@ -100,11 +100,11 @@ func (p *parser) varDecl() (stmt, *parseError) {
 kind is either "function" or "method"
 */
 func (p *parser) funDecl(kind string) (stmt, *parseError) {
-	name, err := p.consumeToken(tIdentifier, "expected "+kind+"name")
+	name, err := p.consumeToken(tIdentifier, "Expect "+kind+"name.")
 	if err != nil {
 		return nil, err
 	}
-	err = p.eatToken(tLeftParen, "expected '(' after "+kind+" name")
+	err = p.eatToken(tLeftParen, "Expect '(' after "+kind+" name.")
 	if err != nil {
 		return nil, err
 	}
@@ -112,18 +112,23 @@ func (p *parser) funDecl(kind string) (stmt, *parseError) {
 	var parameters []token
 	hasMore := !p.peekMatch(tRightParen)
 	for hasMore {
-		param, err := p.consumeToken(tIdentifier, "expected parameter name")
+		token := p.tokens[p.curr]
+		param, err := p.consumeToken(tIdentifier, "Expect parameter name.")
 		if err != nil {
 			return nil, err
 		}
 		parameters = append(parameters, param)
+		if len(parameters) > 255 {
+			// just log, not any big error to stop the parsing process itself
+			logError(token.line, fmt.Sprintf("Error at '%s': Can't have more than 255 parameters.", token.lexeme))
+		}
 		hasMore = p.matchIncrement(tComma)
 	}
-	err = p.eatToken(tRightParen, "expected ')' after parameters")
+	err = p.eatToken(tRightParen, "Expect ')' after parameters.")
 	if err != nil {
 		return nil, err
 	}
-	err = p.eatToken(tLeftBrace, "expected '{' before "+kind+" body")
+	err = p.eatToken(tLeftBrace, "Expect '{' before "+kind+" body.")
 	if err != nil {
 		return nil, err
 	}
@@ -175,7 +180,7 @@ func (p *parser) blockStmt() (stmt, *parseError) {
 }
 
 func (p *parser) ifStmt() (stmt, *parseError) {
-	err := p.eatToken(tLeftParen, "Expected '(' after 'if'.")
+	err := p.eatToken(tLeftParen, "Expect '(' after 'if'.")
 	if err != nil {
 		return nil, err
 	}
@@ -185,7 +190,7 @@ func (p *parser) ifStmt() (stmt, *parseError) {
 		return nil, err
 	}
 
-	err = p.eatToken(tRightParen, "Expected ')' after if condition.")
+	err = p.eatToken(tRightParen, "Expect ')' after if condition.")
 	if err != nil {
 		return nil, err
 	}
@@ -211,7 +216,7 @@ func (p *parser) ifStmt() (stmt, *parseError) {
 }
 
 func (p *parser) whileStmt() (stmt, *parseError) {
-	err := p.eatToken(tLeftParen, "Expected '(' after 'while'.")
+	err := p.eatToken(tLeftParen, "Expect '(' after 'while'.")
 	if err != nil {
 		return nil, err
 	}
@@ -221,7 +226,7 @@ func (p *parser) whileStmt() (stmt, *parseError) {
 		return nil, err
 	}
 
-	err = p.eatToken(tRightParen, "Expected ')' after while condition.")
+	err = p.eatToken(tRightParen, "Expect ')' after while condition.")
 	if err != nil {
 		return nil, err
 	}
@@ -239,16 +244,23 @@ as the first statement. Condition is put in white condition and updater is added
 with while's body in a block attached to while's body.
 */
 func (p *parser) forStmt() (stmt, *parseError) {
-	err := p.eatToken(tLeftParen, "Expected '(' after 'while'.")
+	err := p.eatToken(tLeftParen, "Expect '(' after 'while'.")
 	if err != nil {
 		return nil, err
 	}
 
 	var initializer stmt
 	if !p.matchIncrement(tSemicolon) {
-		initializer, err = p.declaration()
-		if err != nil {
-			return nil, err
+		if p.matchIncrement(tVar) {
+			initializer, err = p.varDecl()
+			if err != nil {
+				return nil, err
+			}
+		} else {
+			initializer, err = p.exprStmt()
+			if err != nil {
+				return nil, err
+			}
 		}
 	}
 
@@ -274,7 +286,7 @@ func (p *parser) forStmt() (stmt, *parseError) {
 		}
 	}
 
-	err = p.eatToken(tRightParen, "Expected ')' after while condition.")
+	err = p.eatToken(tRightParen, "Expect ')' after while condition.")
 	if err != nil {
 		return nil, err
 	}
@@ -333,7 +345,7 @@ func (p *parser) blockRawStmts() ([]stmt, *parseError) {
 		}
 		statements = append(statements, st)
 	}
-	err := p.eatToken(tRightBrace, "Expected '}' after block")
+	err := p.eatToken(tRightBrace, "Expect '}' after block")
 	return statements, err
 }
 
@@ -488,22 +500,22 @@ func (p *parser) finishCall(callee expr) (expr, *parseError) {
 	var arguments []expr
 	hasMore := !p.peekMatch(tRightParen)
 	for hasMore {
+		token := p.tokens[p.curr]
 		arg, err := p.expression()
 		if err != nil {
 			return nil, err
 		}
 		arguments = append(arguments, arg)
+		if len(arguments) > 255 {
+			// just log, not any big error to stop the parsing process itself
+			logError(token.line, fmt.Sprintf("Error at '%s': Can't have more than 255 arguments.", token.lexeme))
+		}
 		hasMore = p.matchIncrement(tComma)
 	}
 
-	paren, err := p.consumeToken(tRightParen, "expected ')' after arguments")
+	paren, err := p.consumeToken(tRightParen, "Expect ')' after arguments")
 	if err != nil {
 		return nil, err
-	}
-
-	if len(arguments) >= 255 {
-		// just log, not any big error to stop the parsing process itself
-		logError(paren.line, "can't have more than 255 arguments to a function.")
 	}
 
 	return eCall{
@@ -531,7 +543,7 @@ func (p *parser) primary() (expr, *parseError) {
 		if err != nil {
 			return nil, err
 		} else if !p.peekMatch(tRightParen) {
-			return nil, p.parseErrorPrev("Expected ')' after expression")
+			return nil, parseErrorAt(p.tokens[p.curr], "Expect ')' after expression.")
 		} else {
 			p.curr++ // consume the right paren
 			return eGrouping{expression: expr}, nil
@@ -572,7 +584,7 @@ semicolons must be present at the end of every statement, but
 we don't actually care about them
 */
 func (p *parser) eatSemicolon() *parseError {
-	return p.eatToken(tSemicolon, "Expected ';' after expression")
+	return p.eatToken(tSemicolon, "Expect ';' after expression.")
 }
 
 /*
@@ -616,16 +628,9 @@ func arrIncludes[T comparable](arr []T, item T) bool {
 	return false
 }
 
-/*
-create a parse error at prev token line
-*/
-func (p *parser) parseErrorPrev(msg string) *parseError {
-	return parseErrorAt(p.tokens[p.curr-1], msg)
-}
-
 func parseErrorAt(token token, msg string) *parseError {
 	return &parseError{
 		line: token.line,
-		msg:  "Error at '"+token.lexeme + "': " + msg,
+		msg:  "Error at '" + token.lexeme + "': " + msg,
 	}
 }

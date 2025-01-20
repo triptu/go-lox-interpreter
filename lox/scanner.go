@@ -96,7 +96,7 @@ func (s *scanner) scanNextToken() {
 		} else if isAlpha(c) {
 			s.scanIdentifier()
 		} else {
-			logError(s.line, fmt.Sprintf("Error: Unexpected character: %s", string(c)))
+			logError(s.line, fmt.Sprintf("Error: Unexpected character."))
 		}
 	}
 }

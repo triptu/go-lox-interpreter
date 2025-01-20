@@ -196,7 +196,7 @@ func (r *resolver) visitPrintStmt(stmt sPrint) error {
 
 func (r *resolver) visitReturnStmt(stmt sReturn) error {
 	if r.currFunction == fNone {
-		return parseErrorAt(stmt.keyword, "Return statement outside of function.")
+		return parseErrorAt(stmt.keyword, "Can't return from top-level code.")
 	}
 
 	if stmt.value != nil {
@@ -264,7 +264,7 @@ func (r *resolver) declare(nameToken token) error {
 	}
 	_, exists := r.peekScope()[name]
 	if exists {
-		return parseErrorAt(nameToken, "Variable is already declared.")
+		return parseErrorAt(nameToken, "Already a variable with this name in this scope.")
 	}
 	r.peekScope()[name] = false
 	return nil

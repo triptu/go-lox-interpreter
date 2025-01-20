@@ -707,7 +707,7 @@ class Test:
                     Runner.expectations += 1
 
                 match = expectedErrorPattern.search(line)
-                if match and not self.compile_errors:
+                if match:
                     compile_err_with_line = "[line {0}] {1}".format(
                         line_num, match.group(1)
                     )
@@ -729,7 +729,7 @@ class Test:
                         not language
                         or language == Runner.curr_suite.language
                         or (language == "java" and Runner.curr_suite.language == "go")
-                    ) and not self.compile_errors:
+                    ):
                         self.compile_errors.add(f"[line {match[3]}] {match[4]}")
 
                         # If we expect a compile error, it should exit with EX_DATAERR.
