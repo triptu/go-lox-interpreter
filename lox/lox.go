@@ -15,14 +15,17 @@ var hasRuntimeError bool
 
 func logError(line int, msg string) {
 	hasError = true
-	fmt.Fprintf(os.Stderr, "[line %d] Error: %s\n", line, msg)
+	fmt.Fprintf(os.Stderr, "[line %d] %s\n", line, msg)
 }
 
 func logRuntimeError(line int, msg string) {
 	hasRuntimeError = true
-	fmt.Fprintf(os.Stderr, "[line %d] Runtime Error: %s\n", line, msg)
+	// fmt.Fprintf(os.Stderr, "[line %d] Runtime Error: %s\n", line, msg)
+	fmt.Fprintf(os.Stderr, "%s\n", msg)
+	fmt.Fprintf(os.Stderr, "[line %d] %s\n", line, msg)
 	panic("runtime error")
 }
+
 
 func PrintTokens(code []byte) {
 	tokens := tokenize(code)

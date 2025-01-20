@@ -136,7 +136,7 @@ func (i interpreter) visitAssignExpr(e eAssign) (any, error) {
 		err = i.globals.set(e.name.lexeme, val)
 	}
 	if err != nil {
-		logRuntimeError(e.name.line, "undefined variable '"+e.name.lexeme+"'.")
+		logRuntimeError(e.name.line, "Undefined variable '"+e.name.lexeme+"'.")
 	}
 	return val, nil
 }
@@ -152,7 +152,7 @@ func (i interpreter) visitBinaryExpr(e eBinary) (any, error) {
 		} else if isNumber(left) && isNumber(right) {
 			return left.(float64) + right.(float64), nil
 		} else {
-			logRuntimeError(e.operator.line, "for plus, operands must be two numbers or two strings.")
+			logRuntimeError(e.operator.line, "Operands must be two numbers or two strings.")
 		}
 	case tMinus:
 		validateNumberOperand2(left, right, e.operator)
@@ -258,7 +258,7 @@ func (i interpreter) visitUnaryExpr(e eUnary) (any, error) {
 func (i interpreter) visitVariableExpr(e eVariable) (any, error) {
 	val, err := i.lookUpVariable(e.name)
 	if err != nil {
-		logRuntimeError(e.name.line, "undefined variable '"+e.name.lexeme+"'.")
+		logRuntimeError(e.name.line, "Undefined variable '"+e.name.lexeme+"'.")
 	}
 	return val, err
 }
@@ -297,13 +297,13 @@ func isNumber(value any) bool {
 
 func validateNumberOperand(num any, operator token) {
 	if !isNumber(num) {
-		logRuntimeError(operator.line, "Operand must be a number for operator: "+operator.lexeme)
+		logRuntimeError(operator.line, "Operand must be a number.")
 	}
 }
 
 func validateNumberOperand2(num1, num2 any, operator token) {
 	if !isNumber(num1) || !isNumber(num2) {
-		logRuntimeError(operator.line, "Operands must be numbers for operator: "+operator.lexeme)
+		logRuntimeError(operator.line, "Operands must be numbers.")
 	}
 }
 

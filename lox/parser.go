@@ -78,7 +78,7 @@ func (p *parser) declaration() (stmt, *parseError) {
 }
 
 func (p *parser) varDecl() (stmt, *parseError) {
-	name, err := p.consumeToken(tIdentifier, "Expected identifier after 'var'")
+	name, err := p.consumeToken(tIdentifier, "Expect variable name.")
 	if err != nil {
 		return nil, err
 	}
@@ -372,7 +372,7 @@ func (p *parser) assignment() (expr, *parseError) {
 		}
 		varToken, ok := expr.(eVariable)
 		if !ok {
-			return nil, parseErrorAt(equalsToken, "invalid assignment target.")
+			return nil, parseErrorAt(equalsToken, "Invalid assignment target.")
 		}
 		return eAssign{
 			name:  varToken.name,
@@ -539,11 +539,11 @@ func (p *parser) primary() (expr, *parseError) {
 	case tIdentifier: // variable access
 		return eVariable{name: token}, nil
 	default:
-		errStr := "': Expect expression."
+		errStr := "Expect expression."
 		if arrIncludes(binaryTokens, token.tokenType) {
-			errStr = ": Operator found without left-hand operand."
+			errStr = "Operator found without left-hand operand."
 		}
-		return nil, parseErrorAt(token, "Error at '"+token.lexeme+errStr)
+		return nil, parseErrorAt(token, errStr)
 	}
 }
 
@@ -587,7 +587,7 @@ func (p *parser) consumeToken(tokenType TokenType, errMsg string) (token, *parse
 	if p.matchIncrement(tokenType) {
 		return p.tokens[p.curr-1], nil
 	} else {
-		return token{}, p.parseErrorPrev(errMsg)
+		return token{}, parseErrorAt(p.tokens[p.curr], errMsg)
 	}
 }
 
@@ -626,6 +626,6 @@ func (p *parser) parseErrorPrev(msg string) *parseError {
 func parseErrorAt(token token, msg string) *parseError {
 	return &parseError{
 		line: token.line,
-		msg:  msg,
+		msg:  "Error at '"+token.lexeme + "': " + msg,
 	}
 }

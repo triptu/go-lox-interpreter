@@ -95,7 +95,7 @@ func (r *resolver) visitVariableExpr(expr eVariable) (any, error) {
 	varName := expr.name.lexeme
 	if len(r.scopes) != 0 {
 		if isReady, exists := r.peekScope()[varName]; exists && !isReady {
-			return nil, parseErrorAt(expr.name, "can't read local variable in its own initializer")
+			return nil, parseErrorAt(expr.name, "Can't read local variable in its own initializer.")
 		}
 	}
 	r.resolveLocal(expr.name)
@@ -196,7 +196,7 @@ func (r *resolver) visitPrintStmt(stmt sPrint) error {
 
 func (r *resolver) visitReturnStmt(stmt sReturn) error {
 	if r.currFunction == fNone {
-		return parseErrorAt(stmt.keyword, "return statement outside of function")
+		return parseErrorAt(stmt.keyword, "Return statement outside of function.")
 	}
 
 	if stmt.value != nil {
@@ -264,7 +264,7 @@ func (r *resolver) declare(nameToken token) error {
 	}
 	_, exists := r.peekScope()[name]
 	if exists {
-		return parseErrorAt(nameToken, nameToken.lexeme+" is already declared")
+		return parseErrorAt(nameToken, "Variable is already declared.")
 	}
 	r.peekScope()[name] = false
 	return nil

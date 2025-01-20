@@ -17,13 +17,14 @@ from typing import Literal
 REPO_DIR = dirname(realpath(__file__))
 print("running tests from " + REPO_DIR)
 
-EXPECTED_OUTPUT_PATTERN = re.compile(r"// expect: ?(.*)")
-EXPECTED_ERROR_PATTERN = re.compile(r"// (Error.*)")
-EXPECTED_RUNTIME_ERROR_PATTERN = re.compile(r"// \[((java|c) )?line (\d+)\] (Error.*)")
-# STACK_TRACE_PATTERN = re.compile(r'// expect runtime error: (.+)')
-STACK_TRACE_PATTERN = re.compile(r"\[line (\d+)\]")
-SYNTAX_ERROR_PATTERN = re.compile(r"\[.*line (\d+)\] (Error.+)")
-NON_TEST_PATTERN = re.compile(r"// nontest")
+expectedOutputPattern = re.compile(r"// expect: ?(.*)")
+expectedErrorPattern = re.compile(r"// (Error.*)")
+# for when errors from both interpreters are different
+errorLinePattern = re.compile(r"// \[((java|c) )?line (\d+)\] (Error.*)")
+expectedRuntimeErrorPattern = re.compile(r"// expect runtime error: (.+)")
+syntaxErrorPattern = re.compile(r"\[.*line (\d+)\] (Error.+)")
+stackTracePattern = re.compile(r"\[line (\d+)\]")
+nonTestPattern = re.compile(r"// nontest")
 
 
 class TestSuite:
@@ -87,21 +88,85 @@ def populate_go_tests():
         TEST_SUITES[test_name] = TestSuite(test_name, "go", args, tests_meta)
         GO_SUITE_NAMES.append(test_name)
 
+    earlyChapters = {
+        "test/scanning": "skip",
+        "test/expressions": "skip",
+    }
+
+    # not implemented the concept of nan yet
+    noNaNEquality = {
+        "test/number/nan_equality.lox": "skip",
+    }
+
+    # limit tests are for clox
+    noLanguageLimits = {
+        "test/limit/loop_too_large.lox": "skip",
+        "test/limit/no_reuse_constants.lox": "skip",
+        "test/limit/too_many_constants.lox": "skip",
+        "test/limit/too_many_locals.lox": "skip",
+        "test/limit/too_many_upvalues.lox": "skip",
+        # Rely on implementing language for stack overflow checking.
+        "test/limit/stack_overflow.lox": "skip",
+    }
+
+    noClasses = {
+        "test/assignment/to_this.lox": "skip",
+        "test/call/object.lox": "skip",
+        "test/class": "skip",
+        "test/closure/close_over_method_parameter.lox": "skip",
+        "test/constructor": "skip",
+        "test/field": "skip",
+        "test/inheritance": "skip",
+        "test/method": "skip",
+        "test/number/decimal_point_at_eof.lox": "skip",
+        "test/number/trailing_dot.lox": "skip",
+        "test/operator/equals_class.lox": "skip",
+        "test/operator/equals_method.lox": "skip",
+        "test/operator/not_class.lox": "skip",
+        "test/regression/394.lox": "skip",
+        "test/super": "skip",
+        "test/this": "skip",
+        "test/return/in_method.lox": "skip",
+        "test/variable/local_from_method.lox": "skip",
+    }
+
+    noFunctions = {
+        "test/call": "skip",
+        "test/closure": "skip",
+        "test/for/closure_in_body.lox": "skip",
+        "test/for/return_closure.lox": "skip",
+        "test/for/return_inside.lox": "skip",
+        "test/for/syntax.lox": "skip",
+        "test/function": "skip",
+        "test/operator/not.lox": "skip",
+        "test/regression/40.lox": "skip",
+        "test/return": "skip",
+        "test/unexpected_character.lox": "skip",
+        "test/while/closure_in_body.lox": "skip",
+        "test/while/return_closure.lox": "skip",
+        "test/while/return_inside.lox": "skip",
+    }
+
+    noResolution = {
+        "test/closure/assign_to_shadowed_later.lox": "skip",
+        "test/function/local_mutual_recursion.lox": "skip",
+        "test/variable/collide_with_parameter.lox": "skip",
+        "test/variable/duplicate_local.lox": "skip",
+        "test/variable/duplicate_parameter.lox": "skip",
+        "test/variable/early_bound.lox": "skip",
+        # Broken because we haven"t fixed it yet by detecting the error.
+        # "test/return/at_top_level.lox": "skip",
+        "test/variable/use_local_in_initializer.lox": "skip",
+    }
+
     add_to_go_suite(
         "golox",
         {
             "test": "pass",
             # These are just for earlier chapters.
-            "test/scanning": "skip",
-            "test/expressions": "skip",
-            # No hardcoded limits in golox.
-            "test/limit/loop_too_large.lox": "skip",
-            "test/limit/no_reuse_constants.lox": "skip",
-            "test/limit/too_many_constants.lox": "skip",
-            "test/limit/too_many_locals.lox": "skip",
-            "test/limit/too_many_upvalues.lox": "skip",
-            # Rely on JVM for stack overflow checking.
-            "test/limit/stack_overflow.lox": "skip",
+            **earlyChapters,
+            **noNaNEquality,
+            **noLanguageLimits,
         },
     )
 
@@ -138,17 +203,12 @@ def populate_go_tests():
         "chap08_statements",
         {
             "test": "pass",
-            # These are just for earlier chapters.
-            "test/scanning": "skip",
-            "test/expressions": "skip",
-            # No hardcoded limits in golox.
-            "test/limit/loop_too_large.lox": "skip",
-            "test/limit/no_reuse_constants.lox": "skip",
-            "test/limit/too_many_constants.lox": "skip",
-            "test/limit/too_many_locals.lox": "skip",
-            "test/limit/too_many_upvalues.lox": "skip",
-            # Rely on JVM for stack overflow checking.
-            "test/limit/stack_overflow.lox": "skip",
+            **earlyChapters,
+            **noNaNEquality,
+            **noLanguageLimits,
+            **noFunctions,
+            **noResolution,
+            **noClasses,
             # No control flow.
             "test/block/empty.lox": "skip",
             "test/for": "skip",
@@ -156,42 +216,6 @@ def populate_go_tests():
             "test/logical_operator": "skip",
             "test/while": "skip",
             "test/variable/unreached_undefined.lox": "skip",
-            # No functions.
-            "test/call": "skip",
-            "test/closure": "skip",
-            "test/function": "skip",
-            "test/operator/not.lox": "skip",
-            "test/regression/40.lox": "skip",
-            "test/return": "skip",
-            "test/unexpected_character.lox": "skip",
-            # Broken because we haven't fixed it yet by detecting the error.
-            "test/return/at_top_level.lox": "skip",
-            "test/variable/use_local_in_initializer.lox": "skip",
-            # No resolution.
-            "test/closure/assign_to_shadowed_later.lox": "skip",
-            "test/function/local_mutual_recursion.lox": "skip",
-            "test/variable/collide_with_parameter.lox": "skip",
-            "test/variable/duplicate_local.lox": "skip",
-            "test/variable/duplicate_parameter.lox": "skip",
-            "test/variable/early_bound.lox": "skip",
-            # No classes.
-            "test/assignment/to_this.lox": "skip",
-            "test/call/object.lox": "skip",
-            "test/class": "skip",
-            "test/closure/close_over_method_parameter.lox": "skip",
-            "test/constructor": "skip",
-            "test/field": "skip",
-            "test/inheritance": "skip",
-            "test/method": "skip",
-            "test/number/decimal_point_at_eof.lox": "skip",
-            "test/number/trailing_dot.lox": "skip",
-            "test/operator/equals_class.lox": "skip",
-            "test/operator/equals_method.lox": "skip",
-            "test/operator/not_class.lox": "skip",
-            "test/super": "skip",
-            "test/this": "skip",
-            "test/return/in_method.lox": "skip",
-            "test/variable/local_from_method.lox": "skip",
         },
     )
 
@@ -199,60 +223,12 @@ def populate_go_tests():
         "chap09_control",
         {
             "test": "pass",
-            # These are just for earlier chapters.
-            "test/scanning": "skip",
-            "test/expressions": "skip",
-            # No hardcoded limits in golox.
-            "test/limit/loop_too_large.lox": "skip",
-            "test/limit/no_reuse_constants.lox": "skip",
-            "test/limit/too_many_constants.lox": "skip",
-            "test/limit/too_many_locals.lox": "skip",
-            "test/limit/too_many_upvalues.lox": "skip",
-            # Rely on JVM for stack overflow checking.
-            "test/limit/stack_overflow.lox": "skip",
-            # No functions.
-            "test/call": "skip",
-            "test/closure": "skip",
-            "test/for/closure_in_body.lox": "skip",
-            "test/for/return_closure.lox": "skip",
-            "test/for/return_inside.lox": "skip",
-            "test/for/syntax.lox": "skip",
-            "test/function": "skip",
-            "test/operator/not.lox": "skip",
-            "test/regression/40.lox": "skip",
-            "test/return": "skip",
-            "test/unexpected_character.lox": "skip",
-            "test/while/closure_in_body.lox": "skip",
-            "test/while/return_closure.lox": "skip",
-            "test/while/return_inside.lox": "skip",
-            # Broken because we haven't fixed it yet by detecting the error.
-            "test/return/at_top_level.lox": "skip",
-            "test/variable/use_local_in_initializer.lox": "skip",
-            # No resolution.
-            "test/closure/assign_to_shadowed_later.lox": "skip",
-            "test/function/local_mutual_recursion.lox": "skip",
-            "test/variable/collide_with_parameter.lox": "skip",
-            "test/variable/duplicate_local.lox": "skip",
-            "test/variable/duplicate_parameter.lox": "skip",
-            "test/variable/early_bound.lox": "skip",
-            # No classes.
-            "test/assignment/to_this.lox": "skip",
-            "test/call/object.lox": "skip",
-            "test/class": "skip",
-            "test/closure/close_over_method_parameter.lox": "skip",
-            "test/constructor": "skip",
-            "test/field": "skip",
-            "test/inheritance": "skip",
-            "test/method": "skip",
-            "test/number/decimal_point_at_eof.lox": "skip",
-            "test/number/trailing_dot.lox": "skip",
-            "test/operator/equals_class.lox": "skip",
-            "test/operator/equals_method.lox": "skip",
-            "test/operator/not_class.lox": "skip",
-            "test/super": "skip",
-            "test/this": "skip",
-            "test/return/in_method.lox": "skip",
-            "test/variable/local_from_method.lox": "skip",
+            **earlyChapters,
+            **noNaNEquality,
+            **noLanguageLimits,
+            **noFunctions,
+            **noResolution,
+            **noClasses,
         },
     )
 
@@ -260,45 +236,11 @@ def populate_go_tests():
         "chap10_functions",
         {
             "test": "pass",
-            # These are just for earlier chapters.
-            "test/scanning": "skip",
-            "test/expressions": "skip",
-            # No hardcoded limits in golox.
-            "test/limit/loop_too_large.lox": "skip",
-            "test/limit/no_reuse_constants.lox": "skip",
-            "test/limit/too_many_constants.lox": "skip",
-            "test/limit/too_many_locals.lox": "skip",
-            "test/limit/too_many_upvalues.lox": "skip",
-            # Rely on JVM for stack overflow checking.
-            "test/limit/stack_overflow.lox": "skip",
-            # Broken because we haven't fixed it yet by detecting the error.
-            "test/return/at_top_level.lox": "skip",
-            "test/variable/use_local_in_initializer.lox": "skip",
-            # No resolution.
-            "test/closure/assign_to_shadowed_later.lox": "skip",
-            "test/function/local_mutual_recursion.lox": "skip",
-            "test/variable/collide_with_parameter.lox": "skip",
-            "test/variable/duplicate_local.lox": "skip",
-            "test/variable/duplicate_parameter.lox": "skip",
-            "test/variable/early_bound.lox": "skip",
-            # No classes.
-            "test/assignment/to_this.lox": "skip",
-            "test/call/object.lox": "skip",
-            "test/class": "skip",
-            "test/closure/close_over_method_parameter.lox": "skip",
-            "test/constructor": "skip",
-            "test/field": "skip",
-            "test/inheritance": "skip",
-            "test/method": "skip",
-            "test/number/decimal_point_at_eof.lox": "skip",
-            "test/number/trailing_dot.lox": "skip",
-            "test/operator/equals_class.lox": "skip",
-            "test/operator/equals_method.lox": "skip",
-            "test/operator/not_class.lox": "skip",
-            "test/super": "skip",
-            "test/this": "skip",
-            "test/return/in_method.lox": "skip",
-            "test/variable/local_from_method.lox": "skip",
+            **earlyChapters,
+            **noNaNEquality,
+            **noLanguageLimits,
+            **noResolution,
+            **noClasses,
         },
     )
 
@@ -306,35 +248,10 @@ def populate_go_tests():
         "chap11_resolving",
         {
             "test": "pass",
-            # These are just for earlier chapters.
-            "test/scanning": "skip",
-            "test/expressions": "skip",
-            # No hardcoded limits in golox.
-            "test/limit/loop_too_large.lox": "skip",
-            "test/limit/no_reuse_constants.lox": "skip",
-            "test/limit/too_many_constants.lox": "skip",
-            "test/limit/too_many_locals.lox": "skip",
-            "test/limit/too_many_upvalues.lox": "skip",
-            # Rely on JVM for stack overflow checking.
-            "test/limit/stack_overflow.lox": "skip",
-            # No classes.
-            "test/assignment/to_this.lox": "skip",
-            "test/call/object.lox": "skip",
-            "test/class": "skip",
-            "test/closure/close_over_method_parameter.lox": "skip",
-            "test/constructor": "skip",
-            "test/field": "skip",
-            "test/inheritance": "skip",
-            "test/method": "skip",
-            "test/number/decimal_point_at_eof.lox": "skip",
-            "test/number/trailing_dot.lox": "skip",
-            "test/operator/equals_class.lox": "skip",
-            "test/operator/equals_method.lox": "skip",
-            "test/operator/not_class.lox": "skip",
-            "test/super": "skip",
-            "test/this": "skip",
-            "test/return/in_method.lox": "skip",
-            "test/variable/local_from_method.lox": "skip",
+            **earlyChapters,
+            **noNaNEquality,
+            **noLanguageLimits,
+            **noClasses,
         },
     )
 
@@ -342,22 +259,16 @@ def populate_go_tests():
         "chap12_classes",
         {
             "test": "pass",
-            # These are just for earlier chapters.
-            "test/scanning": "skip",
-            "test/expressions": "skip",
-            # No hardcoded limits in golox.
-            "test/limit/loop_too_large.lox": "skip",
-            "test/limit/no_reuse_constants.lox": "skip",
-            "test/limit/too_many_constants.lox": "skip",
-            "test/limit/too_many_locals.lox": "skip",
-            "test/limit/too_many_upvalues.lox": "skip",
-            # Rely on JVM for stack overflow checking.
-            "test/limit/stack_overflow.lox": "skip",
+            **earlyChapters,
+            **noLanguageLimits,
+            **noNaNEquality,
             # No inheritance.
+            "test/class/local_inherit_other.lox": "skip",
             "test/class/local_inherit_self.lox": "skip",
             "test/class/inherit_self.lox": "skip",
             "test/class/inherited_method.lox": "skip",
             "test/inheritance": "skip",
+            "test/regression/394.lox": "skip",
             "test/super": "skip",
         },
     )
@@ -366,17 +277,9 @@ def populate_go_tests():
         "chap13_inheritance",
         {
             "test": "pass",
-            # These are just for earlier chapters.
-            "test/scanning": "skip",
-            "test/expressions": "skip",
-            # No hardcoded limits in golox.
-            "test/limit/loop_too_large.lox": "skip",
-            "test/limit/no_reuse_constants.lox": "skip",
-            "test/limit/too_many_constants.lox": "skip",
-            "test/limit/too_many_locals.lox": "skip",
-            "test/limit/too_many_upvalues.lox": "skip",
-            # Rely on JVM for stack overflow checking.
-            "test/limit/stack_overflow.lox": "skip",
+            **earlyChapters,
+            **noNaNEquality,
+            **noLanguageLimits,
         },
     )
 
@@ -785,32 +688,36 @@ class Test:
             if subpath in Runner.curr_suite.tests:
                 pass_or_skip = Runner.curr_suite.tests[subpath]
 
-        if not pass_or_skip:
-            print(
-                'Unknown test state(whether to run or skip) for "{}".'.format(self.path)
-            )
-            return
-        if pass_or_skip == "skip":
+        if not pass_or_skip or pass_or_skip == "skip":
+            if not pass_or_skip:
+                print(
+                    'Unknown test state(whether to run or skip) for "{}, skipping it".'.format(
+                        self.path
+                    )
+                )
             Runner.num_skipped += 1
-            return False
+            return
 
         line_num = 1
         with open(self.path, "r") as file:
             for line in file:
-                match = EXPECTED_OUTPUT_PATTERN.search(line)
+                match = expectedOutputPattern.search(line)
                 if match:
                     self.output.append((match.group(1), line_num))
                     Runner.expectations += 1
 
-                match = EXPECTED_ERROR_PATTERN.search(line)
+                match = expectedErrorPattern.search(line)
                 if match and not self.compile_errors:
-                    self.compile_errors.add(match.group(1))
+                    compile_err_with_line = "[line {0}] {1}".format(
+                        line_num, match.group(1)
+                    )
+                    self.compile_errors.add(compile_err_with_line)
 
                     # If we expect a compile error, it should exit with EX_DATAERR.
                     self.exit_code = 65
                     Runner.expectations += 1
 
-                match = EXPECTED_RUNTIME_ERROR_PATTERN.search(line)
+                match = errorLinePattern.search(line)
                 if match:
                     # The two interpreters are slightly different in terms of which
                     # cascaded errors may appear after an initial compile error because
@@ -819,15 +726,17 @@ class Test:
                     # certain interpreter.
                     language = match.group(2)
                     if (
-                        not language or language == Runner.curr_suite.language
+                        not language
+                        or language == Runner.curr_suite.language
+                        or (language == "java" and Runner.curr_suite.language == "go")
                     ) and not self.compile_errors:
-                        self.compile_errors.add(match.group(4))
+                        self.compile_errors.add(f"[line {match[3]}] {match[4]}")
 
                         # If we expect a compile error, it should exit with EX_DATAERR.
                         self.exit_code = 65
                         Runner.expectations += 1
 
-                match = STACK_TRACE_PATTERN.search(line)
+                match = expectedRuntimeErrorPattern.search(line)
                 if match:
                     self.runtime_error_line = line_num
                     self.runtime_error_message = match.group(1)
@@ -835,7 +744,7 @@ class Test:
                     self.exit_code = 70
                     Runner.expectations += 1
 
-                match = NON_TEST_PATTERN.search(line)
+                match = nonTestPattern.search(line)
                 if match:
                     # Not a test file at all, so ignore it.
                     return False
@@ -851,7 +760,7 @@ class Test:
         args.append(self.path)
         proc = Popen(args, stdin=PIPE, stdout=PIPE, stderr=PIPE)
 
-        print("running test", self.path)
+        # print("running test", self.path)
 
         out, err = proc.communicate()
         self.validate(proc.returncode, out, err)
@@ -888,7 +797,7 @@ class Test:
         # Skip any compile errors. This can happen if there is a compile error in
         # a module loaded by the module being tested.
         line = 0
-        while SYNTAX_ERROR_PATTERN.search(error_lines[line]):
+        while syntaxErrorPattern.search(error_lines[line]):
             line += 1
 
         if error_lines[line] != self.runtime_error_message:
@@ -902,34 +811,36 @@ class Test:
         match = False
         stack_lines = error_lines[line + 1 :]
         for stack_line in stack_lines:
-            match = STACK_TRACE_PATTERN.search(stack_line)
+            match = stackTracePattern.search(stack_line)
             if match:
                 break
 
         if not match:
-            self.fail("Expected stack trace and got:")
+            self.fail("Expected stack trace with line numbers and got:")
             for stack_line in stack_lines:
                 self.fail(stack_line)
         else:
-            pass
-            # stack_line = int(match.group(1))
-            # if stack_line != self.runtime_error_line:
-            #   self.fail('Expected runtime error on line {0} but was on line {1}.',
-            #       self.runtime_error_line, stack_line)
+            stack_line = int(match.group(1))
+            if stack_line != self.runtime_error_line:
+                self.fail(
+                    "Expected runtime error on line {0} but was on line {1}.",
+                    self.runtime_error_line,
+                    stack_line,
+                )
 
     def validate_compile_errors(self, error_lines):
         # Validate that every compile error was expected.
         found_errors = set()
         num_unexpected = 0
         for line in error_lines:
-            match = SYNTAX_ERROR_PATTERN.search(line)
+            match = syntaxErrorPattern.search(line)
             if match:
-                error = match.group(2)
+                error = line
                 if error in self.compile_errors:
                     found_errors.add(error)
                 else:
                     if num_unexpected < 10:
-                        self.fail("Unexpected error:")
+                        self.fail("Unexpected compile error:")
                         self.fail(line)
                     num_unexpected += 1
             elif line != "":
@@ -939,11 +850,11 @@ class Test:
                 num_unexpected += 1
 
         if num_unexpected > 10:
-            self.fail("(truncated " + str(num_unexpected - 10) + " more...)")
+            self.fail("(truncated " + str(num_unexpected - 10) + " more..)")
 
         # Validate that every expected error occurred.
         for error in self.compile_errors - found_errors:
-            self.fail("Missing expected error: {0}", error)
+            self.fail("Missing expected compile error: {0}", error)
 
     def validate_exit_code(self, exit_code, error_lines):
         if exit_code == self.exit_code:
@@ -951,9 +862,9 @@ class Test:
 
         if len(error_lines) > 10:
             error_lines = error_lines[0:10]
-            error_lines.append("(truncated...)")
+            error_lines.append("(truncated..)")
         self.fail(
-            "Expected return code {0} and got {1}. Stderr:", self.exit_code, exit_code
+            "Expected exit code {0} and got {1}. Stderr:", self.exit_code, exit_code
         )
         self.failures += error_lines
 
@@ -988,6 +899,20 @@ class Test:
         if args:
             message = message.format(*args)
         self.failures.append(message)
+
+    def __str__(self):
+        s = "---- Test {0} expectations ----\n".format(self.path)
+        # print all the parsed information. this will be called after
+        # parse is called and before run is called
+        for i in range(len(self.output)):
+            s += "{0}: {1}\n".format(self.output[i][0], self.output[i][1])
+
+        if self.failures:
+            s += "--- Failures ----\n"
+            for f in self.failures:
+                s += f + "\n"
+
+        return s
 
 
 ## --------------- Print utils start ---------------
@@ -1110,6 +1035,15 @@ def run_suite(name, filter_path: str):
     return Runner.failed == 0
 
 
+def make_go_build():
+    command = "go build -o ./build/golox ./cmd/main.go"
+    proc = Popen(command, shell=True)
+    proc.wait()
+    if proc.returncode != 0:
+        print("Error building golox")
+        sys.exit(1)
+
+
 def main(argv):
     populate_go_tests()
     # populate_clox_tests()
@@ -1127,6 +1061,8 @@ def main(argv):
     if suite_name not in TEST_SUITES:
         print('Unknown test suite "{}"'.format(argv[1]))
         sys.exit(1)
+
+    make_go_build()
 
     if not run_suite(suite_name, filter_path):
         sys.exit(1)
