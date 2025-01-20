@@ -2,6 +2,7 @@ package lox
 
 import (
 	"fmt"
+	"strconv"
 	"time"
 )
 
@@ -92,6 +93,22 @@ func defineNativeFunctions(globals *environment) {
 		fn: func(i interpreter, a []any) (any, error) {
 			fmt.Println(a[0])
 			return nil, nil
+		},
+	})
+	globals.define("input", nativeFunction{
+		fn: func(i interpreter, a []any) (any, error) {
+			var input string
+			_, err := fmt.Scanln(&input)
+			if err != nil {
+				return nil, err
+			}
+			return input, nil
+		},
+	})
+	globals.define("parseNumber", nativeFunction{
+		arityCnt: 1,
+		fn: func(i interpreter, a []any) (any, error) {
+			return strconv.ParseFloat(a[0].(string), 64)
 		},
 	})
 }
