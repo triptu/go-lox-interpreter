@@ -2,6 +2,7 @@ package lox
 
 import (
 	"fmt"
+	"time"
 )
 
 type callable interface {
@@ -67,4 +68,30 @@ func (n loxFunction) call(i interpreter, arguments []any) (any, error) {
 
 func (n loxFunction) String() string {
 	return fmt.Sprintf("<fn %s>", n.declaration.name.lexeme)
+}
+
+/*
+Theses are built-in functions that will be available natively in lox.
+*/
+func defineNativeFunctions(globals *environment) {
+	globals.define("clock", nativeFunction{
+		fn: func(i interpreter, a []any) (any, error) {
+			timeInt := time.Now().UnixMilli() / 1000
+			return float64(timeInt), nil
+		},
+	})
+	globals.define("sleep", nativeFunction{ // sleep in seconds
+		arityCnt: 1,
+		fn: func(i interpreter, a []any) (any, error) {
+			time.Sleep(time.Duration(a[0].(float64)) * time.Millisecond)
+			return nil, nil
+		},
+	})
+	globals.define("print", nativeFunction{
+		arityCnt: 1,
+		fn: func(i interpreter, a []any) (any, error) {
+			fmt.Println(a[0])
+			return nil, nil
+		},
+	})
 }

@@ -2,7 +2,6 @@ package lox
 
 import (
 	"fmt"
-	"time"
 )
 
 /*
@@ -326,30 +325,4 @@ this function will be removed.
 */
 func getJustVal[T any](val T, _ error) T {
 	return val
-}
-
-/*
-Theses are built-in functions that are available in any part of the source code.
-*/
-func defineNativeFunctions(globals *environment) {
-	globals.define("clock", nativeFunction{
-		fn: func(i interpreter, a []any) (any, error) {
-			timeInt := time.Now().UnixMilli() / 1000
-			return float64(timeInt), nil
-		},
-	})
-	globals.define("sleep", nativeFunction{ // sleep in seconds
-		arityCnt: 1,
-		fn: func(i interpreter, a []any) (any, error) {
-			time.Sleep(time.Duration(a[0].(float64)) * time.Millisecond)
-			return nil, nil
-		},
-	})
-	globals.define("print", nativeFunction{
-		arityCnt: 1,
-		fn: func(i interpreter, a []any) (any, error) {
-			fmt.Println(a[0])
-			return nil, nil
-		},
-	})
 }
