@@ -1,7 +1,6 @@
 package lox
 
 import (
-	"fmt"
 	"strconv"
 )
 
@@ -96,7 +95,7 @@ func (s *scanner) scanNextToken() {
 		} else if isAlpha(c) {
 			s.scanIdentifier()
 		} else {
-			logScanError(s.line, fmt.Sprintf("Error: Unexpected character."))
+			logScanError(s.line, "Error: Unexpected character.")
 		}
 	}
 }

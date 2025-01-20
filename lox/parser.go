@@ -513,7 +513,7 @@ func (p *parser) finishCall(callee expr) (expr, *parseError) {
 		hasMore = p.matchIncrement(tComma)
 	}
 
-	paren, err := p.consumeToken(tRightParen, "Expect ')' after arguments")
+	paren, err := p.consumeToken(tRightParen, "Expect ')' after arguments.")
 	if err != nil {
 		return nil, err
 	}
