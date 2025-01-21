@@ -34,7 +34,7 @@ type exprVisitor interface {
 	visitSetExpr(eSet) (any, error)
 	// super.method(1, 2, 3)
 	visitSuperExpr(eSuper) (any, error)
-	// this
+	// this (used in class for self-refernce in methods)
 	visitThisExpr(eThis) (any, error)
 	// -1, !true
 	visitUnaryExpr(eUnary) (any, error)

@@ -2,6 +2,10 @@ class Breakfast {
   serve() {
     return "poha";
   }
+
+  serveDrink() {
+    return this.drink;
+  }
 }
 
 print(Breakfast);
@@ -11,3 +15,4 @@ print(breakfast);
 breakfast.drink = "milk";
 print("drink in breakfast = " + breakfast.drink); 
 print(breakfast.serve());
+print("drink for the day - " + breakfast.serveDrink());

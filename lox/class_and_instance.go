@@ -39,7 +39,7 @@ func (i loxClassInstance) get(name token) any {
 	}
 	method, ok := i.findMethod(name)
 	if ok {
-		return method
+		return method.bind(i)
 	}
 
 	logRuntimeError(name.line, "Undefined property '"+name.lexeme+"'.")

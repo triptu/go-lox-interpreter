@@ -9,6 +9,14 @@ const (
 	fMethod
 )
 
+// enum to track if we're inside a class
+type classType int
+
+const (
+	cNone = iota
+	cClass
+)
+
 type resolver struct {
 	// Binding is split into two phases: declaration and definition.
 	// for each variable, in the scope it is part of, when it's declared we add it as
@@ -20,6 +28,7 @@ type resolver struct {
 	scopes       []map[string]bool // stack of nested lexical scopes
 	interpreter  *interpreter
 	currFunction functionType
+	currClass    classType
 }
 
 var _ exprVisitor = (*resolver)(nil)
@@ -30,6 +39,7 @@ func newResolver(interpreter *interpreter) *resolver {
 		scopes:       []map[string]bool{},
 		interpreter:  interpreter,
 		currFunction: fNone,
+		currClass:    cNone,
 	}
 }
 
@@ -174,7 +184,11 @@ func (r *resolver) visitSuperExpr(expr eSuper) (any, error) {
 }
 
 func (r *resolver) visitThisExpr(expr eThis) (any, error) {
-	panic("implement me")
+	if r.currClass == cNone {
+		return nil, parseErrorAt(expr.keyword, "Can't use 'this' outside of a class.")
+	}
+	r.resolveLocal(expr.keyword)
+	return nil, nil
 }
 
 func (r *resolver) visitFunctionStmt(stmt sFunction) error {
@@ -231,10 +245,16 @@ func (r *resolver) visitWhileStmt(stmt sWhile) error {
 }
 
 func (r *resolver) visitClassStmt(stmt sClass) error {
+	enclosingClass := r.currClass
+	r.currClass = cClass
+	defer func() { r.currClass = enclosingClass }()
 	if err := r.declare(stmt.name); err != nil {
 		return err
 	}
 	r.define(stmt.name.lexeme)
+
+	r.beginScope()
+	r.peekScope()["this"] = true
 
 	for _, method := range stmt.methods {
 		if err := r.resolveFunction(method, fMethod); err != nil {
@@ -248,6 +268,8 @@ func (r *resolver) visitClassStmt(stmt sClass) error {
 func (r *resolver) resolveFunction(function sFunction, funcType functionType) error {
 	enclosingFunction := r.currFunction
 	r.currFunction = funcType
+	defer func() { r.currFunction = enclosingFunction }()
+
 	r.beginScope()
 	for _, param := range function.parameters {
 		if err := r.declare(param); err != nil {
@@ -257,7 +279,6 @@ func (r *resolver) resolveFunction(function sFunction, funcType functionType) er
 	}
 	r.resolveStmts(function.body)
 	r.endScope()
-	r.currFunction = enclosingFunction
 	return nil
 }
 
@@ -303,7 +324,7 @@ func (r *resolver) peekScope() map[string]bool {
 	return r.scopes[len(r.scopes)-1]
 }
 
-// the exprName token here is one of tVariable or tAssign
+// the exprName token here is one of tVariable or tAssign or tThis
 func (r *resolver) resolveLocal(exprName token) {
 	varName := exprName.lexeme // variable name
 	for i := len(r.scopes) - 1; i >= 0; i-- {

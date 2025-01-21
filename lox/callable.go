@@ -49,6 +49,12 @@ func (f loxFunction) arity() int {
 	return len(f.declaration.parameters)
 }
 
+func (f loxFunction) bind(instance loxClassInstance) loxFunction {
+	env := newChildEnvironment(f.closure)
+	env.define("this", instance)
+	return loxFunction{declaration: f.declaration, closure: env}
+}
+
 func (f loxFunction) call(i interpreter, arguments []any) (any, error) {
 	env := newChildEnvironment(f.closure)
 	for i, param := range f.declaration.parameters {

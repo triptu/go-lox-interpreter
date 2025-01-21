@@ -598,6 +598,8 @@ func (p *parser) primary() (expr, *parseError) {
 			p.curr++ // consume the right paren
 			return eGrouping{expression: expr}, nil
 		}
+	case tThis:
+		return eThis{keyword: token}, nil
 	case tIdentifier: // variable access
 		return eVariable{name: token}, nil
 	default:

@@ -283,7 +283,7 @@ func (i interpreter) visitSuperExpr(e eSuper) (any, error) {
 }
 
 func (i interpreter) visitThisExpr(e eThis) (any, error) {
-	panic("implement me")
+	return i.lookUpVariable(e.keyword)
 }
 
 func (i interpreter) visitUnaryExpr(e eUnary) (any, error) {
