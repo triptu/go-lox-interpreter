@@ -16,6 +16,7 @@ type classType int
 const (
 	cNone = iota
 	cClass
+	cSubClass
 )
 
 type resolver struct {
@@ -181,7 +182,13 @@ func (r *resolver) visitSetExpr(expr eSet) (any, error) {
 }
 
 func (r *resolver) visitSuperExpr(expr eSuper) (any, error) {
-	panic("implement me")
+	if r.currClass == cNone {
+		return nil, parseErrorAt(expr.keyword, "Can't use 'super' outside of a class.")
+	} else if r.currClass != cSubClass {
+		return nil, parseErrorAt(expr.keyword, "Can't use 'super' in a class with no superclass.")
+	}
+	r.resolveLocal(expr.keyword)
+	return nil, nil
 }
 
 func (r *resolver) visitThisExpr(expr eThis) (any, error) {
@@ -254,6 +261,9 @@ func (r *resolver) visitClassStmt(stmt sClass) error {
 	defer func() {
 		r.currClass = enclosingClass
 		r.endScope()
+		if stmt.superclass != nil {
+			r.endScope()
+		}
 	}()
 	if err := r.declare(stmt.name); err != nil {
 		return err
@@ -261,12 +271,15 @@ func (r *resolver) visitClassStmt(stmt sClass) error {
 	r.define(stmt.name.lexeme)
 
 	if stmt.superclass != nil {
+		r.currClass = cSubClass
 		if stmt.name.lexeme == stmt.superclass.name.lexeme {
-			return parseErrorAt(stmt.superclass.name, "A class cannot inherit from itself.")
+			return parseErrorAt(stmt.superclass.name, "A class can't inherit from itself.")
 		}
 		if _, err := r.resolveExpr(*stmt.superclass); err != nil {
 			return err
 		}
+		r.beginScope()
+		r.peekScope()["super"] = true
 	}
 
 	r.beginScope()
@@ -309,6 +322,9 @@ func (r *resolver) beginScope() {
 }
 
 func (r *resolver) endScope() {
+	if len(r.scopes) == 0 {
+		return
+	}
 	r.scopes = r.scopes[:len(r.scopes)-1]
 }
 
@@ -346,7 +362,7 @@ func (r *resolver) peekScope() map[string]bool {
 	return r.scopes[len(r.scopes)-1]
 }
 
-// the exprName token here is one of tVariable or tAssign or tThis
+// the exprName token here is one of tVariable, tAssign, tThis or tSuper
 func (r *resolver) resolveLocal(exprName token) {
 	varName := exprName.lexeme // variable name
 	for i := len(r.scopes) - 1; i >= 0; i-- {

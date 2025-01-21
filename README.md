@@ -121,8 +121,9 @@ unary          → ( "!" | "-" ) unary
 (* and field access or both, like myClass.pqr().abc()() *)
 call           → primary ( "(" arguments? ")" | "." IDENTIFIER )* ;
 primary        → NUMBER | STRING | "true" | "false" | "nil"
-               | "(" expression ")" 
-               | IDENTIFIER ;
+               | "(" expression ")"
+               | IDENTIFIER 
+               | this | "super" "." IDENTIFIER ;
 
 (* helper rules *)
 arguments      → expression ( "," expression )* ;

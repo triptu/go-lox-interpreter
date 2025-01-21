@@ -97,12 +97,20 @@ func (i interpreter) visitClassStmt(s sClass) error {
 	className := s.name.lexeme
 	i.env.define(className, nil)
 
+	if superclass != nil {
+		i.env = newChildEnvironment(i.env)
+		i.env.define("super", superclass)
+	}
+
 	methods := make(map[string]loxFunction)
 	for _, method := range s.methods {
 		methods[method.name.lexeme] = loxFunction{declaration: method, closure: i.env, isInitializer: method.name.lexeme == "init"}
 	}
 	klass := loxClass{name: className, methods: methods, superclass: superclass}
 
+	if superclass != nil {
+		i.env = i.env.outer
+	}
 	i.env.set(className, klass)
 	return nil
 }
@@ -311,7 +319,29 @@ func (i interpreter) visitSetExpr(e eSet) (any, error) {
 }
 
 func (i interpreter) visitSuperExpr(e eSuper) (any, error) {
-	panic("implement me")
+	distance, ok := i.locals[e.keyword]
+	if !ok {
+		logRuntimeError(e.keyword.line, "Couldn't find 'super' in current scope.")
+		return nil, errors.New("unreachable")
+	}
+	superclass, err := i.env.getAt(distance, "super")
+	if err != nil {
+		logRuntimeError(e.keyword.line, "No parent class to access.")
+		return nil, errors.New("unreachable")
+	}
+	superclass2 := superclass.(*loxClass)
+	object, err := i.env.getAt(distance-1, "this")
+	if err != nil {
+		logRuntimeError(e.keyword.line, "No 'this' at super class child.")
+		return nil, errors.New("unreachable")
+	}
+	object2 := object.(loxClassInstance)
+	method, ok := superclass2.findMethod(e.method.lexeme)
+	if !ok {
+		logRuntimeError(e.method.line, "Undefined property '"+e.method.lexeme+"'.")
+		return nil, errors.New("unreachable")
+	}
+	return method.bind(object2), nil
 }
 
 func (i interpreter) visitThisExpr(e eThis) (any, error) {

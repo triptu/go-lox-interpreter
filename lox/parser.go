@@ -614,6 +614,19 @@ func (p *parser) primary() (expr, *parseError) {
 		}
 	case tThis:
 		return eThis{keyword: token}, nil
+	case tSuper:
+		if err := p.eatToken(tDot, "Expect '.' after 'super'."); err != nil {
+			logParseError(token, err.msg)
+			return nil, nil
+		} else {
+			method, err := p.consumeToken(tIdentifier, "Expect superclass method name.")
+			if err != nil {
+				logParseError(token, err.msg)
+				return nil, nil
+			} else {
+				return eSuper{keyword: token, method: method}, nil
+			}
+		}
 	case tIdentifier: // variable access
 		return eVariable{name: token}, nil
 	default:
