@@ -260,6 +260,15 @@ func (r *resolver) visitClassStmt(stmt sClass) error {
 	}
 	r.define(stmt.name.lexeme)
 
+	if stmt.superclass != nil {
+		if stmt.name.lexeme == stmt.superclass.name.lexeme {
+			return parseErrorAt(stmt.superclass.name, "A class cannot inherit from itself.")
+		}
+		if _, err := r.resolveExpr(*stmt.superclass); err != nil {
+			return err
+		}
+	}
+
 	r.beginScope()
 	r.peekScope()["this"] = true
 

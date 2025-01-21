@@ -84,6 +84,16 @@ we do it in two stages - defining and then setting so the class can be reference
 in its own methods
 */
 func (i interpreter) visitClassStmt(s sClass) error {
+	var superclass *loxClass
+	if s.superclass != nil {
+		superclassVal := getJustVal(i.evaluate(s.superclass))
+		if superclassVal, ok := superclassVal.(loxClass); !ok {
+			logRuntimeError(s.superclass.name.line, "Superclass must be a class.")
+		} else {
+			superclass = &superclassVal
+		}
+	}
+
 	className := s.name.lexeme
 	i.env.define(className, nil)
 
@@ -91,7 +101,7 @@ func (i interpreter) visitClassStmt(s sClass) error {
 	for _, method := range s.methods {
 		methods[method.name.lexeme] = loxFunction{declaration: method, closure: i.env, isInitializer: method.name.lexeme == "init"}
 	}
-	klass := loxClass{name: className, methods: methods}
+	klass := loxClass{name: className, methods: methods, superclass: superclass}
 
 	i.env.set(className, klass)
 	return nil

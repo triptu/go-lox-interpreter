@@ -58,8 +58,9 @@ type sWhile struct {
 }
 
 type sClass struct {
-	name    token
-	methods []sFunction
+	name       token
+	superclass *eVariable
+	methods    []sFunction
 }
 
 type sFunction struct {

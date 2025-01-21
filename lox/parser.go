@@ -150,6 +150,16 @@ func (p *parser) classdeclaration() (stmt, *parseError) {
 	if err != nil {
 		return nil, err
 	}
+
+	var superclass *eVariable
+	if p.matchIncrement(tLess) {
+		superClassName, err := p.consumeToken(tIdentifier, "Expect superclass name.")
+		if err != nil {
+			return nil, err
+		}
+		superclass = &eVariable{name: superClassName}
+	}
+
 	err = p.eatToken(tLeftBrace, "Expect '{' before class body.")
 	if err != nil {
 		return nil, err
@@ -167,8 +177,9 @@ func (p *parser) classdeclaration() (stmt, *parseError) {
 		return nil, err
 	}
 	return sClass{
-		name:    name,
-		methods: methods,
+		name:       name,
+		superclass: superclass,
+		methods:    methods,
 	}, nil
 }
 
