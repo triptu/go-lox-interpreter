@@ -251,7 +251,10 @@ func (r *resolver) visitWhileStmt(stmt sWhile) error {
 func (r *resolver) visitClassStmt(stmt sClass) error {
 	enclosingClass := r.currClass
 	r.currClass = cClass
-	defer func() { r.currClass = enclosingClass }()
+	defer func() {
+		r.currClass = enclosingClass
+		r.endScope()
+	}()
 	if err := r.declare(stmt.name); err != nil {
 		return err
 	}
@@ -276,7 +279,10 @@ func (r *resolver) visitClassStmt(stmt sClass) error {
 func (r *resolver) resolveFunction(function sFunction, funcType functionType) error {
 	enclosingFunction := r.currFunction
 	r.currFunction = funcType
-	defer func() { r.currFunction = enclosingFunction }()
+	defer func() {
+		r.currFunction = enclosingFunction
+		r.endScope()
+	}()
 
 	r.beginScope()
 	for _, param := range function.parameters {
@@ -286,7 +292,6 @@ func (r *resolver) resolveFunction(function sFunction, funcType functionType) er
 		r.define(param.lexeme)
 	}
 	r.resolveStmts(function.body)
-	r.endScope()
 	return nil
 }
 

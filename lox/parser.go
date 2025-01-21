@@ -424,7 +424,10 @@ func (p *parser) assignment() (expr, *parseError) {
 				value:  value,
 			}, nil
 		}
-		return nil, parseErrorAt(equalsToken, "Invalid assignment target.")
+
+		err = parseErrorAt(equalsToken, "Invalid assignment target.")
+		// don't return, this won't cascade, we can continue parsing
+		logParseError(equalsToken, err.msg)
 	}
 
 	return expr, nil
@@ -615,7 +618,7 @@ func (p *parser) isAtEnd() bool {
 	return p.tokens[p.curr].tokenType == tEof
 }
 
-// when we hit an issue, we increment till we can perhaps restart the parsing process
+// when we hit an issue at a token, we increment till we can perhaps restart the parsing process
 // this is so we can give the user as much error information as possible
 func (p *parser) consumeCascadingErrors() {
 	for !p.isAtEnd() {
@@ -681,8 +684,14 @@ func arrIncludes[T comparable](arr []T, item T) bool {
 }
 
 func parseErrorAt(token token, msg string) *parseError {
+	var lexeme string
+	if token.tokenType == tEof {
+		lexeme = "end"
+	} else {
+		lexeme = fmt.Sprintf("'%s'", token.lexeme)
+	}
 	return &parseError{
 		token: token,
-		msg:   "Error at '" + token.lexeme + "': " + msg,
+		msg:   "Error at " + lexeme + ": " + msg,
 	}
 }

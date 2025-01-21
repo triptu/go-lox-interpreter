@@ -53,7 +53,7 @@ func (f loxFunction) arity() int {
 func (f loxFunction) bind(instance loxClassInstance) loxFunction {
 	env := newChildEnvironment(f.closure)
 	env.define("this", instance)
-	return loxFunction{declaration: f.declaration, closure: env}
+	return loxFunction{declaration: f.declaration, closure: env, isInitializer: f.isInitializer}
 }
 
 func (f loxFunction) call(i interpreter, arguments []any) (any, error) {

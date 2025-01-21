@@ -196,11 +196,33 @@ func (i interpreter) visitBinaryExpr(e eBinary) (any, error) {
 		validateNumberOperand2(left, right, e.operator)
 		return left.(float64) <= right.(float64), nil
 	case tEqualEqual:
-		return left == right, nil
+		return checkEqua(left, right), nil
 	case tBangEqual:
-		return left != right, nil
+		return !checkEqua(left, right), nil
 	}
 	return nil, nil // unreachable
+}
+
+func checkEqua(left any, right any) bool {
+	switch left := left.(type) {
+	case loxClass:
+		if right, ok := right.(loxClass); ok {
+			return left.name == right.name
+		}
+		return false
+	case loxClassInstance:
+		if right, ok := right.(loxClassInstance); ok {
+			return &left == &right
+		}
+		return false
+	case loxFunction:
+		if right, ok := right.(loxFunction); ok {
+			return left.declaration.name.lexeme == right.declaration.name.lexeme && left.closure == right.closure
+		}
+		return false
+	default:
+		return left == right
+	}
 }
 
 func (i interpreter) visitCallExpr(e eCall) (any, error) {
