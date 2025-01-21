@@ -231,8 +231,17 @@ func (r *resolver) visitWhileStmt(stmt sWhile) error {
 }
 
 func (r *resolver) visitClassStmt(stmt sClass) error {
-	r.declare(stmt.name)
+	if err := r.declare(stmt.name); err != nil {
+		return err
+	}
 	r.define(stmt.name.lexeme)
+
+	for _, method := range stmt.methods {
+		if err := r.resolveFunction(method, fMethod); err != nil {
+			return err
+		}
+		r.define(method.name.lexeme)
+	}
 	return nil
 }
 

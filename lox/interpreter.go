@@ -84,9 +84,16 @@ we do it in two stages - defining and then setting so the class can be reference
 in its own methods
 */
 func (i interpreter) visitClassStmt(s sClass) error {
-	i.env.define(s.name.lexeme, nil)
-	klass := loxClass{declaration: s, name: s.name.lexeme, closure: i.env}
-	i.env.set(s.name.lexeme, klass)
+	className := s.name.lexeme
+	i.env.define(className, nil)
+
+	methods := make(map[string]loxFunction)
+	for _, method := range s.methods {
+		methods[method.name.lexeme] = loxFunction{declaration: method, closure: i.env}
+	}
+	klass := loxClass{name: className, methods: methods}
+
+	i.env.set(className, klass)
 	return nil
 }
 

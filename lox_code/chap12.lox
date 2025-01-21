@@ -4,9 +4,10 @@ class Breakfast {
   }
 }
 
-print Breakfast;
+print(Breakfast);
 var breakfast = Breakfast();
-print breakfast;
+print(breakfast);
 
 breakfast.drink = "milk";
-print "drink in breakfast = " + breakfast.drink;
+print("drink in breakfast = " + breakfast.drink); 
+print(breakfast.serve());

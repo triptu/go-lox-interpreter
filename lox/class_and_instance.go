@@ -1,9 +1,8 @@
 package lox
 
 type loxClass struct {
-	name        string
-	declaration sClass
-	closure     *environment
+	name    string
+	methods map[string]loxFunction
 }
 
 type loxClassInstance struct {
@@ -35,13 +34,24 @@ func (i loxClassInstance) String() string {
 
 func (i loxClassInstance) get(name token) any {
 	val, ok := i.fields[name.lexeme]
-	if !ok {
-		logRuntimeError(name.line, "Undefined property '"+name.lexeme+"'.")
+	if ok {
+		return val
 	}
-	return val
+	method, ok := i.findMethod(name)
+	if ok {
+		return method
+	}
+
+	logRuntimeError(name.line, "Undefined property '"+name.lexeme+"'.")
+	return nil
 }
 
 func (i loxClassInstance) set(name token, val any) any {
 	i.fields[name.lexeme] = val
 	return val
+}
+
+func (i loxClassInstance) findMethod(name token) (loxFunction, bool) {
+	method, ok := i.klass.methods[name.lexeme]
+	return method, ok
 }
