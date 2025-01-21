@@ -23,6 +23,9 @@ func logParseError(token token, msg string) {
 	fmt.Fprintf(os.Stderr, "[line %d:%d] %s\n", token.line, token.column, msg)
 }
 
+/*
+this function also panics, as for runtime error we can't proceed further in interpreter
+*/
 func logRuntimeError(line int, msg string) {
 	hasRuntimeError = true
 	// fmt.Fprintf(os.Stderr, "[line %d] Runtime Error: %s\n", line, msg)

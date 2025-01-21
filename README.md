@@ -105,7 +105,8 @@ returnStmt     → "return" expression? ";" ;
 
 (* define expressions in order of precedence *)
 expression     → assignment ;
-assignment     → IDENTIFIER "=" assignment
+(* a = 2 or breakfast.milk.sugar = 4 *)
+assignment     → ( call "." )? IDENTIFIER "=" assignment
                | logic_or ;
 logic_or       → logic_and ( "or" logic_and )* ;
 logic_and      → equality ( "and" equality )* ;
@@ -117,7 +118,8 @@ unary          → ( "!" | "-" ) unary
                | call ;
 (* If there are no parentheses, this parses a bare primary expression. *)
 (* Otherwise, there can be multiple layers of calls, like abc()() *)
-call           → primary ( "(" arguments? ")" )* ;
+(* and field access or both, like myClass.pqr().abc()() *)
+call           → primary ( "(" arguments? ")" | "." IDENTIFIER )* ;
 primary        → NUMBER | STRING | "true" | "false" | "nil"
                | "(" expression ")" 
                | IDENTIFIER ;

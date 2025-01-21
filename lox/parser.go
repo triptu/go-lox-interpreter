@@ -411,14 +411,20 @@ func (p *parser) assignment() (expr, *parseError) {
 		if err != nil {
 			return nil, err
 		}
-		varToken, ok := expr.(eVariable)
-		if !ok {
-			return nil, parseErrorAt(equalsToken, "Invalid assignment target.")
+		if varToken, ok := expr.(eVariable); ok {
+			return eAssign{
+				name:  varToken.name,
+				value: value,
+			}, nil
 		}
-		return eAssign{
-			name:  varToken.name,
-			value: value,
-		}, nil
+		if getExpr, ok := expr.(eGet); ok {
+			return eSet{
+				object: getExpr.object,
+				name:   getExpr.name,
+				value:  value,
+			}, nil
+		}
+		return nil, parseErrorAt(equalsToken, "Invalid assignment target.")
 	}
 
 	return expr, nil
@@ -507,6 +513,12 @@ func (p *parser) unary() (expr, *parseError) {
 	return p.call()
 }
 
+/*
+cover function call either directly or method access for class objects. e.g.
+directFun(1, 2, 3)
+myClass.myFunction(1, 2, 3)
+paper.write("hello").withStyle("bold").withColor("red")
+*/
 func (p *parser) call() (expr, *parseError) {
 	expr, err := p.primary()
 	if err != nil {
@@ -517,6 +529,15 @@ func (p *parser) call() (expr, *parseError) {
 			expr, err = p.finishCall(expr)
 			if err != nil {
 				return nil, err
+			}
+		} else if p.matchIncrement(tDot) {
+			field, err := p.consumeToken(tIdentifier, "Expect property name after '.'.")
+			if err != nil {
+				return nil, err
+			}
+			expr = eGet{
+				object: expr,
+				name:   field,
 			}
 		} else {
 			break

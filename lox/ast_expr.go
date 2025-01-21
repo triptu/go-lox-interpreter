@@ -20,7 +20,7 @@ type exprVisitor interface {
 	visitBinaryExpr(eBinary) (any, error)
 	// myFunction(1, 2, 3)
 	visitCallExpr(eCall) (any, error)
-	// myObject.myFunction(1, 2, 3)
+	// myObject.myFunction(1, 2, 3) or breakfast.milk.sugarLevel
 	visitGetExpr(eGet) (any, error)
 	// (1, 2, 3)
 	visitGroupingExpr(eGrouping) (any, error)
@@ -30,6 +30,7 @@ type exprVisitor interface {
 	// these are not coupled with binary as whether the right expression is evaluated
 	// depends on the left expression's evaluation
 	visitLogicalExpr(eLogical) (any, error)
+	// breakfast.milk.sugarLevel = 4, setting fields of class instance
 	visitSetExpr(eSet) (any, error)
 	// super.method(1, 2, 3)
 	visitSuperExpr(eSuper) (any, error)
@@ -59,11 +60,6 @@ type eCall struct {
 	arguments []expr
 }
 
-type eGet struct {
-	object expr
-	name   token
-}
-
 type eGrouping struct {
 	expression expr
 }
@@ -78,6 +74,13 @@ type eLogical struct {
 	right    expr
 }
 
+// object.name is being accessed
+type eGet struct {
+	object expr
+	name   token
+}
+
+// object.name = value
 type eSet struct {
 	object expr
 	name   token

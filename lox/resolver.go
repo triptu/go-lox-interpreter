@@ -158,11 +158,15 @@ func (r *resolver) visitUnaryExpr(expr eUnary) (any, error) {
 }
 
 func (r *resolver) visitGetExpr(expr eGet) (any, error) {
-	panic("implement me")
+	return r.resolveExpr(expr.object)
 }
 
 func (r *resolver) visitSetExpr(expr eSet) (any, error) {
-	panic("implement me")
+	if _, err := r.resolveExpr(expr.object); err != nil {
+		return nil, err
+	}
+	_, err := r.resolveExpr(expr.value)
+	return nil, err
 }
 
 func (r *resolver) visitSuperExpr(expr eSuper) (any, error) {

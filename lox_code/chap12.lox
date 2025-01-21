@@ -1,7 +1,12 @@
-class DevonshireCream {
-  serveOn() {
-    return "Scones";
+class Breakfast {
+  serve() {
+    return "poha";
   }
 }
 
-print DevonshireCream;
+print Breakfast;
+var breakfast = Breakfast();
+print breakfast;
+
+breakfast.drink = "milk";
+print "drink in breakfast = " + breakfast.drink;

@@ -1,6 +1,7 @@
 package lox
 
 import (
+	"errors"
 	"fmt"
 )
 
@@ -220,10 +221,6 @@ func (i interpreter) visitReturnStmt(s sReturn) error {
 	return returnAsError{value}
 }
 
-func (i interpreter) visitGetExpr(e eGet) (any, error) {
-	panic("implement me")
-}
-
 func (i interpreter) visitGroupingExpr(e eGrouping) (any, error) {
 	return i.evaluate(e.expression)
 }
@@ -241,8 +238,37 @@ func (i interpreter) visitLogicalExpr(e eLogical) (any, error) {
 	return i.evaluate(e.right)
 }
 
+/*
+class field access -
+paper.write("hello").withStyle("bold").withColor("red")
+*/
+func (i interpreter) visitGetExpr(e eGet) (any, error) {
+	obj, err := i.evaluate(e.object)
+	if err != nil {
+		return nil, err
+	}
+	obj2, ok := obj.(loxClassInstance)
+	if !ok {
+		logRuntimeError(e.name.line, "Only instances have properties.")
+		return nil, errors.New("unreachable")
+	} else {
+		return obj2.get(e.name), nil
+	}
+}
+
 func (i interpreter) visitSetExpr(e eSet) (any, error) {
-	panic("implement me")
+	obj, err := i.evaluate(e.object)
+	if err != nil {
+		return nil, err
+	}
+	obj2, ok := obj.(loxClassInstance)
+	if !ok {
+		logRuntimeError(e.name.line, "Only instances have fields.")
+		return nil, errors.New("unreachable")
+	} else {
+		value := getJustVal(i.evaluate(e.value))
+		return obj2.set(e.name, value), nil
+	}
 }
 
 func (i interpreter) visitSuperExpr(e eSuper) (any, error) {
