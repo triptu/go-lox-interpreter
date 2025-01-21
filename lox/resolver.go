@@ -7,6 +7,7 @@ const (
 	fNone = iota
 	fFunction
 	fMethod
+	fInitializer // we're in a constructor, user can't return from there
 )
 
 // enum to track if we're inside a class
@@ -218,6 +219,9 @@ func (r *resolver) visitReturnStmt(stmt sReturn) error {
 	}
 
 	if stmt.value != nil {
+		if r.currFunction == fInitializer {
+			return parseErrorAt(stmt.keyword, "Can't return a value from an initializer.")
+		}
 		_, err := r.resolveExpr(stmt.value)
 		return err
 	}
@@ -257,7 +261,11 @@ func (r *resolver) visitClassStmt(stmt sClass) error {
 	r.peekScope()["this"] = true
 
 	for _, method := range stmt.methods {
-		if err := r.resolveFunction(method, fMethod); err != nil {
+		var declarationType functionType = fMethod
+		if method.name.lexeme == "init" {
+			declarationType = fInitializer
+		}
+		if err := r.resolveFunction(method, declarationType); err != nil {
 			return err
 		}
 		r.define(method.name.lexeme)

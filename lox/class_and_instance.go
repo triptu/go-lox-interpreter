@@ -17,6 +17,10 @@ func (c loxClass) String() string {
 }
 
 func (c loxClass) arity() int {
+	initializer, ok := c.findMethod("init")
+	if ok {
+		return initializer.arity()
+	}
 	return 0
 }
 
@@ -25,7 +29,18 @@ calling a class instntiates it, and returns an instance of it
 */
 func (c loxClass) call(i interpreter, arguments []any) (any, error) {
 	instance := loxClassInstance{klass: c, fields: make(map[string]any)}
+	initializer, ok := c.findMethod("init")
+	if ok {
+		// constructors are special, when the instance is created, they're automatically called
+		// with the arguments passed to the class
+		initializer.bind(instance).call(i, arguments)
+	}
 	return instance, nil
+}
+
+func (c loxClass) findMethod(name string) (loxFunction, bool) {
+	method, ok := c.methods[name]
+	return method, ok
 }
 
 func (i loxClassInstance) String() string {
@@ -37,7 +52,7 @@ func (i loxClassInstance) get(name token) any {
 	if ok {
 		return val
 	}
-	method, ok := i.findMethod(name)
+	method, ok := i.klass.findMethod(name.lexeme)
 	if ok {
 		return method.bind(i)
 	}
@@ -49,9 +64,4 @@ func (i loxClassInstance) get(name token) any {
 func (i loxClassInstance) set(name token, val any) any {
 	i.fields[name.lexeme] = val
 	return val
-}
-
-func (i loxClassInstance) findMethod(name token) (loxFunction, bool) {
-	method, ok := i.klass.methods[name.lexeme]
-	return method, ok
 }

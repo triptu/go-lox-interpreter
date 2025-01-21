@@ -1,4 +1,8 @@
 class Breakfast {
+  init() {
+    this.drink = "tea";
+  }
+
   serve() {
     return "poha";
   }
@@ -12,7 +16,10 @@ print(Breakfast);
 var breakfast = Breakfast();
 print(breakfast);
 
-breakfast.drink = "milk";
-print("drink in breakfast = " + breakfast.drink); 
 print(breakfast.serve());
+print("drink for the day - " + breakfast.serveDrink());
+
+
+breakfast.drink = "milk";
+print("updated drink in breakfast = " + breakfast.drink); 
 print("drink for the day - " + breakfast.serveDrink());

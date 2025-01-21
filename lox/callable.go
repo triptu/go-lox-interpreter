@@ -18,8 +18,9 @@ type nativeFunction struct {
 }
 
 type loxFunction struct {
-	declaration sFunction
-	closure     *environment
+	declaration   sFunction
+	closure       *environment
+	isInitializer bool // this is a constructor for some class
 }
 
 type returnAsError struct {
@@ -65,10 +66,16 @@ func (f loxFunction) call(i interpreter, arguments []any) (any, error) {
 	// a list of statements, and not as a block.
 	err := i.executeBlock(f.declaration.body, env)
 	if err != nil {
-		if _, ok := err.(returnAsError); ok {
-			return err.(returnAsError).value, nil
+		if returnValue, ok := err.(returnAsError); ok {
+			if f.isInitializer { // return from constructor always returns class instance
+				return f.closure.getAt(0, "this")
+			}
+			return returnValue.value, nil
 		}
 		return nil, err
+	}
+	if f.isInitializer {
+		return f.closure.getAt(0, "this")
 	}
 	return nil, nil
 }

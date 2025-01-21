@@ -89,7 +89,7 @@ func (i interpreter) visitClassStmt(s sClass) error {
 
 	methods := make(map[string]loxFunction)
 	for _, method := range s.methods {
-		methods[method.name.lexeme] = loxFunction{declaration: method, closure: i.env}
+		methods[method.name.lexeme] = loxFunction{declaration: method, closure: i.env, isInitializer: method.name.lexeme == "init"}
 	}
 	klass := loxClass{name: className, methods: methods}
 
