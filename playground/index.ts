@@ -10,12 +10,13 @@ import {
 } from "./utils";
 
 const editorParent = document.getElementById("editor");
+const runButton = document.getElementById("runBtn");
 // biome-ignore lint/style/noNonNullAssertion: <explanation>
 const outputElement = document.getElementById("output")!;
-if (!editorParent || !outputElement)
-	throw new Error("Input or Output element not found");
+if (!editorParent || !outputElement || !runButton)
+	throw new Error("Run, Input or Output element not found");
 
-let autoRun = true;
+let autoRun = false;
 
 const outputLogger = getOutputLogger(outputElement);
 
@@ -54,3 +55,5 @@ const onToggleAutoRunClick = (e: Event) => {
 	const state = e.target as HTMLInputElement;
 	autoRun = state.checked;
 };
+
+runButton.addEventListener("click", onRunButtonClick);

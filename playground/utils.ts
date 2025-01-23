@@ -49,10 +49,8 @@ export function debounce(fn: Callable, delayMs: number) {
 
 interface OutputLogger {
 	clear: () => void;
-	// biome-ignore lint/suspicious/noExplicitAny: <explanation>
-	log: (...args: any[]) => void;
-	// biome-ignore lint/suspicious/noExplicitAny: <explanation>
-	error: (...args: any[]) => void;
+	log: (arg: string) => void;
+	error: (arg: string) => void;
 }
 
 export function getOutputLogger(outputElement: HTMLElement): OutputLogger {
@@ -60,13 +58,8 @@ export function getOutputLogger(outputElement: HTMLElement): OutputLogger {
 		clear: () => {
 			outputElement.innerHTML = "";
 		},
-		// biome-ignore lint/suspicious/noExplicitAny: <explanation>
-		log: (args: any[]) => {
-			outputElement.innerHTML += `${args
-				.map((arg) =>
-					typeof arg === "object" ? JSON.stringify(arg, null, 2) : arg,
-				)
-				.join(" ")}\n`;
+		log: (arg) => {
+			outputElement.innerHTML += `${arg}\n`;
 		},
 		error: (errMsg: string) => {
 			outputElement.innerHTML += `<span class="text-red-700">${errMsg}</span>\n`;
@@ -75,7 +68,15 @@ export function getOutputLogger(outputElement: HTMLElement): OutputLogger {
 }
 
 const codeLocalStorageKey = "savedCode";
-const defaultCode = "console.log('Hello World!')";
+const defaultCode = `print("Hello World!");
+var a = 2;
+
+fun sum(a,b) {
+  return a + b;
+}
+
+print(sum(a, 5));`;
+
 export const codeStorage = {
 	get: (): string => {
 		const savedCode = localStorage.getItem(codeLocalStorageKey);
@@ -86,75 +87,49 @@ export const codeStorage = {
 	},
 };
 
+let initDone = false;
+let initPromise: Promise<void> | null = null;
 async function initWasm() {
+	if (initDone) {
+		return;
+	}
+	if (initPromise) {
+		return initPromise;
+	}
 	const go = new Go();
-	return new Promise((resolve, reject) => {
+	initPromise = new Promise((resolve, reject) => {
 		WebAssembly.instantiateStreaming(fetch("lox.wasm"), go.importObject)
 			.then((obj) => {
 				go.run(obj.instance); // run the main method in go
-				resolve(true);
+				console.log("wasm loaded");
+				initDone = true;
+				initPromise = null;
+				resolve();
 			})
 			.catch((err) => {
 				console.error("failed to load wasm");
 				reject(err);
 			});
 	});
+	return initPromise;
 }
-setTimeout(async () => {
+
+export async function runCode(code: string, outputLogger: OutputLogger) {
 	await initWasm();
-	window.loxrun?.(
-		"run",
-		'print("Hello World from js land!");',
-		({ type, data }) => {
-			switch (type) {
-				case "log":
-					console.log(`damn - ${data}`);
-					break;
-				default:
-					console.error(`Unknown event type from wasm: ${type}`);
-			}
-		},
-	);
-}, 1000);
-
-export function runCode2(code: string, outputLogger: OutputLogger) {}
-
-export function runCode(code: string, outputLogger: OutputLogger) {
 	outputLogger.clear();
 
-	// Use a Web Worker for safer execution
-	const worker = new Worker(
-		URL.createObjectURL(
-			new Blob(
-				[
-					`
-              // Redirect console.log to main thread
-              console.log = (...args) => {
-                postMessage({type: 'log', data: args});
-              };
-              
-              onmessage = function(e) {
-                try {
-                  eval(e.data);
-                  postMessage({type: 'done'});
-                } catch (error) {
-                  postMessage({type: 'error', error: error.toString()});
-                }
-              }
-            `,
-				],
-				{ type: "application/javascript" },
-			),
-		),
-	);
-
-	worker.onmessage = (e) => {
-		if (e.data.type === "log") {
-			outputLogger.log(e.data.data);
-		} else if (e.data.type === "error") {
-			outputLogger.error(e.data.error);
+	window.loxrun?.("run", code, ({ type, data }) => {
+		switch (type) {
+			case "log":
+				outputLogger.log(data);
+				break;
+			case "error":
+				outputLogger.error(data);
+				break;
+			case "done":
+				break;
+			default:
+				console.error(`Unknown event type from wasm: ${type}`);
 		}
-	};
-
-	worker.postMessage(code);
+	});
 }

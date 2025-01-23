@@ -19,6 +19,11 @@ func main() {
 			callbackJs.Invoke(result)
 		}
 		runLoxCode(args[0].String(), args[1].String(), callbackGo)
+
+		final := make(map[string]interface{})
+		final["type"] = "done"
+		final["data"] = ""
+		callbackJs.Invoke(final)
 		return nil
 	}))
 

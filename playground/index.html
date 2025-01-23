@@ -47,11 +47,35 @@
         </div>
       </div>
 
-      <div class="flex gap-4 p-4 flex-col lg:flex-row flex-1">
-        <div class="h-4/5 lg:h-auto lg:flex-1" id="editor"></div>
-        <div class="flex-1 bg-gray-100 ring-1 ring-gray-200 text-gray-900 text-md rounded p-4 whitespace-pre-wrap font-mono overflow-auto">
-          <pre id="output"></pre>
+      <div class="flex gap-4 p-4 pt-2 flex-col lg:flex-row flex-1">
+        <div class="h-4/5 lg:h-auto lg:flex-1 flex flex-col gap-2">
+          <div class="w-full flex justify-end lg:justify-start items-center">
+            <span class="text-gray-900 mr-2">
+              Example:
+            </span>
+            <select class="px-2 w-60 h-9 bg-gray-200 rounded-md shadow-xs text-sm appearance-none hover:bg-gray-300" id="exampleSelect">
+              <option value="hello">Hello World</option>
+              <option value="fibonacci">Fibonacci</option>
+              <option value="inheritance">Inheritance</option>
+            </select>
+          </div>
+          
+          <div class="h-full" id="editor"></div>
         </div>
+
+        <div class="flex-1 flex flex-col gap-2">
+          <div class="w-full flex justify-end items-center">
+            <button class="cursor-default bg-blue-600 hover:bg-blue-700 text-white font-bold h-9 px-4 text-sm rounded flex items-center gap-1" id="runBtn">
+              <svg xmlns="http://www.w3.org/2000/svg" width="18px" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-play"><polygon points="6 3 20 12 6 21 6 3"/></svg>  
+              Run
+            </button>
+          </div>
+
+          <div class="flex-1 bg-gray-100 ring-1 ring-gray-200 text-gray-900 text-md rounded p-4 whitespace-pre-wrap font-mono overflow-auto">
+            <pre id="output"></pre>
+          </div>
+        </div>
+        
       </div>
     </div>
   </body>
