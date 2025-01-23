@@ -9,5 +9,7 @@ command = """\
   export PATH=$PATH:/opt/build/tinygo/usr/local/bin && \
   rm -f node_modules/.bin/bun node_modules/.bin/bunx && \
   bun update canary && \
+  bun --version && \
+  bun run v && \
   bun run build \
   """
