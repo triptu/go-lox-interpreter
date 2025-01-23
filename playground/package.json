@@ -2,7 +2,9 @@
 	"name": "golox-playground",
 	"scripts": {
 		"check": "biome check --write ./",
-		"build": "rm -rf ./dist && bun build ./index.html --outdir=dist",
+		"copy-wasm-exec": "cp $(tinygo env TINYGOROOT)/targets/wasm_exec.js .",
+		"build-wasm": "cd .. && GOOS=js GOARCH=wasm tinygo build -o playground/dist/lox.wasm cmd/wasm/main.go -no-debug -scheduler=none",
+		"build": "rm -rf ./dist && mkdir dist && bun run build-wasm && bun build ./index.html --outdir=dist",
 		"dev": "bun run build --watch"
 	},
 	"dependencies": {

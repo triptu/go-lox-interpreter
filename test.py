@@ -1037,7 +1037,7 @@ def run_suite(name, filter_path: str):
 
 
 def make_go_build():
-    command = "go build -o ./build/golox ./cmd/main.go"
+    command = "go build -o ./build/golox ./cmd/cli/main.go"
     proc = Popen(command, shell=True)
     proc.wait()
     if proc.returncode != 0:

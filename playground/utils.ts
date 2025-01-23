@@ -1,3 +1,13 @@
+declare class Go {
+	argv: string[];
+	env: { [envKey: string]: string };
+	exit: (code: number) => void;
+	importObject: WebAssembly.Imports;
+	exited: boolean;
+	mem: DataView;
+	run(instance: WebAssembly.Instance): Promise<void>;
+}
+
 // biome-ignore lint/suspicious/noExplicitAny: we don't args type here
 type Callable = (...args: any[]) => void;
 
@@ -65,6 +75,39 @@ export const codeStorage = {
 		localStorage.setItem(codeLocalStorageKey, code);
 	},
 };
+
+const WASM_URL = "lox.wasm";
+interface WasmGo {
+	exports: {
+		wasmLox: (command: "run", sourceCode: string) => string;
+		add: (a: number, b: number) => number;
+	};
+}
+let wasm: WasmGo | undefined;
+function initWasm() {
+	try {
+		const go = new Go();
+		if ("instantiateStreaming" in WebAssembly) {
+			WebAssembly.instantiateStreaming(fetch(WASM_URL), go.importObject).then(
+				(obj) => {
+					wasm = obj.instance as WasmGo;
+					console.log("wasm loaded", wasm);
+				},
+			);
+		}
+	} catch (err) {
+		console.error("wasm_exec.js is not loaded");
+		return;
+	}
+}
+setTimeout(initWasm, 1000);
+setTimeout(() => {
+	console.log("result of add", wasm?.exports.add(1, 2)); // this is the function defined in the wasm module
+	wasm?.exports.wasmLox("run", 'print("Hello World!");');
+	console.log("completed executing code");
+}, 2000);
+
+export function runCode2(code: string, outputLogger: OutputLogger) {}
 
 export function runCode(code: string, outputLogger: OutputLogger) {
 	outputLogger.clear();
