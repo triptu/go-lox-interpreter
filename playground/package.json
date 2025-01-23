@@ -1,0 +1,25 @@
+{
+	"name": "golox-playground",
+	"scripts": {
+		"check": "biome check --write ./",
+		"build": "rm -rf ./dist && bun build ./index.html --outdir=dist",
+		"dev": "bun run build --watch"
+	},
+	"dependencies": {
+		"@codemirror/autocomplete": "6.18.4",
+		"@codemirror/commands": "6.8.0",
+		"@codemirror/lang-javascript": "6.2.2",
+		"@codemirror/language": "6.10.8",
+		"@codemirror/lint": "6.8.4",
+		"@codemirror/search": "6.5.8",
+		"@codemirror/state": "6.5.1",
+		"@codemirror/view": "6.36.2",
+		"@lezer/common": "1.2.3",
+		"@lezer/highlight": "1.2.1",
+		"@lezer/lr": "1.4.2",
+		"codemirror": "6.0.1"
+	},
+	"devDependencies": {
+		"@biomejs/biome": "1.9.4"
+	}
+}

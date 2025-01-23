@@ -1,0 +1,6 @@
+{
+    "biome.lspBin": "playground/node_modules/.bin/biome",
+    "editor.codeActionsOnSave": {
+        "source.organizeImports.biome": "explicit"
+    }
+}
