@@ -3,7 +3,7 @@
 	"scripts": {
 		"check": "biome check --write ./",
 		"copy-wasm-exec": "cp $(tinygo env TINYGOROOT)/targets/wasm_exec.js .",
-		"build-wasm": "cd .. && GOOS=js GOARCH=wasm tinygo build -o playground/dist/lox.wasm cmd/wasm/main.go -no-debug -scheduler=none",
+		"build-wasm": "cd .. && GOOS=js GOARCH=wasm tinygo build -o playground/dist/lox.wasm -no-debug -scheduler=none cmd/wasm/main.go",
 		"build": "rm -rf ./dist && mkdir dist && bun run build-wasm && bun build ./index.html --outdir=dist",
 		"dev": "bun run build --watch"
 	},

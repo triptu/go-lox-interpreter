@@ -24,14 +24,6 @@
 		throw new Error("cannot export Go (neither global, window nor self is defined)");
 	}
 
-	if (!global.require && typeof require !== "undefined") {
-		global.require = require;
-	}
-
-	if (!global.fs && global.require) {
-		global.fs = require("node:fs");
-	}
-
 	const enosys = () => {
 		const err = new Error("not implemented");
 		err.code = "ENOSYS";
@@ -98,32 +90,6 @@
 			cwd() { throw enosys(); },
 			chdir() { throw enosys(); },
 		}
-	}
-
-	if (!global.crypto) {
-		const nodeCrypto = require("node:crypto");
-		global.crypto = {
-			getRandomValues(b) {
-				nodeCrypto.randomFillSync(b);
-			},
-		};
-	}
-
-	if (!global.performance) {
-		global.performance = {
-			now() {
-				const [sec, nsec] = process.hrtime();
-				return sec * 1000 + nsec / 1000000;
-			},
-		};
-	}
-
-	if (!global.TextEncoder) {
-		global.TextEncoder = require("node:util").TextEncoder;
-	}
-
-	if (!global.TextDecoder) {
-		global.TextDecoder = require("node:util").TextDecoder;
 	}
 
 	// End of polyfills for common API.
@@ -515,27 +481,5 @@
 				return event.result;
 			};
 		}
-	}
-
-	if (
-		global.require &&
-		global.require.main === module &&
-		global.process &&
-		global.process.versions &&
-		!global.process.versions.electron
-	) {
-		if (process.argv.length != 3) {
-			console.error("usage: go_js_wasm_exec [wasm binary] [arguments]");
-			process.exit(1);
-		}
-
-		const go = new Go();
-		WebAssembly.instantiate(fs.readFileSync(process.argv[2]), go.importObject).then(async (result) => {
-			let exitCode = await go.run(result.instance);
-			process.exit(exitCode);
-		}).catch((err) => {
-			console.error(err);
-			process.exit(1);
-		});
 	}
 })();
