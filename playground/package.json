@@ -7,7 +7,7 @@
 		"build-wasm-dbg": "cd .. && GOOS=js GOARCH=wasm tinygo build -o playground/dist/lox.wasm cmd/wasm/main.go",
 		"build": "rm -rf ./dist && mkdir dist && bun run build-wasm && bun build ./index.html --outdir=dist",
 		"dev": "bun run build --watch",
-		"v": "bun --revision"
+		"deploy": "netlify deploy --prod"
 	},
 	"dependencies": {
 		"@codemirror/autocomplete": "6.18.4",

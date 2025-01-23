@@ -2,3 +2,5 @@
 build
 playground/node_modules
 playground/dist
+# Local Netlify folder
+.netlify
