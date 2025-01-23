@@ -4,7 +4,11 @@ publish = "playground/dist"
 command = """\
   pwd && \
   wget -nv https://github.com/tinygo-org/tinygo/releases/download/v0.35.0/tinygo_0.35.0_amd64.deb && \
-  dpkg -x tinygo_0.35.0_amd64.deb /usr/local/bin && \
-  export PATH=$PATH:/usr/local/bin && \
+  mkdir /opt/build/tinygo && \
+  dpkg -x tinygo_0.35.0_amd64.deb /opt/build/tinygo && \
+  export PATH=$PATH:/opt/build/tinygo/bin && \
   bun run build \
   """
+
+[environment]
+GO_VERSION = "1.23.x"
