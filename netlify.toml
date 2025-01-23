@@ -7,5 +7,6 @@ command = """\
   mkdir /opt/build/tinygo && \
   dpkg -x tinygo_0.35.0_amd64.deb /opt/build/tinygo && \
   export PATH=$PATH:/opt/build/tinygo/usr/local/bin && \
+  bun upgrade canary && \
   bun run build \
   """
