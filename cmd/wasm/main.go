@@ -1,25 +1,33 @@
+//go:build js && wasm
+
 package main
 
-import "golox/lox"
+import (
+	"golox/lox"
+	"syscall/js"
+)
 
-func main() {}
+func main() {
+	c := make(chan struct{}, 0)
 
-// This function is imported from JavaScript, as it doesn't define a body.
-// You should define a function named 'add' in the WebAssembly 'env'
-// module from JavaScript.
-//
-//export add
-func add(x, y int) int {
-	println("adding %d and %d\n", x, y)
-	return x + y
+	js.Global().Set("loxrun", js.FuncOf(func(this js.Value, args []js.Value) any {
+		callbackJs := args[2]
+		callbackGo := func(s string) {
+			result := make(map[string]interface{})
+			result["type"] = "log"
+			result["data"] = s
+			callbackJs.Invoke(result)
+		}
+		runLoxCode(args[0].String(), args[1].String(), callbackGo)
+		return nil
+	}))
+
+	// pause, this is needed for Wasm exports to be visible to JavaScript
+	<-c
 }
 
-// this function is exported to javascript in the wasm module
-//
-//export wasmLox
-func wasmLox(command string, sourceCode string) string {
+func runLoxCode(command, sourceCode string, printTarget func(string)) {
 	if command == "run" {
-		lox.Run([]byte(sourceCode))
+		lox.Run([]byte(sourceCode), printTarget)
 	}
-	return "hello world"
 }

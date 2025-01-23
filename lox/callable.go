@@ -104,7 +104,7 @@ func defineNativeFunctions(globals *environment) {
 	globals.define("print", nativeFunction{
 		arityCnt: 1,
 		fn: func(i interpreter, a []any) (any, error) {
-			fmt.Println(a[0])
+			println(a[0])
 			return nil, nil
 		},
 	})

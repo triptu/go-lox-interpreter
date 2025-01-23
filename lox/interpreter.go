@@ -10,21 +10,23 @@ Interpreter also implements the visitor interface for the AST nodes.
 */
 
 type interpreter struct {
-	globals *environment  // permanent reference to the global environment
-	env     *environment  // reference to the environment of the current scope/block
-	locals  map[token]int // store the scope depth for each variable token usage
+	globals     *environment  // permanent reference to the global environment
+	env         *environment  // reference to the environment of the current scope/block
+	locals      map[token]int // store the scope depth for each variable token usage
+	printTarget func(s string)
 }
 
 var _ exprVisitor = (*interpreter)(nil)
 var _ stmtVisitor = (*interpreter)(nil)
 
-func newInterpreter() *interpreter {
+func newInterpreter(printTarget func(s string)) *interpreter {
 	globals := newEnvironment()
 	defineNativeFunctions(globals)
 	return &interpreter{
-		globals: globals,
-		locals:  make(map[token]int),
-		env:     globals,
+		globals:     globals,
+		locals:      make(map[token]int),
+		env:         globals,
+		printTarget: printTarget,
 	}
 }
 
@@ -49,7 +51,7 @@ func (i interpreter) visitExprStmt(s sExpr) error {
 
 func (i interpreter) visitPrintStmt(s sPrint) error {
 	val := getJustVal(i.evaluate(s.expression))
-	fmt.Println(getLiteralStr(val))
+	i.printTarget(getLiteralStr(val))
 	return nil
 }
 

@@ -8,6 +8,16 @@ declare class Go {
 	run(instance: WebAssembly.Instance): Promise<void>;
 }
 
+declare global {
+	interface Window {
+		loxrun: (
+			command: string,
+			code: string,
+			onEvent: (event: { type: string; data: string }) => void,
+		) => void;
+	}
+}
+
 // biome-ignore lint/suspicious/noExplicitAny: we don't args type here
 type Callable = (...args: any[]) => void;
 
@@ -76,36 +86,36 @@ export const codeStorage = {
 	},
 };
 
-const WASM_URL = "lox.wasm";
-interface WasmGo {
-	exports: {
-		wasmLox: (command: "run", sourceCode: string) => string;
-		add: (a: number, b: number) => number;
-	};
+async function initWasm() {
+	const go = new Go();
+	return new Promise((resolve, reject) => {
+		WebAssembly.instantiateStreaming(fetch("lox.wasm"), go.importObject)
+			.then((obj) => {
+				go.run(obj.instance); // run the main method in go
+				resolve(true);
+			})
+			.catch((err) => {
+				console.error("failed to load wasm");
+				reject(err);
+			});
+	});
 }
-let wasm: WasmGo | undefined;
-function initWasm() {
-	try {
-		const go = new Go();
-		if ("instantiateStreaming" in WebAssembly) {
-			WebAssembly.instantiateStreaming(fetch(WASM_URL), go.importObject).then(
-				(obj) => {
-					wasm = obj.instance as WasmGo;
-					console.log("wasm loaded", wasm);
-				},
-			);
-		}
-	} catch (err) {
-		console.error("wasm_exec.js is not loaded");
-		return;
-	}
-}
-setTimeout(initWasm, 1000);
-setTimeout(() => {
-	console.log("result of add", wasm?.exports.add(1, 2)); // this is the function defined in the wasm module
-	wasm?.exports.wasmLox("run", 'print("Hello World!");');
-	console.log("completed executing code");
-}, 2000);
+setTimeout(async () => {
+	await initWasm();
+	window.loxrun?.(
+		"run",
+		'print("Hello World from js land!");',
+		({ type, data }) => {
+			switch (type) {
+				case "log":
+					console.log(`damn - ${data}`);
+					break;
+				default:
+					console.error(`Unknown event type from wasm: ${type}`);
+			}
+		},
+	);
+}, 1000);
 
 export function runCode2(code: string, outputLogger: OutputLogger) {}
 
