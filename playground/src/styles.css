@@ -1,4 +1,5 @@
 /* https://tailwind-lite.com/ */
+/* change once bun supports the tailwind plugin for build - https://bun.sh/docs/bundler/fullstack#using-tailwindcss-in-html-routes */
 @import url("./tailwind-lite.css");
 
 .h-dvh {
