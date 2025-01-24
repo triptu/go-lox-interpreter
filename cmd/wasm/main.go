@@ -3,6 +3,7 @@
 package main
 
 import (
+	"fmt"
 	"golox/lox"
 	"syscall/js"
 )
@@ -12,13 +13,17 @@ func main() {
 
 	js.Global().Set("loxrun", js.FuncOf(func(this js.Value, args []js.Value) any {
 		callbackJs := args[2]
-		callbackGo := func(s string) {
+		logOutput := func(s string, isError bool) {
 			result := make(map[string]interface{})
-			result["type"] = "log"
+			if isError {
+				result["type"] = "error"
+			} else {
+				result["type"] = "log"
+			}
 			result["data"] = s
 			callbackJs.Invoke(result)
 		}
-		runLoxCode(args[0].String(), args[1].String(), callbackGo)
+		runLoxCode(args[0].String(), args[1].String(), logOutput)
 
 		final := make(map[string]interface{})
 		final["type"] = "done"
@@ -31,8 +36,14 @@ func main() {
 	<-c
 }
 
-func runLoxCode(command, sourceCode string, printTarget func(string)) {
+func runLoxCode(command, sourceCode string, printTarget func(string, bool)) {
 	if command == "run" {
-		lox.Run([]byte(sourceCode), printTarget)
+		lox.ResetErrorState()
+		exitCode := lox.Run([]byte(sourceCode), func(s string) {
+			printTarget(s, false)
+		})
+		if exitCode != 0 {
+			printTarget(fmt.Sprintf("exit code: %d", exitCode), true)
+		}
 	}
 }

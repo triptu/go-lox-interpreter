@@ -41,8 +41,20 @@ export const Button = ({
 export function Header() {
 	return (
 		<div class="rounded-t p-4 bg-gray-900 text-gray-50 flex items-center justify-between">
-			<h1 class="text-2xl font-bold">GoLox Playground</h1>
+			<h1 class="text-2xl font-bold">
+				GoLox <span class="hidden sm:inline">Playground</span>
+			</h1>
 			<div class="flex gap-4 items-center">
+				<a
+					href="https://craftinginterpreters.com/the-lox-language.html"
+					target="_blank"
+					rel="noopener noreferrer"
+					class="text-gray-100 hover:text-white flex gap-2 items-center"
+				>
+					<span>Lox</span>
+					<ExternalLinkIcon />
+				</a>
+
 				<a
 					href="https://github.com/triptu/go-lox-interpreter"
 					target="_blank"

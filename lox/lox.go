@@ -13,6 +13,9 @@ This is the entry point for Lox exposing public methods for different functional
 var hasError bool
 var hasRuntimeError bool
 
+const compileErrorExitCode = 65
+const runtimeErrorExitCode = 70
+
 func logScanError(line int, msg string) {
 	hasError = true
 	fmt.Fprintf(os.Stderr, "[line %d] %s\n", line, msg)
@@ -110,13 +113,15 @@ func Evaluate(code []byte) {
 	}
 }
 
-func Run(code []byte, printTarget func(string)) {
+func Run(code []byte, printTarget func(string)) (exitCode int) {
+	exitCode = 0
+
 	defer func() {
 		if r := recover(); r != nil {
 			if !hasRuntimeError {
 				fmt.Println("Recovered from run time error panic, Error: ", r)
 			}
-			os.Exit(70)
+			exitCode = runtimeErrorExitCode
 		}
 	}()
 
@@ -125,21 +130,25 @@ func Run(code []byte, printTarget func(string)) {
 	parser := newParser[expr](tokens)
 	statements := parser.parse()
 	if hasError {
-		os.Exit(65)
+		exitCode = compileErrorExitCode
+		return
 	} else {
 		interpreter := newInterpreter(printTarget)
 
 		resolver := newResolver(interpreter)
 		resolver.resolve(statements)
 		if hasError {
-			os.Exit(65)
+			exitCode = compileErrorExitCode
+			return
 		}
 
 		interpreter.interpret(statements)
 		if hasRuntimeError {
-			os.Exit(70)
+			exitCode = runtimeErrorExitCode
+			return
 		}
 	}
+	return
 }
 
 func getLiteralStr(literal interface{}) string {
@@ -155,4 +164,9 @@ func getLiteralStr(literal interface{}) string {
 	default:
 		return fmt.Sprintf("%v", literal)
 	}
+}
+
+func ResetErrorState() {
+	hasError = false
+	hasRuntimeError = false
 }

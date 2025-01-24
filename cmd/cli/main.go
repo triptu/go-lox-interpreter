@@ -32,9 +32,10 @@ func main() {
 	} else if command == "visualize" {
 		lox.Visualize(fileContents)
 	} else if command == "run" {
-		lox.Run(fileContents, func(s string) {
+		exitCode := lox.Run(fileContents, func(s string) {
 			fmt.Println(s)
 		})
+		os.Exit(exitCode)
 	} else {
 		fmt.Fprintf(os.Stderr, "Unknown command: %s\n", command)
 		os.Exit(1)

@@ -108,6 +108,9 @@ def populate_go_tests():
         "test/limit/too_many_upvalues.lox": "skip",
         # Rely on implementing language for stack overflow checking.
         "test/limit/stack_overflow.lox": "skip",
+        # we just merge string
+        "test/operator/add_bool_string.lox": "skip",
+        "test/operator/add_string_nil.lox": "skip",
     }
 
     noClasses = {
