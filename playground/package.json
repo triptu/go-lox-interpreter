@@ -7,7 +7,8 @@
 		"build-wasm-dbg": "cd .. && GOOS=js GOARCH=wasm tinygo build -o playground/dist/lox.wasm cmd/wasm/main.go",
 		"build": "rm -rf ./dist && mkdir dist && bun run build-wasm && bun build ./index.html --outdir=dist",
 		"dev": "bun run build --watch",
-		"deploy": "netlify deploy --prod"
+		"deploy": "netlify deploy --prod",
+		"gen-lox-parser": "lezer-generator src/lox-grammar/lox-lezer.grammar -o src/lox-grammar/lox-parser.ts"
 	},
 	"dependencies": {
 		"@codemirror/autocomplete": "6.18.4",
@@ -28,6 +29,7 @@
 		"preact": "^10.25.4"
 	},
 	"devDependencies": {
+		"@lezer/generator": "^1.7.2",
 		"@biomejs/biome": "1.9.4"
 	}
 }

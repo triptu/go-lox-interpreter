@@ -1,11 +1,12 @@
-import { javascript } from "@codemirror/lang-javascript";
-import { ViewPlugin } from "@codemirror/view";
+import { Prec } from "@codemirror/state";
+import { ViewPlugin, keymap } from "@codemirror/view";
 import { signal } from "@preact/signals";
 import { EditorView, basicSetup } from "codemirror";
 import { render } from "preact";
 import { useEffect, useRef } from "preact/hooks";
 import { Button, Header } from "./components";
 import { RunIcon, SpinnerIcon, StopIcon } from "./icons";
+import { lox } from "./lox-grammar/lox-codemirror";
 import {
 	type OutputLogger,
 	codeStorage,
@@ -41,6 +42,20 @@ async function runCodeWithStateStuff(code: string) {
 		isRunning.value = false;
 	}
 }
+
+const keymapExtension = [
+	Prec.highest(
+		keymap.of([
+			{
+				key: "Mod-s",
+				run: ({ state }) => {
+					runCodeWithStateStuff(state.doc.toString());
+					return true;
+				},
+			},
+		]),
+	),
+];
 
 function SelectSampleCode() {
 	return (
@@ -111,7 +126,7 @@ function CodeEditor() {
 	useEffect(() => {
 		editorView.value = new EditorView({
 			doc: codeStorage.get(),
-			extensions: [basicSetup, javascript(), autoRunCodePlugin],
+			extensions: [basicSetup, lox(), autoRunCodePlugin, keymapExtension],
 			parent: editorParent.current,
 		});
 	}, []);
