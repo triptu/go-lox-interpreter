@@ -1,9 +1,13 @@
 import { Prec } from "@codemirror/state";
 import { ViewPlugin, keymap } from "@codemirror/view";
-import { signal } from "@preact/signals";
+import { computed, effect, signal } from "@preact/signals";
 import { EditorView, basicSetup } from "codemirror";
 import { render } from "preact";
 import { useEffect, useRef } from "preact/hooks";
+import {
+	errorLineDecorationField,
+	updateErrorLinesEffect,
+} from "./cm-error-line";
 import { Button, Header } from "./components";
 import { RunIcon, SpinnerIcon, StopIcon } from "./icons";
 import {
@@ -20,15 +24,43 @@ const isAutoRunEnabled = signal(false);
 const editorView = signal<EditorView | null>(null);
 const outputLines = signal<{ text: string; isError: boolean }[]>([]);
 
+const reErroLine = /\[line (\d+)(:\d+)?\] (Error.+)/;
+
+// {line, col, text}, it would be in form "[line 1:12] err text"
+const $errorLines = computed(() => {
+	if (!outputLines.value) return [];
+	const errLines = [];
+	for (const line of outputLines.value) {
+		if (!line.isError) continue;
+		const match = reErroLine.exec(line.text);
+		if (match) {
+			errLines.push({
+				line: Number.parseInt(match[1]),
+				col: match[2] ? Number.parseInt(match[2].slice(1)) : undefined,
+				text: match[3],
+			});
+		}
+	}
+	return errLines;
+});
+
+effect(() => {
+	if (editorView.value) {
+		editorView.value.dispatch({
+			effects: updateErrorLinesEffect.of($errorLines.value),
+		});
+	}
+});
+
 const outputLogger: OutputLogger = {
 	clear: () => {
 		outputLines.value = [];
 	},
 	log: (arg) => {
-		outputLines.value.push({ text: arg, isError: false });
+		outputLines.value = [...outputLines.value, { text: arg, isError: false }];
 	},
 	error: (errMsg: string) => {
-		outputLines.value.push({ text: errMsg, isError: true });
+		outputLines.value = [...outputLines.value, { text: errMsg, isError: true }];
 	},
 };
 
@@ -126,7 +158,13 @@ function CodeEditor() {
 	useEffect(() => {
 		editorView.value = new EditorView({
 			doc: codeStorage.get(),
-			extensions: [basicSetup, jsLox, autoRunCodePlugin, keymapExtension],
+			extensions: [
+				basicSetup,
+				jsLox,
+				autoRunCodePlugin,
+				keymapExtension,
+				errorLineDecorationField,
+			],
 			parent: editorParent.current,
 		});
 	}, []);

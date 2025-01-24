@@ -21,3 +21,8 @@
 .cm-scroller {
 	overflow: auto;
 }
+
+.cm-errorline {
+	background-color: rgba(255, 0, 0, 0.35) !important;
+	text-decoration: underline wavy red;
+}
