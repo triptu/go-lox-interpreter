@@ -91,6 +91,26 @@ export const RunIcon = (args: { class?: string }) => {
 	);
 };
 
+export const StopIcon = (args: { class?: string }) => {
+	return (
+		// biome-ignore lint/a11y/noSvgWithoutTitle: <explanation>
+		<svg
+			xmlns="http://www.w3.org/2000/svg"
+			width="18px"
+			viewBox="0 0 24 24"
+			fill="none"
+			stroke="currentColor"
+			stroke-width="2"
+			stroke-linecap="round"
+			stroke-linejoin="round"
+			class="lucide lucide-circle-stop"
+		>
+			<circle cx="12" cy="12" r="10" />
+			<rect x="9" y="9" width="6" height="6" rx="1" />
+		</svg>
+	);
+};
+
 export const SpinnerIcon = (args: { class?: string }) => {
 	return (
 		// biome-ignore lint/a11y/noSvgWithoutTitle: <explanation>

@@ -1,8 +1,11 @@
 package main
 
 import (
+	"context"
 	"fmt"
 	"os"
+	"os/signal"
+	"syscall"
 
 	"golox/lox"
 )
@@ -48,7 +51,10 @@ func main() {
 	} else if command == "visualize" {
 		lox.Visualize(fileContents)
 	} else if command == "run" {
-		exitCode := lox.Run(fileContents)
+		// Create context that listens for the interrupt signal from the OS for graceful stop
+		ctx, stop := signal.NotifyContext(context.Background(), syscall.SIGINT, syscall.SIGTERM)
+		defer stop()
+		exitCode := lox.Run(fileContents, ctx)
 		os.Exit(exitCode)
 	} else {
 		fmt.Fprintf(os.Stderr, "Unknown command: %s\n", command)

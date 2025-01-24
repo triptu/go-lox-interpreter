@@ -19,16 +19,23 @@ function clsx(...classes: string[]) {
 export const Button = ({
 	className,
 	children,
+	color = "blue",
 	...props
 }: {
+	color?: "blue" | "red";
 	className?: string;
 	children: ComponentChildren;
 } & JSX.IntrinsicElements["button"]) => {
+	const colorClass =
+		color === "blue"
+			? "bg-blue-600 hover:bg-blue-700"
+			: "bg-red-600 hover:bg-red-700";
 	return (
 		<button
 			class={clsx(
 				className,
-				"cursor-default bg-blue-600 hover:bg-blue-700 text-white font-bold h-9 px-4 text-sm rounded flex items-center gap-1 disabled:bg-gray-400",
+				colorClass,
+				"cursor-default font-bold h-9 px-4 text-sm rounded flex items-center gap-1 disabled:bg-gray-400 text-white",
 			)}
 			type="button"
 			{...props}

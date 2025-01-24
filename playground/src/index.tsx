@@ -5,8 +5,14 @@ import { EditorView, basicSetup } from "codemirror";
 import { render } from "preact";
 import { useEffect, useRef } from "preact/hooks";
 import { Button, Header } from "./components";
-import { RunIcon, SpinnerIcon } from "./icons";
-import { type OutputLogger, codeStorage, debounce, runCode } from "./utils";
+import { RunIcon, SpinnerIcon, StopIcon } from "./icons";
+import {
+	type OutputLogger,
+	codeStorage,
+	debounce,
+	runCode,
+	stopRun,
+} from "./utils";
 
 const isRunning = signal(false);
 const isAutoRunEnabled = signal(false);
@@ -29,6 +35,8 @@ async function runCodeWithStateStuff(code: string) {
 	try {
 		isRunning.value = true;
 		await runCode(code, outputLogger);
+	} catch (err) {
+		console.warn(err);
 	} finally {
 		isRunning.value = false;
 	}
@@ -52,7 +60,7 @@ function Toolbar() {
 		<div class="w-full flex items-center justify-end md:justify-between gap-4">
 			<SelectSampleCode />
 
-			<div class="flex items-center">
+			<div class="flex items-center gap-2">
 				<Button
 					className="h-9"
 					type="button"
@@ -63,6 +71,16 @@ function Toolbar() {
 				>
 					{isRunning.value ? <SpinnerIcon class="animate-spin" /> : <RunIcon />}
 					Run
+				</Button>
+				<Button
+					className="h-9"
+					type="button"
+					color="red"
+					onClick={() => stopRun()}
+					disabled={!isRunning.value}
+				>
+					<StopIcon />
+					Stop
 				</Button>
 			</div>
 		</div>

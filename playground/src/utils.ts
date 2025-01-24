@@ -15,6 +15,7 @@ declare global {
 			code: string,
 			onEvent: (event: { type: string; data: string }) => void,
 		) => void;
+		loxstop: () => void;
 	}
 }
 
@@ -105,7 +106,6 @@ export async function runCode(code: string, outputLogger: OutputLogger) {
 					break;
 				case "error":
 					outputLogger.error(data);
-					reject(new Error(data));
 					break;
 				case "done":
 					resolve();
@@ -115,4 +115,8 @@ export async function runCode(code: string, outputLogger: OutputLogger) {
 			}
 		});
 	});
+}
+
+export function stopRun() {
+	window.loxstop();
 }

@@ -1,6 +1,7 @@
 package lox
 
 import (
+	"context"
 	"errors"
 	"fmt"
 )
@@ -10,6 +11,7 @@ Interpreter also implements the visitor interface for the AST nodes.
 */
 
 type interpreter struct {
+	ctx     context.Context
 	globals *environment  // permanent reference to the global environment
 	env     *environment  // reference to the environment of the current scope/block
 	locals  map[token]int // store the scope depth for each variable token usage
@@ -28,10 +30,18 @@ func newInterpreter() *interpreter {
 	}
 }
 
-func (i interpreter) interpret(statements []stmt) error {
+func (i interpreter) interpret(statements []stmt, ctx context.Context) error {
+	i.ctx = ctx
+
+	done := ctx.Done()
 	for _, st := range statements {
-		if err := i.execute(st); err != nil {
-			return err
+		select {
+		case <-done:
+			return ctx.Err()
+		default:
+			if err := i.execute(st); err != nil {
+				return err
+			}
 		}
 	}
 	return nil
@@ -116,16 +126,21 @@ func (i interpreter) visitClassStmt(s sClass) error {
 }
 
 func (i interpreter) visitWhileStmt(s sWhile) error {
+	done := i.ctx.Done()
 	for {
-		val := getJustVal(i.evaluate(s.condition))
-		if !isTruthy(val) {
-			break
-		}
-		if err := i.execute(s.body); err != nil {
-			return err
+		select {
+		case <-done:
+			return i.ctx.Err()
+		default:
+			val := getJustVal(i.evaluate(s.condition))
+			if !isTruthy(val) {
+				return nil
+			}
+			if err := i.execute(s.body); err != nil {
+				return err
+			}
 		}
 	}
-	return nil
 }
 
 func (i interpreter) executeBlock(statements []stmt, outerEnv *environment) error {

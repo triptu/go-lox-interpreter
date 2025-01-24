@@ -1,6 +1,7 @@
 package lox
 
 import (
+	"context"
 	"fmt"
 	"os"
 	"strconv"
@@ -84,7 +85,7 @@ func Evaluate(code []byte) {
 	}
 }
 
-func Run(code []byte) (exitCode int) {
+func Run(code []byte, ctx context.Context) (exitCode int) {
 	exitCode = 0
 
 	defer func() {
@@ -113,7 +114,7 @@ func Run(code []byte) (exitCode int) {
 			return
 		}
 
-		interpreter.interpret(statements)
+		interpreter.interpret(statements, ctx)
 		if hasRuntimeError {
 			exitCode = runtimeErrorExitCode
 			return
