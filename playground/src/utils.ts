@@ -1,3 +1,7 @@
+import { snippetCompletion } from "@codemirror/autocomplete";
+import { javascriptLanguage } from "@codemirror/lang-javascript";
+import { LanguageSupport } from "@codemirror/language";
+
 declare class Go {
 	argv: string[];
 	env: { [envKey: string]: string };
@@ -120,3 +124,34 @@ export async function runCode(code: string, outputLogger: OutputLogger) {
 export function stopRun() {
 	window.loxstop();
 }
+
+export const jsLox = new LanguageSupport(javascriptLanguage, [
+	javascriptLanguage.data.of({
+		autocomplete: [
+			snippetCompletion("class ${name} {\n  init(${args}) {\n    ${}\n  }\n}", {
+				label: "class",
+			}),
+			snippetCompletion("fun ${name}(${args}) {\n  ${}\n}", {
+				label: "fun",
+			}),
+			snippetCompletion("var ${name} = ${value};", {
+				label: "var",
+			}),
+			snippetCompletion("if (${condition}) {\n  ${}\n}", {
+				label: "if",
+			}),
+			snippetCompletion("while (${condition}) {\n  ${}\n}", {
+				label: "while",
+			}),
+			snippetCompletion("for (${expr}; ${condition}; ${step}) {\n  ${}\n}", {
+				label: "for",
+			}),
+			snippetCompletion("return ${value};", {
+				label: "return",
+			}),
+			snippetCompletion("print(${value});", {
+				label: "print",
+			}),
+		],
+	}),
+]);

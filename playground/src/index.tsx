@@ -6,11 +6,11 @@ import { render } from "preact";
 import { useEffect, useRef } from "preact/hooks";
 import { Button, Header } from "./components";
 import { RunIcon, SpinnerIcon, StopIcon } from "./icons";
-import { lox } from "./lox-grammar/lox-codemirror";
 import {
 	type OutputLogger,
 	codeStorage,
 	debounce,
+	jsLox,
 	runCode,
 	stopRun,
 } from "./utils";
@@ -126,7 +126,7 @@ function CodeEditor() {
 	useEffect(() => {
 		editorView.value = new EditorView({
 			doc: codeStorage.get(),
-			extensions: [basicSetup, lox(), autoRunCodePlugin, keymapExtension],
+			extensions: [basicSetup, jsLox, autoRunCodePlugin, keymapExtension],
 			parent: editorParent.current,
 		});
 	}, []);
