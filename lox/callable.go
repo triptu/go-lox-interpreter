@@ -90,7 +90,7 @@ Theses are built-in functions that will be available natively in lox.
 func defineNativeFunctions(globals *environment) {
 	globals.define("clock", nativeFunction{
 		fn: func(i interpreter, a []any) (any, error) {
-			timeInt := time.Now().UnixMilli() / 1000
+			timeInt := time.Now().UnixMilli()
 			return float64(timeInt), nil
 		},
 	})

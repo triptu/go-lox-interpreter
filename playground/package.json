@@ -21,8 +21,10 @@
 		"@lezer/common": "1.2.3",
 		"@lezer/highlight": "1.2.1",
 		"@lezer/lr": "1.4.2",
+		"@preact/signals": "^2.0.1",
 		"bun": "1.2.0-canary.20250123.1",
 		"codemirror": "6.0.1",
+		"install": "^0.13.0",
 		"preact": "^10.25.4"
 	},
 	"devDependencies": {

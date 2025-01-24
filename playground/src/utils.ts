@@ -21,18 +21,6 @@ declare global {
 // biome-ignore lint/suspicious/noExplicitAny: we don't args type here
 type Callable = (...args: any[]) => void;
 
-export function throttle(fn: Callable, delayMs: number) {
-	let lastCall = 0;
-	// biome-ignore lint/suspicious/noExplicitAny: <explanation>
-	return (...args: any[]) => {
-		const now = performance.now();
-		if (now - lastCall >= delayMs) {
-			lastCall = now;
-			fn(...args);
-		}
-	};
-}
-
 export function debounce(fn: Callable, delayMs: number) {
 	let timeoutId: number | undefined;
 	// biome-ignore lint/suspicious/noExplicitAny: <explanation>
@@ -47,24 +35,10 @@ export function debounce(fn: Callable, delayMs: number) {
 	};
 }
 
-interface OutputLogger {
+export interface OutputLogger {
 	clear: () => void;
 	log: (arg: string) => void;
 	error: (arg: string) => void;
-}
-
-export function getOutputLogger(outputElement: HTMLElement): OutputLogger {
-	return {
-		clear: () => {
-			outputElement.innerHTML = "";
-		},
-		log: (arg) => {
-			outputElement.innerHTML += `${arg}\n`;
-		},
-		error: (errMsg: string) => {
-			outputElement.innerHTML += `<span class="text-red-700">${errMsg}</span>\n`;
-		},
-	};
 }
 
 const codeLocalStorageKey = "savedCode";
@@ -115,21 +89,30 @@ async function initWasm() {
 }
 
 export async function runCode(code: string, outputLogger: OutputLogger) {
+	if (!code) {
+		console.warn("No code to run");
+		return;
+	}
 	await initWasm();
 	outputLogger.clear();
+	codeStorage.set(code);
 
-	window.loxrun?.("run", code, ({ type, data }) => {
-		switch (type) {
-			case "log":
-				outputLogger.log(data);
-				break;
-			case "error":
-				outputLogger.error(data);
-				break;
-			case "done":
-				break;
-			default:
-				console.error(`Unknown event type from wasm: ${type}`);
-		}
+	return new Promise<void>((resolve, reject) => {
+		window.loxrun?.("run", code, ({ type, data }) => {
+			switch (type) {
+				case "log":
+					outputLogger.log(data);
+					break;
+				case "error":
+					outputLogger.error(data);
+					reject(new Error(data));
+					break;
+				case "done":
+					resolve();
+					break;
+				default:
+					console.error(`Unknown event type from wasm: ${type}`);
+			}
+		});
 	});
 }

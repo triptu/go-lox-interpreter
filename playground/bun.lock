@@ -15,8 +15,10 @@
         "@lezer/common": "1.2.3",
         "@lezer/highlight": "1.2.1",
         "@lezer/lr": "1.4.2",
+        "@preact/signals": "^2.0.1",
         "bun": "1.2.0-canary.20250123.1",
         "codemirror": "6.0.1",
+        "install": "^0.13.0",
         "preact": "^10.25.4",
       },
       "devDependencies": {
@@ -91,11 +93,17 @@
 
     "@oven/bun-windows-x64-baseline": ["@oven/bun-windows-x64-baseline@1.2.0-canary.20250123.1", "", { "os": "win32", "cpu": "x64" }, "sha512-loJZPgzuTzXR2KaBGxghsPLc+SLVmpaCcksC9D9bG54s8zMDGahsYPh2qa6h8sqkoitQHtpqMwCn7KjrmLoeLg=="],
 
+    "@preact/signals": ["@preact/signals@2.0.1", "", { "dependencies": { "@preact/signals-core": "^1.7.0" }, "peerDependencies": { "preact": "10.x" } }, "sha512-f9p/utMgttPb9bJ+UgRBkTDZ9uQiZfX1/gV3pXGWz+yGNQj8MrnG55Xo8MAG4IHcb5UXQO6tvt9ZlsM4A2j+Rw=="],
+
+    "@preact/signals-core": ["@preact/signals-core@1.8.0", "", {}, "sha512-OBvUsRZqNmjzCZXWLxkZfhcgT+Fk8DDcT/8vD6a1xhDemodyy87UJRJfASMuSD8FaAIeGgGm85ydXhm7lr4fyA=="],
+
     "bun": ["bun@1.2.0-canary.20250123.1", "", { "optionalDependencies": { "@oven/bun-darwin-aarch64": "1.2.0-canary.20250123.1+7830e15", "@oven/bun-darwin-x64": "1.2.0-canary.20250123.1+7830e15", "@oven/bun-darwin-x64-baseline": "1.2.0-canary.20250123.1+7830e15", "@oven/bun-linux-aarch64": "1.2.0-canary.20250123.1+7830e15", "@oven/bun-linux-aarch64-musl": "1.2.0-canary.20250123.1+7830e15", "@oven/bun-linux-x64": "1.2.0-canary.20250123.1+7830e15", "@oven/bun-linux-x64-baseline": "1.2.0-canary.20250123.1+7830e15", "@oven/bun-linux-x64-musl": "1.2.0-canary.20250123.1+7830e15", "@oven/bun-linux-x64-musl-baseline": "1.2.0-canary.20250123.1+7830e15", "@oven/bun-windows-x64": "1.2.0-canary.20250123.1+7830e15", "@oven/bun-windows-x64-baseline": "1.2.0-canary.20250123.1+7830e15" }, "os": [ "linux", "win32", "darwin", ], "cpu": [ "x64", "arm64", ], "bin": { "bun": "bin/bun.exe", "bunx": "bin/bun.exe" } }, "sha512-QLZLgTQZdkwjdf3bbr7EB8DrECLsfPSXd9AiFdYgrJVdrzTI7x54BMndII92lmK6T7YDN+/v7HReKsZH4PBqaA=="],
 
     "codemirror": ["codemirror@6.0.1", "", { "dependencies": { "@codemirror/autocomplete": "^6.0.0", "@codemirror/commands": "^6.0.0", "@codemirror/language": "^6.0.0", "@codemirror/lint": "^6.0.0", "@codemirror/search": "^6.0.0", "@codemirror/state": "^6.0.0", "@codemirror/view": "^6.0.0" } }, "sha512-J8j+nZ+CdWmIeFIGXEFbFPtpiYacFMDR8GlHK3IyHQJMCaVRfGx9NT+Hxivv1ckLWPvNdZqndbr/7lVhrf/Svg=="],
 
     "crelt": ["crelt@1.0.6", "", {}, "sha512-VQ2MBenTq1fWZUH9DJNGti7kKv6EeAuYr3cLwxUWhIu1baTaXh4Ib5W2CqHVqib4/MqbYGJqiL3Zb8GJZr3l4g=="],
+
+    "install": ["install@0.13.0", "", {}, "sha512-zDml/jzr2PKU9I8J/xyZBQn8rPCAY//UOYNmR01XwNwyfhEWObo2SWfSl1+0tm1u6PhxLwDnfsT/6jB7OUxqFA=="],
 
     "preact": ["preact@10.25.4", "", {}, "sha512-jLdZDb+Q+odkHJ+MpW/9U5cODzqnB+fy2EiHSZES7ldV5LK7yjlVzTp7R8Xy6W6y75kfK8iWYtFVH7lvjwrCMA=="],
 
