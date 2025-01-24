@@ -10,23 +10,21 @@ Interpreter also implements the visitor interface for the AST nodes.
 */
 
 type interpreter struct {
-	globals     *environment  // permanent reference to the global environment
-	env         *environment  // reference to the environment of the current scope/block
-	locals      map[token]int // store the scope depth for each variable token usage
-	printTarget func(s string)
+	globals *environment  // permanent reference to the global environment
+	env     *environment  // reference to the environment of the current scope/block
+	locals  map[token]int // store the scope depth for each variable token usage
 }
 
 var _ exprVisitor = (*interpreter)(nil)
 var _ stmtVisitor = (*interpreter)(nil)
 
-func newInterpreter(printTarget func(s string)) *interpreter {
+func newInterpreter() *interpreter {
 	globals := newEnvironment()
 	defineNativeFunctions(globals)
 	return &interpreter{
-		globals:     globals,
-		locals:      make(map[token]int),
-		env:         globals,
-		printTarget: printTarget,
+		globals: globals,
+		locals:  make(map[token]int),
+		env:     globals,
 	}
 }
 
@@ -51,7 +49,7 @@ func (i interpreter) visitExprStmt(s sExpr) error {
 
 func (i interpreter) visitPrintStmt(s sPrint) error {
 	val := getJustVal(i.evaluate(s.expression))
-	i.printTarget(getLiteralStr(val))
+	logger.Print(getLiteralStr(val))
 	return nil
 }
 
@@ -90,7 +88,7 @@ func (i interpreter) visitClassStmt(s sClass) error {
 	if s.superclass != nil {
 		superclassVal := getJustVal(i.evaluate(s.superclass))
 		if superclassVal, ok := superclassVal.(loxClass); !ok {
-			logRuntimeError(s.superclass.name.line, "Superclass must be a class.")
+			logRuntimeError(s.superclass.name, "Superclass must be a class.")
 		} else {
 			superclass = &superclassVal
 		}
@@ -175,7 +173,7 @@ func (i interpreter) visitAssignExpr(e eAssign) (any, error) {
 		err = i.globals.set(e.name.lexeme, val)
 	}
 	if err != nil {
-		logRuntimeError(e.name.line, "Undefined variable '"+e.name.lexeme+"'.")
+		logRuntimeError(e.name, "Undefined variable '"+e.name.lexeme+"'.")
 	}
 	return val, nil
 }
@@ -191,7 +189,7 @@ func (i interpreter) visitBinaryExpr(e eBinary) (any, error) {
 		} else if isNumber(left) && isNumber(right) {
 			return left.(float64) + right.(float64), nil
 		} else {
-			logRuntimeError(e.operator.line, "Operands must be two numbers or two strings.")
+			logRuntimeError(e.operator, "Operands must be two numbers or two strings.")
 		}
 	case tMinus:
 		validateNumberOperand2(left, right, e.operator)
@@ -253,10 +251,10 @@ func (i interpreter) visitCallExpr(e eCall) (any, error) {
 	}
 	callee2, ok := callee.(callable)
 	if !ok {
-		logRuntimeError(e.paren.line, "Can only call functions and classes.")
+		logRuntimeError(e.paren, "Can only call functions and classes.")
 	}
 	if len(args) != callee2.arity() {
-		logRuntimeError(e.paren.line,
+		logRuntimeError(e.paren,
 			fmt.Sprintf("Expected %d arguments but got %d.", callee2.arity(), len(args)))
 	}
 	return callee2.call(i, args)
@@ -298,7 +296,7 @@ func (i interpreter) visitGetExpr(e eGet) (any, error) {
 	}
 	obj2, ok := obj.(loxClassInstance)
 	if !ok {
-		logRuntimeError(e.name.line, "Only instances have properties.")
+		logRuntimeError(e.name, "Only instances have properties.")
 		return nil, errors.New("unreachable")
 	} else {
 		return obj2.get(e.name), nil
@@ -312,7 +310,7 @@ func (i interpreter) visitSetExpr(e eSet) (any, error) {
 	}
 	obj2, ok := obj.(loxClassInstance)
 	if !ok {
-		logRuntimeError(e.name.line, "Only instances have fields.")
+		logRuntimeError(e.name, "Only instances have fields.")
 		return nil, errors.New("unreachable")
 	} else {
 		value := getJustVal(i.evaluate(e.value))
@@ -323,24 +321,24 @@ func (i interpreter) visitSetExpr(e eSet) (any, error) {
 func (i interpreter) visitSuperExpr(e eSuper) (any, error) {
 	distance, ok := i.locals[e.keyword]
 	if !ok {
-		logRuntimeError(e.keyword.line, "Couldn't find 'super' in current scope.")
+		logRuntimeError(e.keyword, "Couldn't find 'super' in current scope.")
 		return nil, errors.New("unreachable")
 	}
 	superclass, err := i.env.getAt(distance, "super")
 	if err != nil {
-		logRuntimeError(e.keyword.line, "No parent class to access.")
+		logRuntimeError(e.keyword, "No parent class to access.")
 		return nil, errors.New("unreachable")
 	}
 	superclass2 := superclass.(*loxClass)
 	object, err := i.env.getAt(distance-1, "this")
 	if err != nil {
-		logRuntimeError(e.keyword.line, "No 'this' at super class child.")
+		logRuntimeError(e.keyword, "No 'this' at super class child.")
 		return nil, errors.New("unreachable")
 	}
 	object2 := object.(loxClassInstance)
 	method, ok := superclass2.findMethod(e.method.lexeme)
 	if !ok {
-		logRuntimeError(e.method.line, "Undefined property '"+e.method.lexeme+"'.")
+		logRuntimeError(e.method, "Undefined property '"+e.method.lexeme+"'.")
 		return nil, errors.New("unreachable")
 	}
 	return method.bind(object2), nil
@@ -366,7 +364,7 @@ func (i interpreter) visitUnaryExpr(e eUnary) (any, error) {
 func (i interpreter) visitVariableExpr(e eVariable) (any, error) {
 	val, err := i.lookUpVariable(e.name)
 	if err != nil {
-		logRuntimeError(e.name.line, "Undefined variable '"+e.name.lexeme+"'.")
+		logRuntimeError(e.name, "Undefined variable '"+e.name.lexeme+"'.")
 	}
 	return val, err
 }
@@ -405,19 +403,19 @@ func isNumber(value any) bool {
 
 func validateNumberOperand(num any, operator token) {
 	if !isNumber(num) {
-		logRuntimeError(operator.line, "Operand must be a number.")
+		logRuntimeError(operator, "Operand must be a number.")
 	}
 }
 
 func validateNumberOperand2(num1, num2 any, operator token) {
 	if !isNumber(num1) || !isNumber(num2) {
-		logRuntimeError(operator.line, "Operands must be numbers.")
+		logRuntimeError(operator, "Operands must be numbers.")
 	}
 }
 
 func validateNonZeroDenom(denom float64, operator token) {
 	if denom == 0 {
-		logRuntimeError(operator.line, "Division by zero")
+		logRuntimeError(operator, "Division by zero")
 	}
 }
 

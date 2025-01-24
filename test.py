@@ -24,7 +24,7 @@ errorLinePattern = re.compile(r"// \[((java|c) )?line (\d+)\] (Error.*)")
 expectedRuntimeErrorPattern = re.compile(r"// expect runtime error: (.+)")
 # matches optional column number and ignores it, not making part of the capture group
 syntaxErrorPattern = re.compile(r"\[.*line (\d+)(?::\d+)?\] (Error.+)")
-stackTracePattern = re.compile(r"\[line (\d+)\]")
+stackTracePattern = re.compile(r"\[line (\d+)(?::\d+)?\]")
 nonTestPattern = re.compile(r"// nontest")
 
 

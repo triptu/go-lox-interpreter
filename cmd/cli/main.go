@@ -23,6 +23,22 @@ func main() {
 		os.Exit(1)
 	}
 
+	lox.SetLogger(lox.Logger{
+		Print: func(s string) {
+			fmt.Println(s)
+		},
+		ScanError: func(line int, col int, msg string) {
+			fmt.Fprintf(os.Stderr, "[line %d:%d] %s\n", line, col, msg)
+		},
+		ParseError: func(token lox.TokenLogMeta, msg string) {
+			fmt.Fprintf(os.Stderr, "[line %d:%d] %s\n", token.Line, token.Col, msg)
+		},
+		RuntimeError: func(token lox.TokenLogMeta, msg string) {
+			fmt.Fprintf(os.Stderr, "%s\n", msg)
+			fmt.Fprintf(os.Stderr, "[line %d:%d] %s\n", token.Line, token.Col, msg)
+		},
+	})
+
 	if command == "tokenize" {
 		lox.PrintTokens(fileContents)
 	} else if command == "parse" {
@@ -32,9 +48,7 @@ func main() {
 	} else if command == "visualize" {
 		lox.Visualize(fileContents)
 	} else if command == "run" {
-		exitCode := lox.Run(fileContents, func(s string) {
-			fmt.Println(s)
-		})
+		exitCode := lox.Run(fileContents)
 		os.Exit(exitCode)
 	} else {
 		fmt.Fprintf(os.Stderr, "Unknown command: %s\n", command)

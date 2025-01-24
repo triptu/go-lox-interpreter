@@ -10,39 +10,12 @@ import (
 This is the entry point for Lox exposing public methods for different functionalities.
 */
 
-var hasError bool
-var hasRuntimeError bool
-
-const compileErrorExitCode = 65
-const runtimeErrorExitCode = 70
-
-func logScanError(line int, msg string) {
-	hasError = true
-	fmt.Fprintf(os.Stderr, "[line %d] %s\n", line, msg)
-}
-
-func logParseError(token token, msg string) {
-	hasError = true
-	fmt.Fprintf(os.Stderr, "[line %d:%d] %s\n", token.line, token.column, msg)
-}
-
-/*
-this function also panics, as for runtime error we can't proceed further in interpreter
-*/
-func logRuntimeError(line int, msg string) {
-	hasRuntimeError = true
-	// fmt.Fprintf(os.Stderr, "[line %d] Runtime Error: %s\n", line, msg)
-	fmt.Fprintf(os.Stderr, "%s\n", msg)
-	fmt.Fprintf(os.Stderr, "[line %d] %s\n", line, msg)
-	panic("runtime error")
-}
-
 func PrintTokens(code []byte) {
 	tokens := tokenize(code)
 	for _, token := range tokens {
 		fmt.Println(token)
 	}
-	if hasError {
+	if hasParseError {
 		os.Exit(65)
 	}
 }
@@ -59,7 +32,7 @@ func Parse(code []byte) {
 	tokens := tokenize(code)
 	parser := newParser[expr](tokens)
 	parsedExpr := parser.parseExpression()
-	if hasError {
+	if hasParseError {
 		os.Exit(65)
 	} else {
 		printer := astPrinter{}
@@ -71,7 +44,7 @@ func Visualize(code []byte) {
 	tokens := tokenize(code)
 	parser := newParser[expr](tokens)
 	parsedExpr := parser.parseExpression()
-	if hasError {
+	if hasParseError {
 		os.Exit(65)
 	} else {
 		visualizer := NewVisualiseTreeVisitor()
@@ -93,18 +66,16 @@ func Evaluate(code []byte) {
 	}()
 
 	tokens := tokenize(code)
-	if hasError {
+	if hasParseError {
 		os.Exit(65)
 	}
 
 	parser := newParser[expr](tokens)
 	parsedExpr := parser.parseExpression()
-	if hasError {
+	if hasParseError {
 		os.Exit(65)
 	} else {
-		interpreter := newInterpreter(func(s string) {
-			fmt.Println(s)
-		})
+		interpreter := newInterpreter()
 		val, _ := interpreter.evaluate(parsedExpr)
 		fmt.Println(getLiteralStr(val))
 		if hasRuntimeError {
@@ -113,7 +84,7 @@ func Evaluate(code []byte) {
 	}
 }
 
-func Run(code []byte, printTarget func(string)) (exitCode int) {
+func Run(code []byte) (exitCode int) {
 	exitCode = 0
 
 	defer func() {
@@ -129,15 +100,15 @@ func Run(code []byte, printTarget func(string)) (exitCode int) {
 
 	parser := newParser[expr](tokens)
 	statements := parser.parse()
-	if hasError {
+	if hasParseError {
 		exitCode = compileErrorExitCode
 		return
 	} else {
-		interpreter := newInterpreter(printTarget)
+		interpreter := newInterpreter()
 
 		resolver := newResolver(interpreter)
 		resolver.resolve(statements)
-		if hasError {
+		if hasParseError {
 			exitCode = compileErrorExitCode
 			return
 		}
@@ -164,9 +135,4 @@ func getLiteralStr(literal interface{}) string {
 	default:
 		return fmt.Sprintf("%v", literal)
 	}
-}
-
-func ResetErrorState() {
-	hasError = false
-	hasRuntimeError = false
 }
