@@ -108,9 +108,17 @@ export async function runCode(code: string, outputLogger: OutputLogger) {
 				case "log":
 					outputLogger.log(data);
 					break;
-				case "error":
-					outputLogger.error(data);
+				case "error": {
+					let msgText = data.replace("Expect", "Expected");
+					if (msgText.endsWith("Expected ';' after expression.")) {
+						msgText = msgText.replace(
+							"after expression.",
+							"after previous expression.",
+						);
+					}
+					outputLogger.error(msgText);
 					break;
+				}
 				case "done":
 					resolve();
 					break;

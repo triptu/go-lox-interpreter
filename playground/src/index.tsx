@@ -4,11 +4,14 @@ import { computed, effect, signal } from "@preact/signals";
 import { EditorView, basicSetup } from "codemirror";
 import { render } from "preact";
 import { useEffect, useRef } from "preact/hooks";
+
 import {
 	errorLineDecorationField,
+	keywordDecorationPlugin,
 	updateErrorLinesEffect,
-} from "./cm-error-line";
+} from "./cm-extensions";
 import { Button, Header } from "./components";
+import { readLoxFiles } from "./examples/read-lox-files" with { type: "macro" };
 import { RunIcon, SpinnerIcon, StopIcon } from "./icons";
 import {
 	type OutputLogger,
@@ -24,20 +27,26 @@ const isAutoRunEnabled = signal(false);
 const editorView = signal<EditorView | null>(null);
 const outputLines = signal<{ text: string; isError: boolean }[]>([]);
 
-const reErroLine = /\[line (\d+)(:\d+)?\] (Error.+)/;
+const reErrorLine = /\[line (\d+)(:\d+)?\] (Error.+)/;
 
-// {line, col, text}, it would be in form "[line 1:12] err text"
-const $errorLines = computed(() => {
+export const sampleLoxFiles = await readLoxFiles();
+console.log("sample lox files", sampleLoxFiles);
+
+const $errorLinesToHighlight = computed(() => {
 	if (!outputLines.value) return [];
 	const errLines = [];
 	for (const line of outputLines.value) {
 		if (!line.isError) continue;
-		const match = reErroLine.exec(line.text);
+		const match = reErrorLine.exec(line.text);
 		if (match) {
+			let lineNum = Number.parseInt(match[1]);
+			const msgText = match[3];
+			if (msgText.endsWith("Expected ';' after previous expression.")) {
+				lineNum -= 1; // fix the highlighted line
+			}
 			errLines.push({
-				line: Number.parseInt(match[1]),
+				line: lineNum,
 				col: match[2] ? Number.parseInt(match[2].slice(1)) : undefined,
-				text: match[3],
 			});
 		}
 	}
@@ -47,7 +56,7 @@ const $errorLines = computed(() => {
 effect(() => {
 	if (editorView.value) {
 		editorView.value.dispatch({
-			effects: updateErrorLinesEffect.of($errorLines.value),
+			effects: updateErrorLinesEffect.of($errorLinesToHighlight.value),
 		});
 	}
 });
@@ -164,6 +173,7 @@ function CodeEditor() {
 				autoRunCodePlugin,
 				keymapExtension,
 				errorLineDecorationField,
+				keywordDecorationPlugin,
 			],
 			parent: editorParent.current,
 		});

@@ -4,6 +4,9 @@
     "jsxImportSource": "preact",
     "baseUrl": "./",
     "skipLibCheck": true,
-    "lib": ["ES2023"]
+    "lib": ["ES2023", "DOM"],
+    "module": "ESNext",
+    "moduleResolution":"node",
+    "target": "ES2023"
   },
 }
