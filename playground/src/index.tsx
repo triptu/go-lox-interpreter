@@ -254,14 +254,14 @@ function Output() {
 
 function App() {
 	return (
-		<div class="bg-white rounded shadow flex flex-col flex-1">
+		<div class="bg-white rounded shadow flex flex-col h-full">
 			<Header />
 
 			<div class="flex px-4 my-2">
 				<Toolbar />
 			</div>
 
-			<div class="flex gap-4 px-4 mb-4 flex-col lg:flex-row flex-1">
+			<div class="flex gap-4 px-4 mb-4 flex-col lg:flex-row min-h-0 flex-1">
 				<div class="h-4/5 lg:h-auto lg:w-3/5 flex flex-col gap-2">
 					<CodeEditor />
 				</div>
