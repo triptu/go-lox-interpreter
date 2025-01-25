@@ -634,6 +634,15 @@ async function initWasm() {
 	return initPromise;
 }
 
+let inputPromiseResolve = null;
+self.promptInput = (msg) => {
+	const inputPromise = new Promise((resolve) => {
+		inputPromiseResolve = resolve;
+	});
+	postMessage({type: "input", data: msg});
+	return inputPromise;
+}
+
 addEventListener(
 	"message",
 	async (e) => {
@@ -650,6 +659,9 @@ addEventListener(
 						postMessage(event);
 					});
 					break;
+				case "inputResult":
+					inputPromiseResolve(e.data.data);
+					break
 				default:
 					console.error(`Unknown message type: ${e.data.type}`);
 					postMessage({ type: "fatal", data: `Webworker error: ${err}` });

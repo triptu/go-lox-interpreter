@@ -76,7 +76,9 @@ func runLoxCode(this js.Value, args []js.Value) {
 	lox.SetLogger(lox.Logger{
 		Input: func(prompt string) (string, error) {
 			// we'll take input through prompt  in js to keep things simple
-			return js.Global().Get("prompt").Invoke(prompt).String(), nil
+			inputPromise := js.Global().Get("promptInput").Invoke(prompt)
+			result, _ := await(inputPromise)
+			return result[0].String(), nil
 		},
 		Print: func(s string) {
 			logOutput(s, false)
@@ -120,4 +122,32 @@ func functionRunner(fn func(this js.Value, args []js.Value)) js.Func {
 		wg.Wait()
 		return nil
 	})
+}
+
+// https://stackoverflow.com/a/68427221/6579613
+func await(awaitable js.Value) ([]js.Value, []js.Value) {
+	then := make(chan []js.Value)
+	defer close(then)
+	thenFunc := js.FuncOf(func(this js.Value, args []js.Value) interface{} {
+		then <- args
+		return nil
+	})
+	defer thenFunc.Release()
+
+	catch := make(chan []js.Value)
+	defer close(catch)
+	catchFunc := js.FuncOf(func(this js.Value, args []js.Value) interface{} {
+		catch <- args
+		return nil
+	})
+	defer catchFunc.Release()
+
+	awaitable.Call("then", thenFunc).Call("catch", catchFunc)
+
+	select {
+	case result := <-then:
+		return result, nil
+	case err := <-catch:
+		return nil, err
+	}
 }

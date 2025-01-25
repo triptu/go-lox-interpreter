@@ -43,6 +43,7 @@ export async function runCode(
 				case "input": {
 					// use prompt to get input from user
 					const value = prompt(data);
+					worker.postMessage({ type: "inputResult", data: value });
 					break;
 				}
 				case "error": {
