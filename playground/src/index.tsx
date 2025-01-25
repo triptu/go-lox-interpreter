@@ -215,11 +215,7 @@ function CodeEditor() {
 		});
 	}, []);
 
-	return (
-		<div class="h-4/5 lg:h-auto lg:flex-1 lg:w-3/5 flex flex-col gap-2">
-			<div class="h-full" ref={editorParent} />
-		</div>
-	);
+	return <div class="h-full" ref={editorParent} />;
 }
 
 function OutputLine({ text }: { text: string }) {
@@ -238,22 +234,20 @@ function OutputLine({ text }: { text: string }) {
 
 function Output() {
 	return (
-		<div class="lg:w-2/5 flex-1 flex flex-col gap-2">
-			<div class="flex-1 bg-gray-100 ring-1 ring-gray-200 text-gray-900 text-md rounded p-4 whitespace-pre-wrap font-mono overflow-auto">
-				{outputLines.value.map((line, index) => (
-					<span
-						// biome-ignore lint/suspicious/noArrayIndexKey: <explanation>
-						key={index}
-						class={
-							line.isError
-								? "text-red-700 whitespace-pre-wrap"
-								: "whitespace-pre-wrap"
-						}
-					>
-						<OutputLine text={line.text} />
-					</span>
-				))}
-			</div>
+		<div class="flex-1 bg-gray-100 ring-1 ring-gray-200 text-gray-900 text-md rounded p-4 whitespace-pre-wrap font-mono overflow-auto">
+			{outputLines.value.map((line, index) => (
+				<span
+					// biome-ignore lint/suspicious/noArrayIndexKey: <explanation>
+					key={index}
+					class={
+						line.isError
+							? "text-red-700 whitespace-pre-wrap"
+							: "whitespace-pre-wrap"
+					}
+				>
+					<OutputLine text={line.text} />
+				</span>
+			))}
 		</div>
 	);
 }
@@ -268,8 +262,12 @@ function App() {
 			</div>
 
 			<div class="flex gap-4 px-4 mb-4 flex-col lg:flex-row flex-1">
-				<CodeEditor />
-				<Output />
+				<div class="h-4/5 lg:h-auto lg:flex-1 lg:w-3/5 flex flex-col gap-2">
+					<CodeEditor />
+				</div>
+				<div class="lg:w-2/5 flex-1 flex flex-col gap-2">
+					<Output />
+				</div>
 			</div>
 		</div>
 	);
