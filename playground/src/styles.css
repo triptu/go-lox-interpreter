@@ -20,6 +20,7 @@
 
 .cm-scroller {
 	overflow: auto;
+	scrollbar-width: thin;
 }
 
 .cm-errorline {
