@@ -21,7 +21,9 @@ export function debounce(fn: Callable, delayMs: number) {
 
 const codeLocalStorageKey = "savedCode";
 export const defaultCode = `// You can edit this code!
-// You can also try other examples from the select box above
+// You can also try other 
+// examples from above selection
+
 print("Hello World!");
 var a = 2;
 

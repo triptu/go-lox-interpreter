@@ -1,5 +1,10 @@
 {
 	"files": {
-		"ignore": ["wasm_exec.js", "node_modules/**/*", "dist/**/*"]
+		"ignore": [
+			"wasm_exec.js",
+			"code-runner-worker.js",
+			"node_modules/**/*",
+			"dist/**/*"
+		]
 	}
 }

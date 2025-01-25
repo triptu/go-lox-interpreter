@@ -21,9 +21,15 @@ The above command, creates build files in `playground/dist` ready to be served.
 bun run dev
 ```
 
-The above command will watch for changes and rebuild the playground. You can open `playground/dist/index.html` directly in your browser and reload on any change(Bun doesn't support hot reloading at the moment).
+The above command will watch for changes and rebuild the playground. You can open `playground/dist/index.html` directly in your browser and reload on any change(Bun doesn't support hot reloading at the moment). Also if you change the Go code, lox examples or the worker code, you would need to stop and rereun the command.
 
+### Updating wasm_exec.js 
 
+This is copied from following path and there are some changes done to make it work with Bun. You can run `bun run copy-wasm-exec` to copy the new version if needed, and then add it on top of the worker file, as we run WASM in a web worker.
+
+```sh
+$(tinygo env TINYGOROOT)/targets/wasm_exec.js
+```
 
 ### Todo
 

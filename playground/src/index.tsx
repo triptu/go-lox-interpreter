@@ -11,7 +11,7 @@ import {
 	keywordDecorationPlugin,
 	updateErrorLinesEffect,
 } from "./cm-extensions";
-import { type OutputLogger, runCode, stopRun } from "./code-runner";
+import { type OutputLogger, runCode, stopCurrentRun } from "./code-runner";
 import { Button, Header } from "./components";
 import { readLoxFiles } from "./examples/read-lox-files" with { type: "macro" };
 import { RunIcon, SpinnerIcon, StopIcon } from "./icons";
@@ -169,7 +169,7 @@ function Toolbar() {
 					className="h-9"
 					type="button"
 					color="red"
-					onClick={() => stopRun()}
+					onClick={() => stopCurrentRun()}
 					disabled={!isRunning.value}
 				>
 					<StopIcon />

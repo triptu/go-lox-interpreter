@@ -3,9 +3,10 @@
 	"scripts": {
 		"check": "biome check --write ./",
 		"copy-wasm-exec": "cp $(tinygo env TINYGOROOT)/targets/wasm_exec.js .",
+		"copy-worker": "cp ./src/code-runner-worker.js ./dist",
 		"build-wasm": "cd .. && GOOS=js GOARCH=wasm tinygo build -o playground/dist/lox.wasm -no-debug cmd/wasm/main.go",
 		"build-wasm-dbg": "cd .. && GOOS=js GOARCH=wasm tinygo build -o playground/dist/lox.wasm cmd/wasm/main.go",
-		"build": "rm -rf ./dist && mkdir dist && bun run build-wasm && bun build ./index.html --outdir=dist",
+		"build": "rm -rf ./dist && mkdir dist && bun run build-wasm && bun run copy-worker && bun build ./index.html --outdir=dist",
 		"dev": "bun run build --watch",
 		"deploy": "netlify deploy --prod"
 	},
