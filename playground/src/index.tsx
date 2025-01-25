@@ -192,7 +192,6 @@ const autoRunCodePlugin = ViewPlugin.fromClass(
 		code = "";
 		constructor(view) {
 			this.code = view.state.doc.toString();
-			runCodeWithStateStuff(this.code);
 		}
 		update = debounce((viewUpdate) => {
 			if (!isAutoRunEnabled.value) return;

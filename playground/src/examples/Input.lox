@@ -1,0 +1,9 @@
+var name = input("What's your name?");
+print("hello " + name + "!");
+sleep(500);
+var age = parseNumber(input("How old are you?"));
+if (age >= 18) {
+    print("You are an adult!");
+} else {
+    print("You are a minor!");
+}

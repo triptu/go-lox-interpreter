@@ -27,6 +27,15 @@ func main() {
 	}
 
 	lox.SetLogger(lox.Logger{
+		Input: func(prompt string) (string, error) {
+			fmt.Print(prompt)
+			var input string
+			_, err := fmt.Scanln(&input)
+			if err != nil {
+				return "", err
+			}
+			return input, nil
+		},
 		Print: func(s string) {
 			fmt.Println(s)
 		},

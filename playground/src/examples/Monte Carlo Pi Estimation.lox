@@ -1,0 +1,62 @@
+// https://en.wikipedia.org/wiki/Monte_Carlo_integration
+
+class PiEstimator {
+  // Simulate dart throws to estimate pi
+  estimatePi(totalThrows) {
+    var insideCircle = 0;
+    var i = 0;
+
+    while (i < totalThrows) {
+      // Generate random x and y coordinates between -1 and 1
+      var x = randInt(200) / 100.0 - 1;
+      var y = randInt(200) / 100.0 - 1;
+
+      // Check if dart lands inside unit circle
+      if (x * x + y * y <= 1) {
+        insideCircle = insideCircle + 1;
+      }
+
+      i = i + 1;
+    }
+
+    // Pi estimate: (points inside circle / total points) * 4
+    return (insideCircle / totalThrows) * 4;
+  }
+
+  // Run multiple simulations to get more accurate estimation
+  runSimulation() {
+    print("Monte Carlo Pi Estimation Simulation");
+    print("------------------------------");
+
+    while (true) {
+      print("Enter number of dart throws (0 to exit)");
+      var throwsStr = input("number of dart throws (0 to exit):");
+      var throws = parseNumber(throwsStr);
+
+      if (throws <= 0) {
+        return;
+      }
+
+      var start = clock();
+      var piEstimate = this.estimatePi(throws);
+      var end = clock();
+
+      clear();
+      print("Estimated π: " + piEstimate); 
+      print("Actual π:    3.141592653589793"); 
+      print("Throws:      " + throws);
+      print("Time taken:  " + ((end - start) / 1000.0) + " seconds");
+      print("");
+
+      // Small pause to let user read results
+      sleep(1000);
+    }
+  }
+}
+
+fun main() {
+  var simulator = PiEstimator();
+  simulator.runSimulation();
+}
+
+main();

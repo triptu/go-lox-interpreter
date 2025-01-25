@@ -13,6 +13,7 @@ type TokenLogMeta struct {
 
 // interface as its different for normal run and wasm
 type Logger struct {
+	Input        func(prompt string) (string, error)  // corresponds to input in lox
 	Print        func(s string)                       // corresponds to print in lox
 	ScanError    func(line int, col int, msg string)  // error during tokenization
 	ParseError   func(token TokenLogMeta, msg string) // error during parsing and resolving(static analysis)

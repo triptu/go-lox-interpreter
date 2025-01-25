@@ -111,13 +111,9 @@ func defineNativeFunctions(globals *environment) {
 		},
 	})
 	globals.define("input", nativeFunction{
+		arityCnt: 1,
 		fn: func(i interpreter, a []any) (any, error) {
-			var input string
-			_, err := fmt.Scanln(&input)
-			if err != nil {
-				return nil, err
-			}
-			return input, nil
+			return logger.Input(a[0].(string))
 		},
 	})
 	globals.define("parseNumber", nativeFunction{

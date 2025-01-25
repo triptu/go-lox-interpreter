@@ -1,8 +1,8 @@
 print("what's your name?");
-var name = input();
+var name = input("name -");
 print("hello " + name + "!");
 print("how old are you?");
-var age = parseNumber(input());
+var age = parseNumber(input("age -"));
 if (age >= 18) {
     print("you are an adult!");
 } else {

@@ -70,6 +70,10 @@ func runLoxCode(command, sourceCode string, callbackJs js.Value) {
 	state.cancelRun = cancel
 
 	lox.SetLogger(lox.Logger{
+		Input: func(prompt string) (string, error) {
+			// we'll take input through prompt  in js to keep things simple
+			return js.Global().Get("prompt").Invoke(prompt).String(), nil
+		},
 		Print: func(s string) {
 			logOutput(s, false)
 		},

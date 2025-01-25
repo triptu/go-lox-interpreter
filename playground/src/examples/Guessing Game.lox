@@ -1,0 +1,65 @@
+class GuessingGame {
+  init(maxRange, attempts) {
+    // Generate a random number between 0 and maxRange
+    this.targetNumber = randInt(maxRange);
+    this.maxAttempts = attempts;
+    this.currentAttempts = 0;
+  }
+
+  play() {
+    clear();
+     print("Welcome to the Number Guessing Game!");
+     print("I've chosen a number. Try to guess it.");
+     print("You have " + this.maxAttempts + " attempts.");
+
+    while (this.currentAttempts < this.maxAttempts) {
+      // Get user input and convert to number
+      var guess = parseNumber(input("What's your guess?"));
+      print("Enter your guess:" + guess);
+
+      // Increment attempts
+      this.currentAttempts = this.currentAttempts + 1;
+
+      // Game logic
+      if (guess == this.targetNumber) {
+         print("Congratulations! You guessed the number!");
+         print("It took you " + this.currentAttempts + " attempts.");
+        return true;
+      } else if (guess < this.targetNumber) {
+         print("Too low! Try again.");
+      } else {
+         print("Too high! Try again.");
+      }
+
+      // Show remaining attempts
+       print("Attempts left: " + (this.maxAttempts - this.currentAttempts));
+
+      // Optional: small delay to make game feel more interactive
+      sleep(500);
+    }
+
+    // Game over if no guesses left
+    print("Sorry, you've run out of attempts!");
+    print("The number was " + this.targetNumber);
+    return false;
+  }
+}
+
+// Main game runner
+fun main() {
+  var playAgain = true;
+
+  while (playAgain) {
+    // Create a new game with number range 0-100, 6 attempts
+    var game = GuessingGame(100, 6);
+    game.play();
+
+    sleep(500);
+
+    // Ask to play again
+    print("Do you want to play again? (1 for yes, 0 for no)");
+    playAgain = parseNumber(input("Play again? (1 for yes, 0 for no)")) == 1;
+  }
+}
+
+main();
