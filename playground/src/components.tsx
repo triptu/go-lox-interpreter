@@ -48,9 +48,19 @@ export const Button = ({
 export function Header() {
 	return (
 		<div class="rounded-t p-4 bg-gray-900 text-gray-50 flex items-center justify-between">
-			<h1 class="text-2xl font-bold">
-				GoLox <span class="hidden sm:inline">Playground</span>
-			</h1>
+			<div class="flex flex-col">
+				<h1 class="text-2xl font-bold">
+					GoLox <span class="hidden sm:inline">Playground</span>
+				</h1>
+				<span class="text-gray-300 text-sm hidden md:inline">
+					A local in browser playground for Lox interpreter written in Golang{" "}
+					<span class="hidden lg:inline">and compiled to WASM</span>
+				</span>
+				<span class="md:hidden text-gray-300 text-sm">
+					Lox interpreter written in Golang
+				</span>
+			</div>
+
 			<div class="flex gap-4 items-center">
 				<a
 					href="https://craftinginterpreters.com/the-lox-language.html"
