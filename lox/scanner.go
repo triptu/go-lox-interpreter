@@ -74,6 +74,8 @@ func (s *scanner) scanNextToken() {
 		}
 	case '*':
 		s.addSimpleToken(tStar)
+	case '%':
+		s.addSimpleToken(tMod)
 	case ' ', '\t', '\r':
 		// ignore whitespace
 	case '\n':

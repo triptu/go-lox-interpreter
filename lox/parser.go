@@ -467,7 +467,7 @@ func (p *parser) term() (expr, *parseError) {
 }
 
 func (p *parser) factor() (expr, *parseError) {
-	return p.binaryOp(p.unary, tSlash, tStar)
+	return p.binaryOp(p.unary, tSlash, tStar, tMod)
 }
 
 /*

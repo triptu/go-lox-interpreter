@@ -23,6 +23,7 @@ const (
 	tSemicolon
 	tSlash
 	tStar
+	tMod
 
 	// conditions(1 or 2 char) tokens
 	tBang
@@ -72,6 +73,7 @@ var tokenNames = map[TokenType]string{
 	tSemicolon:    "SEMICOLON",
 	tSlash:        "SLASH",
 	tStar:         "STAR",
+	tMod:          "MOD",
 	tBang:         "BANG",
 	tBangEqual:    "BANG_EQUAL",
 	tEqual:        "EQUAL",
@@ -121,7 +123,7 @@ var keywords = map[string]TokenType{
 	"while":  tWhile,
 }
 
-var binaryTokens = []TokenType{tPlus, tStar, tSlash, tGreater, tLess, tEqual, tLessEqual, tGreaterEqual, tBangEqual, tEqualEqual, tAnd, tOr}
+var binaryTokens = []TokenType{tPlus, tStar, tMod, tSlash, tGreater, tLess, tEqual, tLessEqual, tGreaterEqual, tBangEqual, tEqualEqual, tAnd, tOr}
 
 type token struct {
 	tokenType TokenType
