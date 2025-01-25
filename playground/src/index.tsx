@@ -2,9 +2,10 @@ import { Prec } from "@codemirror/state";
 import { ViewPlugin, keymap } from "@codemirror/view";
 import { computed, effect, signal } from "@preact/signals";
 import { EditorView, basicSetup } from "codemirror";
-import { render } from "preact";
-import { useEffect, useRef } from "preact/hooks";
+import { Fragment, render } from "preact";
+import { useEffect, useRef, useState } from "preact/hooks";
 
+import { indentWithTab } from "@codemirror/commands";
 import {
 	errorLineDecorationField,
 	keywordDecorationPlugin,
@@ -17,6 +18,7 @@ import {
 	type OutputLogger,
 	codeStorage,
 	debounce,
+	defaultCode,
 	jsLox,
 	runCode,
 	stopRun,
@@ -29,8 +31,8 @@ const outputLines = signal<{ text: string; isError: boolean }[]>([]);
 
 const reErrorLine = /\[line (\d+)(:\d+)?\] (Error.+)/;
 
-export const sampleLoxFiles = await readLoxFiles();
-console.log("sample lox files", sampleLoxFiles);
+export const sampleLoxFiles: { [filename: string]: string } =
+	await readLoxFiles();
 
 const $errorLinesToHighlight = computed(() => {
 	if (!outputLines.value) return [];
@@ -41,7 +43,10 @@ const $errorLinesToHighlight = computed(() => {
 		if (match) {
 			let lineNum = Number.parseInt(match[1]);
 			const msgText = match[3];
-			if (msgText.endsWith("Expected ';' after previous expression.")) {
+			if (
+				msgText.endsWith("Expected ';' after expression.") &&
+				!msgText.includes("Error at end")
+			) {
 				lineNum -= 1; // fix the highlighted line
 			}
 			errLines.push({
@@ -66,6 +71,9 @@ const outputLogger: OutputLogger = {
 		outputLines.value = [];
 	},
 	log: (arg) => {
+		if (arg === "\f") {
+			outputLines.value = [];
+		}
 		outputLines.value = [...outputLines.value, { text: arg, isError: false }];
 	},
 	error: (errMsg: string) => {
@@ -73,10 +81,10 @@ const outputLogger: OutputLogger = {
 	},
 };
 
-async function runCodeWithStateStuff(code: string) {
+async function runCodeWithStateStuff(code: string, skipSave = false) {
 	try {
 		isRunning.value = true;
-		await runCode(code, outputLogger);
+		await runCode(code, outputLogger, skipSave);
 	} catch (err) {
 		console.warn(err);
 	} finally {
@@ -96,17 +104,53 @@ const keymapExtension = [
 			},
 		]),
 	),
+	keymap.of([indentWithTab]),
 ];
 
 function SelectSampleCode() {
+	const [selectedFilename, setSelectedFilename] = useState<string>("choose");
+	const onChange = (e: Event) => {
+		const target = e.target as HTMLSelectElement;
+		const filename = target.value;
+		setSelectedFilename(filename);
+		let code = "";
+		if (filename === "choose") {
+			code = codeStorage.get();
+		} else if (filename === "default") {
+			code = defaultCode;
+		} else {
+			code = sampleLoxFiles[filename];
+		}
+		if (code) {
+			// update editorview
+			editorView.value?.dispatch({
+				changes: {
+					from: 0,
+					to: editorView.value.state.doc.length,
+					insert: code,
+				},
+			});
+			runCodeWithStateStuff(code, true);
+		}
+	};
 	return (
 		<div class="flex items-center">
 			<span class="text-gray-900 mr-2 hidden md:inline-block">Example:</span>
-			<select class="px-2 w-36 sm:w-48 md:w-60 h-9 bg-gray-200 rounded-md shadow-xs text-sm appearance-none hover:bg-gray-300">
-				<option value="hello">Hello World</option>
-				<option value="fibonacci">Fibonacci</option>
-				<option value="inheritance">Inheritance</option>
-			</select>
+			<div class="px-2 bg-gray-200 hover:bg-gray-300 rounded-md shadow-xs">
+				<select
+					value={selectedFilename}
+					onChange={onChange}
+					class="w-36 truncate sm:w-48 md:w-60 h-9 bg-gray-200 text-sm hover:bg-gray-300 outline-none focus:border-none"
+				>
+					<option value="choose">Choose an example</option>
+					<option value="default">Default Code</option>
+					{Object.keys(sampleLoxFiles).map((filename) => (
+						<option key={filename} value={filename}>
+							{filename.replace(".lox", "")}
+						</option>
+					))}
+				</select>
+			</div>
 		</div>
 	);
 }
@@ -180,21 +224,42 @@ function CodeEditor() {
 	}, []);
 
 	return (
-		<div class="h-4/5 lg:h-auto lg:flex-1 flex flex-col gap-2">
+		<div class="h-4/5 lg:h-auto lg:flex-1 lg:w-3/5 flex flex-col gap-2">
 			<div class="h-full" ref={editorParent} />
 		</div>
 	);
 }
 
+function OutputLine({ text }: { text: string }) {
+	return (
+		<>
+			{text.split("\\n").map((line, index) => (
+				// biome-ignore lint/suspicious/noArrayIndexKey: <explanation>
+				<Fragment key={index}>
+					{line}
+					<br />
+				</Fragment>
+			))}
+		</>
+	);
+}
+
 function Output() {
 	return (
-		<div class="flex-1 flex flex-col gap-2">
+		<div class="lg:w-2/5 flex-1 flex flex-col gap-2">
 			<div class="flex-1 bg-gray-100 ring-1 ring-gray-200 text-gray-900 text-md rounded p-4 whitespace-pre-wrap font-mono overflow-auto">
 				{outputLines.value.map((line, index) => (
-					// biome-ignore lint/suspicious/noArrayIndexKey: <explanation>
-					<pre key={index} class={line.isError && "text-red-700"}>
-						{line.text}
-					</pre>
+					<span
+						// biome-ignore lint/suspicious/noArrayIndexKey: <explanation>
+						key={index}
+						class={
+							line.isError
+								? "text-red-700 whitespace-pre-wrap"
+								: "whitespace-pre-wrap"
+						}
+					>
+						<OutputLine text={line.text} />
+					</span>
 				))}
 			</div>
 		</div>

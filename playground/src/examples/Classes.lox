@@ -1,0 +1,25 @@
+class Breakfast {
+  init() {
+    this.drink = "tea";
+  }
+
+  serve() {
+    return "poha";
+  }
+
+  serveDrink() {
+    return this.drink;
+  }
+}
+
+print(Breakfast);
+var breakfast = Breakfast();
+print(breakfast);
+
+print(breakfast.serve());
+print("drink for the day - " + breakfast.serveDrink());
+
+
+breakfast.drink = "milk";
+print("updated drink in breakfast = " + breakfast.drink); 
+print("drink for the day - " + breakfast.serveDrink());

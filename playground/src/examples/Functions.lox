@@ -1,0 +1,136 @@
+// native functions
+
+print(clock() + 75);
+print(clock() / 1000);
+print(randInt(10));
+print(parseNumber("123.456"));
+
+// user defined functions
+
+fun foo() {
+  print 7;
+}
+foo();
+
+fun cumulative_sum() {
+    var n = 10;  // Fixed value
+    var total = 0;
+    var i = 1;
+    while (i <= n) {
+        total = total + i;
+        i = i + 1;
+    }
+    print "The cumulative sum from 1 to 10 is: ";
+    print total;
+}
+
+cumulative_sum();
+
+// with arguments
+
+fun calculateGrade(score, bonus) {
+  var finalScore = score + bonus;
+
+  if (finalScore >= 90) {
+    print "A";
+  } else if (finalScore >= 80) {
+    print "B";
+  } else if (finalScore >= 70) {
+    print "C";
+  } else if (finalScore >= 60) {
+    print "D";
+  } else {
+    print "F";
+  }
+}
+
+var score = 81;
+var bonus = 3;
+print "Grade for given score is: ";
+calculateGrade(score, bonus);
+
+
+// return statement
+
+print "test - return statements";
+
+fun fib(n) {
+  if (n < 2) return n;
+  return fib(n - 2) + fib(n - 1);
+}
+
+var start = clock();
+print "10th fib number = ";
+print fib(10);
+print (clock() - start) < 5; // 5 seconds
+
+fun f() {
+  if (false) return "no"; else return "ok";
+}
+
+print f();
+
+fun f() {
+  while (!true) return "ok";
+}
+
+print f();
+
+fun f() {
+  return;
+  print "bad";
+}
+
+print f();
+
+
+
+print "test - higher order functions";
+
+fun makeAdder(x) {
+  fun add(y) {
+    return x + y;
+  }
+  return add;
+}
+
+fun applyTwice(f, x) {
+  return f(f(x));
+}
+
+var addx = makeAdder(2);
+var addy = makeAdder(2);
+
+print applyTwice(addx, 2);
+print applyTwice(addy, 2);
+
+
+fun makeFilter(min) {
+  fun filter(n) {
+    if (n < min) {
+      return false;
+    }
+    return true;
+  }
+  return filter;
+}
+
+// This function applies a function to a list of numbers
+fun applyToNumbers(f, count) {
+  var n = 0;
+  while (n < count) {
+    if (f(n)) {
+      print n;
+    }
+    n = n + 1;
+  }
+}
+
+var greaterThanX = makeFilter(55);
+var greaterThanY = makeFilter(10);
+
+print "Numbers >= 55:";
+applyToNumbers(greaterThanX, 55 + 5);
+
+print "Numbers >= 10:";
+applyToNumbers(greaterThanY, 10 + 5);

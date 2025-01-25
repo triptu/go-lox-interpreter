@@ -1,0 +1,4 @@
+var duration = 1000 + randInt(1000);
+print "Sleeping for " + duration/1000 + " seconds.";
+sleep(duration);
+print("Done sleeping. Good morning!");

@@ -47,7 +47,9 @@ export interface OutputLogger {
 }
 
 const codeLocalStorageKey = "savedCode";
-const defaultCode = `print("Hello World!");
+export const defaultCode = `// You can edit this code!
+// You can also try other examples from the select box above
+print("Hello World!");
 var a = 2;
 
 fun sum(a,b) {
@@ -93,14 +95,20 @@ async function initWasm() {
 	return initPromise;
 }
 
-export async function runCode(code: string, outputLogger: OutputLogger) {
+export async function runCode(
+	code: string,
+	outputLogger: OutputLogger,
+	skipSave = false,
+) {
 	if (!code) {
 		console.warn("No code to run");
 		return;
 	}
 	await initWasm();
 	outputLogger.clear();
-	codeStorage.set(code);
+	if (!skipSave) {
+		codeStorage.set(code);
+	}
 
 	return new Promise<void>((resolve, reject) => {
 		window.loxrun?.("run", code, ({ type, data }) => {
@@ -109,13 +117,7 @@ export async function runCode(code: string, outputLogger: OutputLogger) {
 					outputLogger.log(data);
 					break;
 				case "error": {
-					let msgText = data.replace("Expect", "Expected");
-					if (msgText.endsWith("Expected ';' after expression.")) {
-						msgText = msgText.replace(
-							"after expression.",
-							"after previous expression.",
-						);
-					}
+					const msgText = data.replace("Expect", "Expected");
 					outputLogger.error(msgText);
 					break;
 				}

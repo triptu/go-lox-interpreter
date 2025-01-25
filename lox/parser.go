@@ -102,7 +102,7 @@ func (p *parser) vardeclaration() (stmt, *parseError) {
 kind is either "function" or "method"
 */
 func (p *parser) fundeclaration(kind string) (stmt, *parseError) {
-	name, err := p.consumeToken(tIdentifier, "Expect "+kind+"name.")
+	name, err := p.consumeToken(tIdentifier, "Expect "+kind+" name.")
 	if err != nil {
 		return nil, err
 	}

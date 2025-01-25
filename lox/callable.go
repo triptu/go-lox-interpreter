@@ -2,6 +2,8 @@ package lox
 
 import (
 	"fmt"
+	"math"
+	"math/rand/v2"
 	"strconv"
 	"time"
 )
@@ -122,6 +124,26 @@ func defineNativeFunctions(globals *environment) {
 		arityCnt: 1,
 		fn: func(i interpreter, a []any) (any, error) {
 			return strconv.ParseFloat(a[0].(string), 64)
+		},
+	})
+	globals.define("randInt", nativeFunction{
+		arityCnt: 1,
+		fn: func(i interpreter, a []any) (any, error) {
+			numInt := rand.IntN(int(a[0].(float64)))
+			return float64(numInt), nil
+		},
+	})
+	globals.define("clear", nativeFunction{
+		arityCnt: 0,
+		fn: func(i interpreter, a []any) (any, error) {
+			logger.Print("\f")
+			return nil, nil
+		},
+	})
+	globals.define("floor", nativeFunction{
+		arityCnt: 1,
+		fn: func(i interpreter, a []any) (any, error) {
+			return math.Floor(a[0].(float64)), nil
 		},
 	})
 }

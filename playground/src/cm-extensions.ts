@@ -44,7 +44,7 @@ const functionDeco = Decoration.mark({ class: "cm-lox-fun" });
 const printDeco = Decoration.mark({ class: "cm-lox-print" });
 const keywordDeco = Decoration.mark({ class: "cm-lox-keyword" });
 const keywordDecorator = new MatchDecorator({
-	regexp: /\b(fun|print|or|and)\b/g,
+	regexp: /\b(fun|print|or|and|parseNumber|floor|clock|clear|randInt)\b/g,
 	decoration: (match) => {
 		const keyword = match[1];
 		switch (keyword) {
