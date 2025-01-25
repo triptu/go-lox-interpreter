@@ -11,18 +11,11 @@ import {
 	keywordDecorationPlugin,
 	updateErrorLinesEffect,
 } from "./cm-extensions";
+import { type OutputLogger, runCode, stopRun } from "./code-runner";
 import { Button, Header } from "./components";
 import { readLoxFiles } from "./examples/read-lox-files" with { type: "macro" };
 import { RunIcon, SpinnerIcon, StopIcon } from "./icons";
-import {
-	type OutputLogger,
-	codeStorage,
-	debounce,
-	defaultCode,
-	jsLox,
-	runCode,
-	stopRun,
-} from "./utils";
+import { codeStorage, debounce, defaultCode, jsLox } from "./utils";
 
 const isRunning = signal(false);
 const isAutoRunEnabled = signal(false);

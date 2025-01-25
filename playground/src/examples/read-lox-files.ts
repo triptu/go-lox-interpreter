@@ -12,7 +12,7 @@ export async function readLoxFiles(): Promise<{ [filename: string]: string }> {
 		// @ts-expect-error - runs at build time
 		const currDir = import.meta.dir;
 		for (const fileName of glob.scanSync({ cwd: currDir })) {
-			console.log("fileName", fileName);
+			// console.log("fileName", fileName);
 			const fullPath = path.join(currDir, fileName);
 			const justFileName = path.basename(fullPath);
 
