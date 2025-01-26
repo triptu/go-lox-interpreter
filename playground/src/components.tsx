@@ -35,7 +35,7 @@ export const Button = ({
 			class={clsx(
 				className,
 				colorClass,
-				"cursor-default font-bold h-9 px-4 text-sm rounded flex items-center gap-1 disabled:bg-gray-400 text-white",
+				"cursor-default font-bold h-9 px-2 sm:px-4 text-sm rounded flex items-center gap-1 disabled:bg-gray-400 text-white",
 			)}
 			type="button"
 			{...props}
@@ -47,7 +47,7 @@ export const Button = ({
 
 export function Header() {
 	return (
-		<div class="rounded-t p-4 bg-gray-900 text-gray-50 flex items-center justify-between">
+		<div class="p-4 bg-gray-900 text-gray-50 flex items-center justify-between">
 			<div class="flex flex-col">
 				<h1 class="text-2xl font-bold">
 					GoLox <span class="hidden sm:inline">Playground</span>
@@ -57,7 +57,7 @@ export function Header() {
 					<span class="hidden lg:inline">and compiled to WASM</span>
 				</span>
 				<span class="md:hidden text-gray-300 text-sm">
-					Lox interpreter written in Golang
+					Lox interpreter in Golang
 				</span>
 			</div>
 

@@ -133,7 +133,7 @@ function SelectSampleCode() {
 				<select
 					value={selectedFilename}
 					onChange={onChange}
-					class="w-36 truncate sm:w-48 md:w-60 h-9 bg-gray-200 text-sm hover:bg-gray-300 outline-none focus:border-none"
+					class="w-32 truncate sm:w-48 md:w-60 h-9 bg-gray-200 text-sm hover:bg-gray-300 outline-none focus:border-none"
 				>
 					<option value="choose">Choose an example</option>
 					<option value="default">Default Code</option>
@@ -150,7 +150,7 @@ function SelectSampleCode() {
 
 function Toolbar() {
 	return (
-		<div class="w-full flex items-center justify-end md:justify-between gap-4">
+		<div class="w-full flex items-center justify-between gap-4">
 			<SelectSampleCode />
 
 			<div class="flex items-center gap-2">
@@ -254,7 +254,7 @@ function Output() {
 
 function App() {
 	return (
-		<div class="bg-white rounded shadow flex flex-col h-full">
+		<div class="bg-white flex flex-col h-full">
 			<Header />
 
 			<div class="flex px-4 my-2">
