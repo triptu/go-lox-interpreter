@@ -1,7 +1,10 @@
 ## Golox Playground
 
-Repo for the Golox Playground.
+Repo for the [Golox Playground](https://golox.tushartripathi.me/).
 
+![Playground Web](../assets/playground-web.gif)
+
+![Playground Mobile](../assets/playground-mobile.gif)
 
 ## Commands
 
@@ -25,7 +28,7 @@ The above command will watch for changes and rebuild the playground. You can ope
 
 ### Updating wasm_exec.js 
 
-This is copied from following path and there are some changes done to make it work with Bun. You can run `bun run copy-wasm-exec` to copy the new version if needed, and then add it on top of the worker file, as we run WASM in a web worker.
+This is copied from inside `tinygo` with some changes done to make it work with Bun. You can run `bun run copy-wasm-exec` to copy the new version if needed, and then add it on top of the worker file, as we run WASM in a web worker.
 
 ```sh
 $(tinygo env TINYGOROOT)/targets/wasm_exec.js
@@ -33,9 +36,8 @@ $(tinygo env TINYGOROOT)/targets/wasm_exec.js
 
 ### Todo
 
-- Once Netlify has latest bun, we can use it for build and deploy.
-- Change the interpreter to return error throughout instead of panicking. As TinyGo doesn't support panic, the
-WASM experience in case of runtime error is not good.
-- Write lezer grammar for lox, to use it for syntax highlighting in code mirror. Currently, we've done two things on top of JS' language pack -
+- Once Netlify has latest bun, we can use it for build and deploy. Currently it's a manual process, using Netlfiy's CLI.
+- Change the interpreter to return error throughout instead of panicking. As TinyGo [doesn't support recover](https://github.com/tinygo-org/tinygo/pull/4380) in WASM yet, the experience in case of runtime error is not good.
+- Write lezer grammar for lox, to use it for syntax highlighting in code mirror. I tried this but it was quite complex and didn't seem worth the effort. Currently, I've done two things on top of JS' language pack to make the experience nicer -
     - added lox based code snippets for autocomplete which overrides the js ones
     - added a view plugin to syntax highlight lox keywords not present in the js grammar

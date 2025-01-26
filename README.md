@@ -1,10 +1,34 @@
 # [Lox](https://craftinginterpreters.com/the-lox-language.html) Interpreter in Go
 
+## Online Playground
+
+Try it at [golox.tushartripathi.me](https://golox.tushartripathi.me/).
+
+![Playground Web](./assets/playground-web.gif)
+
+<details>
+<summary>Mobile version</summary>
+<img src="./assets/playground-mobile.gif" alt="Playground Mobile" width="300"/>
+</details>
+<br/>
+
+
+- [Tinygo](https://tinygo.org/) is used to compile the interpreter code to WASM.
+- The web playground is written with Bun and Preact, which interprets the LOX code using the above generated WASM, locally in the browser. The related code is in the `playground` directory.
+
 ## Running the program
+
+### Interpret a lox file
+
+This is the main command, which runs your program. You can try it out in the [playground](https://golox.tushartripathi.me/).
+
+```sh
+./run.sh run <filename>
+```
 
 ### Tokenize
 
-Prints the tokens array for the source code.
+Prints the tokens in the source code.
 
 ```sh
 ./run.sh tokenize <filename>
@@ -12,7 +36,7 @@ Prints the tokens array for the source code.
 
 ### Parse
 
-Parses the tokens array and prints the AST. This is not very clean, the AST is printed as a complicated looking string in the form `(<operator> <left> <right>)`. It's better to use the visualiser to see the AST.
+Parses the tokens array and prints the AST. The AST is printed as a list of [S-expressions](https://en.wikipedia.org/wiki/S-expression). There is also a visualize command to see a visual representation of the AST.
 
 ```sh
 ./run.sh parse <filename>
@@ -20,25 +44,23 @@ Parses the tokens array and prints the AST. This is not very clean, the AST is p
 
 ### Visualise
 
-Visualises the AST by creating a DOT file and then generating a PNG image with Graphviz.
+Visthis command creates a DOT file and then generates a PNG image with Graphviz which shows the AST as a tree.
 
 ```sh
 ./run.sh visualize <filename>
 ```
 
-### Evaluate
+Example:
 
-Evaluates the AST and prints the result.
+AST for this expression - `2+(3-7)*9 < 7 * (2 + 3) == 5 * 3 + 6`
 
-```sh
-./run.sh evaluate <filename>
-```
+![AST](./assets/ast_tree.png)
 
 
 ## Running tests
 
 ```sh
-python test.py <suite_name> <filter_path>
+python test.py <suite_name>
 ```
 
 example
@@ -48,7 +70,7 @@ example
 > python test.py chap10_functions
 ```
 
-`golox` runs all tests. Or else you can filter tests upto a specific chapter.
+`golox` runs all tests. Optionally you can filter tests upto a specific chapter.
 
 ## Grammar for the lox language
 
