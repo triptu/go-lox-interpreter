@@ -41,3 +41,4 @@ $(tinygo env TINYGOROOT)/targets/wasm_exec.js
 - Write lezer grammar for lox, to use it for syntax highlighting in code mirror. I tried this but it was quite complex and didn't seem worth the effort. Currently, I've done two things on top of JS' language pack to make the experience nicer -
     - added lox based code snippets for autocomplete which overrides the js ones
     - added a view plugin to syntax highlight lox keywords not present in the js grammar
+- Use Tailwind v4 instead of the current [Tailwind Lite](https://tailwind-lite.com/), this will signicantly reduce the size of the bundle but it's not supported in build [yet](https://bun.sh/docs/bundler/fullstack#this-is-a-work-in-progress).
