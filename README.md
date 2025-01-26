@@ -15,6 +15,55 @@ Try it at [golox.tushartripathi.me](https://golox.tushartripathi.me/).
 
 - [Tinygo](https://tinygo.org/) is used to compile the interpreter code to WASM.
 - The web playground is written with Bun and Preact, which interprets the LOX code using the above generated WASM, locally in the browser. The related code is in the `playground` directory.
+- The examples in the playground are available in [this directory](./playground/src/examples).
+
+
+<details>
+<summary>Sample Code(Binary Search)</summary>
+
+```lox
+fun binary_search(arr, target) {
+  var left = 0;
+  var right = len(arr) - 1;
+
+  while (left <= right) {
+    var mid = floor((left + right) / 2);
+    var midValue = arr[mid];
+
+    if (midValue == target) {
+      return mid;
+    }
+    if (target < midValue) {
+      right = mid - 1;
+    } else {
+      left = mid + 1;
+    }
+  }
+  return -1; // not found
+}
+```
+
+</details>
+
+
+## Extensions to the language
+
+- print can also be used as a function in addition to being a statement.
+- Dynamic list with python like syntax. `len` is used to get the length and `append`, `extend`, `pop`, `remove`, `insert` can be used to manipulate the list. Two concatenate, just use th `+` operator. There is also an example [hashmap implementation](./playground/src/examples/HashMap.lox) in Lox on top of built in lists.
+- A bunch of native functions defined in [callable.go](./lox/callable.go)
+  - `input` - to get input from user
+  - `parseNumber` - to parse a string to a number
+  - `string` - to convert anyIthing to a string
+  - `clock` - to get the current unix time in milliseconds
+  - `sleep` - to sleep for a number of milliseconds
+  - `len` - for length of list or string
+  - `randInt` - to get a random integer between 0 and the given number
+  - `floor` - to get the floor of a number
+  - `ord` - to get the ascii value of a character
+- The `+` operator is overloaded, you can add strings, numbers, lists. You can also add any other type to a string which is helpful for printing.
+- The string can also be accessed by index, like `str[0]` to get the first character.
+- Negative indexing is also supported in both lists and strings, so `str[-1]` will give you the last character, and `items[-1]` will give you the last item in the list.
+
 
 ## Running the program
 
