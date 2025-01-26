@@ -43,6 +43,8 @@ type exprVisitor interface {
 	visitVariableExpr(eVariable) (any, error)
 	// [1, 2, 3]
 	visitListExpr(eList) (any, error)
+	// arr[1]
+	visitGetIndexExpr(eGetIndex) (any, error)
 }
 
 type eAssign struct {
@@ -80,6 +82,13 @@ type eLogical struct {
 type eGet struct {
 	object expr
 	name   token
+}
+
+// object[key] is being accessed, index in case of array
+type eGetIndex struct {
+	object  expr
+	key     expr
+	bracket token // stored only for error reporting
 }
 
 // object.name = value
@@ -164,4 +173,8 @@ func (e eVariable) accept(v exprVisitor) (any, error) {
 
 func (e eList) accept(v exprVisitor) (any, error) {
 	return v.visitListExpr(e)
+}
+
+func (e eGetIndex) accept(v exprVisitor) (any, error) {
+	return v.visitGetIndexExpr(e)
 }

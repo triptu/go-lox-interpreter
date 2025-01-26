@@ -153,6 +153,16 @@ func (r *resolver) visitListExpr(expr eList) (any, error) {
 	return nil, nil
 }
 
+func (r *resolver) visitGetIndexExpr(expr eGetIndex) (any, error) {
+	if _, err := r.resolveExpr(expr.object); err != nil {
+		return nil, err
+	}
+	if _, err := r.resolveExpr(expr.key); err != nil {
+		return nil, err
+	}
+	return nil, nil
+}
+
 func (r *resolver) visitGroupingExpr(expr eGrouping) (any, error) {
 	return r.resolveExpr(expr.expression)
 }

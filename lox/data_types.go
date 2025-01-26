@@ -35,8 +35,6 @@ func (l *loxList) getMethod(name token) callable {
 
 func (l *loxList) getMethodAndArity(name token) (int, func(args []any) any) {
 	switch name.lexeme {
-	case "getAt":
-		return 1, l.getAt
 	case "append":
 		return 1, l.append
 	case "extend":
@@ -54,9 +52,11 @@ func (l *loxList) getMethodAndArity(name token) (int, func(args []any) any) {
 	}
 }
 
-func (l *loxList) getAt(args []any) any {
-	index := int(args[0].(float64))
-	if index < 0 || index >= len(l.elements) {
+func (l *loxList) getAtIndex(index int) any {
+	if index < 0 {
+		index = len(l.elements) + index
+	}
+	if index >= len(l.elements) {
 		logRuntimeError(token{}, "Index out of bounds")
 		return nil
 	}

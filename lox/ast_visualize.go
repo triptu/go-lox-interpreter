@@ -230,6 +230,10 @@ func (v *visualiseTreeVisitor) visitListExpr(e eList) (any, error) {
 	panic("not implemented")
 }
 
+func (v *visualiseTreeVisitor) visitGetIndexExpr(e eGetIndex) (any, error) {
+	panic("not implemented")
+}
+
 func getVal(val any, _ error) any {
 	return val
 }

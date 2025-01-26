@@ -294,6 +294,27 @@ func (i interpreter) visitListExpr(e eList) (any, error) {
 	return list, nil
 }
 
+// accessing array index
+func (i interpreter) visitGetIndexExpr(e eGetIndex) (any, error) {
+	obj, err := i.evaluate(e.object)
+	if err != nil {
+		return nil, err
+	}
+	indexFloat, err := i.evaluate(e.key)
+	if err != nil {
+		return nil, err
+	}
+	index := int(indexFloat.(float64))
+
+	switch obj2 := obj.(type) {
+	case *loxList:
+		return obj2.getAtIndex(index), nil
+	default:
+		logRuntimeError(e.bracket, "Only lists can be accessed by index.")
+		return nil, errors.New("unreachable")
+	}
+}
+
 func (i interpreter) visitReturnStmt(s sReturn) error {
 	var value any
 	if s.value != nil {

@@ -143,7 +143,10 @@ unary          → ( "!" | "-" ) unary
 (* If there are no parentheses, this parses a bare primary expression. *)
 (* Otherwise, there can be multiple layers of calls, like abc()() *)
 (* and field access or both, like myClass.pqr().abc()() *)
-call           → primary ( "(" arguments? ")" | "." IDENTIFIER )* ;
+(* aray index access is also a call *)
+call           → primary ( "(" arguments? ")" | "." IDENTIFIER )* 
+               | primary "[" expression "]" ;
+
 primary        → NUMBER | STRING | "true" | "false" | "nil"
                | "(" expression ")"
                | IDENTIFIER 

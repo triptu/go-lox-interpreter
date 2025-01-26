@@ -529,9 +529,12 @@ func (p *parser) unary() (expr, *parseError) {
 
 /*
 cover function call either directly or method access for class objects. e.g.
+or array index access
 directFun(1, 2, 3)
 myClass.myFunction(1, 2, 3)
 paper.write("hello").withStyle("bold").withColor("red")
+arr[0]
+getList()[0].items[3]
 */
 func (p *parser) call() (expr, *parseError) {
 	expr, err := p.primary()
@@ -552,6 +555,20 @@ func (p *parser) call() (expr, *parseError) {
 			expr = eGet{
 				object: expr,
 				name:   field,
+			}
+		} else if p.matchIncrement(tLeftBracket) {
+			index, err := p.expression()
+			if err != nil {
+				return nil, err
+			}
+			bracket, err := p.consumeToken(tRightBracket, "Expect ']' after index access.")
+			if err != nil {
+				return nil, err
+			}
+			expr = eGetIndex{
+				object:  expr,
+				key:     index,
+				bracket: bracket,
 			}
 		} else {
 			break
