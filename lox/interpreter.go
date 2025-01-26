@@ -218,6 +218,9 @@ func (i interpreter) visitBinaryExpr(e eBinary) (any, error) {
 	case tMod:
 		validateNumberOperand2(left, right, e.operator)
 		return math.Mod(left.(float64), right.(float64)), nil
+	case tXor:
+		validateNumberOperand2(left, right, e.operator)
+		return int(left.(float64)) ^ int(right.(float64)), nil
 	case tSlash:
 		validateNumberOperand2(left, right, e.operator)
 		validateNonZeroDenom(right.(float64), e.operator)

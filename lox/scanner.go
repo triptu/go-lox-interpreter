@@ -80,6 +80,8 @@ func (s *scanner) scanNextToken() {
 		s.addSimpleToken(tStar)
 	case '%':
 		s.addSimpleToken(tMod)
+	case '^':
+		s.addSimpleToken(tXor)
 	case ' ', '\t', '\r':
 		// ignore whitespace
 	case '\n':
