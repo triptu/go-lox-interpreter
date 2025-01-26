@@ -63,6 +63,18 @@ func (l *loxList) getAtIndex(index int) any {
 	return l.elements[index]
 }
 
+func (l *loxList) setAtIndex(index int, value any) any {
+	if index < 0 {
+		index = len(l.elements) + index
+	}
+	if index >= len(l.elements) {
+		logRuntimeError(token{}, "Index out of bounds")
+		return nil
+	}
+	l.elements[index] = value
+	return value
+}
+
 func (l *loxList) append(args []any) any {
 	l.elements = append(l.elements, args[0])
 	return l

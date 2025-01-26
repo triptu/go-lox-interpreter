@@ -20,3 +20,9 @@ arr4.remove(1);
 print(arr4); // expect: ["a", "c"]
 
 print(arr1[-1] + arr2[-2]); // expect: 14
+
+// set index test
+var arr5 = ["a", "b", "c"];
+print(arr5); // expect: ["a", "b", "c"]
+arr5[1] = "hello";
+print(arr5); // expect: ["a", "hello", "c"]

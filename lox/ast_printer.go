@@ -84,6 +84,10 @@ func (p astPrinter) visitGetIndexExpr(e eGetIndex) (any, error) {
 	return p.parenthesize("getIndex", e.object, e.key)
 }
 
+func (p astPrinter) visitSetIndexExpr(e eSetIndex) (any, error) {
+	return p.parenthesize("setIndex", e.object, e.key, e.value)
+}
+
 func (p astPrinter) parenthesize(name string, exprs ...expr) (any, error) {
 	var sb strings.Builder
 	sb.WriteString("(")

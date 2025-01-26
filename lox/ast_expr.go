@@ -45,6 +45,8 @@ type exprVisitor interface {
 	visitListExpr(eList) (any, error)
 	// arr[1]
 	visitGetIndexExpr(eGetIndex) (any, error)
+	// arr[1] = 2
+	visitSetIndexExpr(eSetIndex) (any, error)
 }
 
 type eAssign struct {
@@ -96,6 +98,13 @@ type eSet struct {
 	object expr
 	name   token
 	value  expr
+}
+
+type eSetIndex struct {
+	object  expr
+	key     expr
+	value   expr
+	bracket token // stored only for error reporting
 }
 
 type eSuper struct {
@@ -177,4 +186,8 @@ func (e eList) accept(v exprVisitor) (any, error) {
 
 func (e eGetIndex) accept(v exprVisitor) (any, error) {
 	return v.visitGetIndexExpr(e)
+}
+
+func (e eSetIndex) accept(v exprVisitor) (any, error) {
+	return v.visitSetIndexExpr(e)
 }

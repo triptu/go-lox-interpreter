@@ -435,6 +435,14 @@ func (p *parser) assignment() (expr, *parseError) {
 				value:  value,
 			}, nil
 		}
+		if getIndexExpr, ok := expr.(eGetIndex); ok {
+			return eSetIndex{
+				object:  getIndexExpr.object,
+				key:     getIndexExpr.key,
+				value:   value,
+				bracket: getIndexExpr.bracket,
+			}, nil
+		}
 
 		err = parseErrorAt(equalsToken, "Invalid assignment target.")
 		// don't return, this won't cascade, we can continue parsing

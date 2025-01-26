@@ -152,12 +152,15 @@ func defineNativeFunctions(globals *environment) {
 	globals.define("len", nativeFunction{
 		arityCnt: 1,
 		fn: func(i interpreter, a []any) (any, error) {
-			asList, ok := a[0].(*loxList)
-			if !ok {
+			switch a[0].(type) {
+			case *loxList:
+				return float64(len(a[0].(*loxList).elements)), nil
+			case string:
+				return float64(len(a[0].(string))), nil
+			default:
 				logRuntimeError(token{}, "len() can only be called on iterables.")
 				return nil, errors.New("len() can only be called on iterables")
 			}
-			return len(asList.elements), nil
 		},
 	})
 }

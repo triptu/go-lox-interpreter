@@ -312,8 +312,36 @@ func (i interpreter) visitGetIndexExpr(e eGetIndex) (any, error) {
 	switch obj2 := obj.(type) {
 	case *loxList:
 		return obj2.getAtIndex(index), nil
+	case string:
+		return obj2[index], nil
 	default:
-		logRuntimeError(e.bracket, "Only lists can be accessed by index.")
+		logRuntimeError(e.bracket, "Only lists and strings can be accessed by index.")
+		return nil, errors.New("unreachable")
+	}
+}
+
+// setting array index
+func (i interpreter) visitSetIndexExpr(e eSetIndex) (any, error) {
+	obj, err := i.evaluate(e.object)
+	if err != nil {
+		return nil, err
+	}
+	indexFloat, err := i.evaluate(e.key)
+	if err != nil {
+		return nil, err
+	}
+	index := int(indexFloat.(float64))
+
+	value, err := i.evaluate(e.value)
+	if err != nil {
+		return nil, err
+	}
+
+	switch obj2 := obj.(type) {
+	case *loxList:
+		return obj2.setAtIndex(index, value), nil
+	default:
+		logRuntimeError(e.bracket, "Only lists can be mutated by index.")
 		return nil, errors.New("unreachable")
 	}
 }

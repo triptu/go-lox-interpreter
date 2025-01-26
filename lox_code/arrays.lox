@@ -9,3 +9,12 @@ print(arr3.pop()); // expect: 6
 print(arr3);
 
 print(arr1[-1] + arr2[-2]);
+
+for (var i = 0; i < len(arr3); i = i + 1) {
+  print(arr3[i]);
+}
+
+
+print("arr3[2]= " + arr3[2]);
+arr3[2] = "hello";
+print("arr3[2]= " + arr3[2]);
