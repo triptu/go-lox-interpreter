@@ -1,0 +1,162 @@
+// Hashmap implementation in Lox
+
+class Hashmap {
+    init() {
+        // Initialize with a default capacity and load factor
+        this.capacity = 16;
+        this.size = 0;
+        this.loadFactor = 0.75;
+        
+        // Create initial bucket array filled with empty lists
+        this.buckets = [];
+        for (var i = 0; i < this.capacity; i = i + 1) {
+            this.buckets.append([]);
+        }
+    }
+
+    // FNV-1a hash function for string keys
+    // Provides a simple but reasonably distributed hash
+    _hash(key) {
+        // FNV-1a hash constants
+        var fnvPrime = 16777619;
+        var offsetBasis = 2166136261;
+        
+        var hash = offsetBasis;
+        
+        // Hash each character of the string
+        for (var i = 0; i < len(key); i = i + 1) {
+            hash = hash * fnvPrime;
+            // Use built-in ord() to get character code
+            hash = hash ^ ord(key[i]);
+            // Ensure 32-bit integer
+            hash = floor(hash % 4294967296);
+        }
+        
+        return hash;
+    }
+
+    // Internal method to resize and rehash when load factor is exceeded
+    _resize() {
+        // Double the capacity
+        var oldBuckets = this.buckets;
+        this.capacity = this.capacity * 2;
+        
+        // Reset buckets and size
+        this.buckets = [];
+        this.size = 0;
+        for (var i = 0; i < this.capacity; i = i + 1) {
+            this.buckets.append([]);
+        }
+        
+        // Rehash all existing key-value pairs
+        for (var bucket in oldBuckets) {
+            for (var entry in bucket) {
+                this.set(entry[0], entry[1]);
+            }
+        }
+    }
+
+    // Set a key-value pair
+    set(key, value) {
+        // Check if resize is needed
+        if (this.size >= this.capacity * this.loadFactor) {
+            this._resize();
+        }
+        
+        // Calculate bucket index
+        var index = this._hash(key) % this.capacity;
+        var bucket = this.buckets[index];
+        
+        // Check if key already exists
+        for (var i = 0; i < len(bucket); i = i + 1) {
+            if (bucket[i][0] == key) {
+                // Update existing key
+                bucket[i][1] = value;
+                return;
+            }
+        }
+        
+        // Add new key-value pair
+        bucket.append([key, value]);
+        this.size = this.size + 1;
+    }
+
+    // Get value for a given key
+    get(key) {
+        var index = this._hash(key) % this.capacity;
+        var bucket = this.buckets[index];
+        
+        for (var entry in bucket) {
+            if (entry[0] == key) {
+                return entry[1];
+            }
+        }
+        
+        // Return nil if key not found
+        return nil;
+    }
+
+    // Check if key exists
+    contains(key) {
+        var index = this._hash(key) % this.capacity;
+        var bucket = this.buckets[index];
+        
+        for (var entry in bucket) {
+            if (entry[0] == key) {
+                return true;
+            }
+        }
+        
+        return false;
+    }
+
+    // Remove a key-value pair
+    remove(key) {
+        var index = this._hash(key) % this.capacity;
+        var bucket = this.buckets[index];
+        
+        for (var i = 0; i < len(bucket); i = i + 1) {
+            if (bucket[i][0] == key) {
+                bucket.remove(i);
+                this.size = this.size - 1;
+                return true;
+            }
+        }
+        
+        return false;
+    }
+
+    // Get all keys
+    keys() {
+        var allKeys = [];
+        for (var bucket in this.buckets) {
+            for (var entry in bucket) {
+                allKeys.append(entry[0]);
+            }
+        }
+        return allKeys;
+    }
+
+    // Get all values
+    values() {
+        var allValues = [];
+        for (var bucket in this.buckets) {
+            for (var entry in bucket) {
+                allValues.append(entry[1]);
+            }
+        }
+        return allValues;
+    }
+
+    // Get current size of the hashmap
+    getSize() {
+        return this.size;
+    }
+}
+
+var map = Hashmap();
+map.set("name", "Alice");
+print(map.get("name"));  // Prints: Alice
+print(map.contains("name"));  // Prints: true
+map.remove("name");
+print(map.contains("name"));  // Prints: false

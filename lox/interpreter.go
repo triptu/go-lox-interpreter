@@ -205,7 +205,7 @@ func (i interpreter) visitBinaryExpr(e eBinary) (any, error) {
 		} else if isNumber(left) && isNumber(right) {
 			return left.(float64) + right.(float64), nil
 		} else if isList(left) && isList(right) {
-			return left.(*LoxList).concat(right.(*LoxList)), nil
+			return left.(*loxList).concat([]any{right.(*loxList)}), nil
 		} else {
 			logRuntimeError(e.operator, "Operands must be two numbers or two strings.")
 		}
@@ -328,12 +328,15 @@ func (i interpreter) visitGetExpr(e eGet) (any, error) {
 	if err != nil {
 		return nil, err
 	}
-	obj2, ok := obj.(loxClassInstance)
-	if !ok {
+
+	switch obj2 := obj.(type) {
+	case loxClassInstance:
+		return obj2.get(e.name), nil
+	case dataType:
+		return obj2.getMethod(e.name), nil
+	default:
 		logRuntimeError(e.name, "Only instances have properties.")
 		return nil, errors.New("unreachable")
-	} else {
-		return obj2.get(e.name), nil
 	}
 }
 
@@ -342,13 +345,13 @@ func (i interpreter) visitSetExpr(e eSet) (any, error) {
 	if err != nil {
 		return nil, err
 	}
-	obj2, ok := obj.(loxClassInstance)
-	if !ok {
-		logRuntimeError(e.name, "Only instances have fields.")
-		return nil, errors.New("unreachable")
-	} else {
+	switch obj2 := obj.(type) {
+	case loxClassInstance:
 		value := getJustVal(i.evaluate(e.value))
 		return obj2.set(e.name, value), nil
+	default:
+		logRuntimeError(e.name, "Only instances have fields.")
+		return nil, errors.New("unreachable")
 	}
 }
 
@@ -436,7 +439,7 @@ func isNumber(value any) bool {
 }
 
 func isList(value any) bool {
-	_, ok := value.(*LoxList)
+	_, ok := value.(*loxList)
 	return ok
 }
 
