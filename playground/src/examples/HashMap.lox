@@ -28,7 +28,7 @@ class Hashmap {
             hash = hash * fnvPrime;
             // Use built-in ord() to get character code
             hash = hash ^ ord(key[i]);
-            // Ensure 32-bit integer
+            // Ensure integer
             hash = floor(hash % 4294967296);
         }
         
@@ -37,6 +37,9 @@ class Hashmap {
 
     // Internal method to resize and rehash when load factor is exceeded
     _resize() {
+        print("");
+        print("---- resizing the map ----");
+        print("");
         // Double the capacity
         var oldBuckets = this.buckets;
         this.capacity = this.capacity * 2;
@@ -47,10 +50,13 @@ class Hashmap {
         for (var i = 0; i < this.capacity; i = i + 1) {
             this.buckets.append([]);
         }
+
         
         // Rehash all existing key-value pairs
-        for (var bucket in oldBuckets) {
-            for (var entry in bucket) {
+        for (var i=0; i<len(oldBuckets) ; i=i+1) {
+            var bucket = oldBuckets[i];
+            for (var i=0; i<len(bucket); i=i+1) {
+                var entry = bucket[i];
                 this.set(entry[0], entry[1]);
             }
         }
@@ -86,7 +92,8 @@ class Hashmap {
         var index = this._hash(key) % this.capacity;
         var bucket = this.buckets[index];
         
-        for (var entry in bucket) {
+        for (var i=0; i<len(bucket); i=i+1) {
+            var entry = bucket[i];
             if (entry[0] == key) {
                 return entry[1];
             }
@@ -101,7 +108,8 @@ class Hashmap {
         var index = this._hash(key) % this.capacity;
         var bucket = this.buckets[index];
         
-        for (var entry in bucket) {
+        for (var i=0; i<len(bucket); i=i+1) {
+            var entry = bucket[i];
             if (entry[0] == key) {
                 return true;
             }
@@ -129,8 +137,10 @@ class Hashmap {
     // Get all keys
     keys() {
         var allKeys = [];
-        for (var bucket in this.buckets) {
-            for (var entry in bucket) {
+        for (var i; i<len(oldBuckets) ; i=i+1) {
+            var bucket = oldBuckets[i];
+            for (var i=0; i<len(bucket); i=i+1) {
+                var entry = bucket[i];
                 allKeys.append(entry[0]);
             }
         }
@@ -140,8 +150,10 @@ class Hashmap {
     // Get all values
     values() {
         var allValues = [];
-        for (var bucket in this.buckets) {
-            for (var entry in bucket) {
+        for (var i; i<len(oldBuckets) ; i=i+1) {
+            var bucket = oldBuckets[i];
+            for (var i=0; i<len(bucket); i=i+1) {
+                var entry = bucket[i];
                 allValues.append(entry[1]);
             }
         }
@@ -155,8 +167,24 @@ class Hashmap {
 }
 
 var map = Hashmap();
+print("adding to map - name=Alice");
 map.set("name", "Alice");
-print(map.get("name"));  // Prints: Alice
-print(map.contains("name"));  // Prints: true
+print("map.get('name')=" + map.get("name"));
+print("map.contains('name')=" + map.contains("name"));
+print("calling map.remove('name')"); 
 map.remove("name");
-print(map.contains("name"));  // Prints: false
+print("map.contains('name')=" + map.contains("name"));
+
+for (var i=0; i<40; i=i+1) {
+    if (i % 2 == 0) {
+        var key = string(i);
+        map.set(key, i);
+    }
+}
+
+for (var i=0; i<6; i=i+1) {
+    var exists = map.contains(string(i));
+    print("map.contains " + string(i) + " = " + exists);
+}
+
+print(map.get("10") + map.get("20") + map.get("30"));

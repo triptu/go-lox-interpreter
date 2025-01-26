@@ -123,6 +123,12 @@ func defineNativeFunctions(globals *environment) {
 			return strconv.ParseFloat(a[0].(string), 64)
 		},
 	})
+	globals.define("string", nativeFunction{
+		arityCnt: 1,
+		fn: func(i interpreter, a []any) (any, error) {
+			return fmt.Sprintf("%v", a[0]), nil
+		},
+	})
 	globals.define("randInt", nativeFunction{
 		arityCnt: 1,
 		fn: func(i interpreter, a []any) (any, error) {
@@ -146,7 +152,7 @@ func defineNativeFunctions(globals *environment) {
 	globals.define("ord", nativeFunction{ // gives the ascii value of a character
 		arityCnt: 1,
 		fn: func(i interpreter, a []any) (any, error) {
-			return int(a[0].(string)[0]), nil
+			return float64(a[0].(string)[0]), nil
 		},
 	})
 	globals.define("len", nativeFunction{
@@ -158,6 +164,7 @@ func defineNativeFunctions(globals *environment) {
 			case string:
 				return float64(len(a[0].(string))), nil
 			default:
+				// fmt.Printf("type of %v is %T\n", a[0], a[0])
 				logRuntimeError(token{}, "len() can only be called on iterables.")
 				return nil, errors.New("len() can only be called on iterables")
 			}

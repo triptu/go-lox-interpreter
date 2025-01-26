@@ -220,7 +220,7 @@ func (i interpreter) visitBinaryExpr(e eBinary) (any, error) {
 		return math.Mod(left.(float64), right.(float64)), nil
 	case tXor:
 		validateNumberOperand2(left, right, e.operator)
-		return int(left.(float64)) ^ int(right.(float64)), nil
+		return float64(int(left.(float64)) ^ int(right.(float64))), nil
 	case tSlash:
 		validateNumberOperand2(left, right, e.operator)
 		validateNonZeroDenom(right.(float64), e.operator)
@@ -281,6 +281,7 @@ func (i interpreter) visitCallExpr(e eCall) (any, error) {
 		logRuntimeError(e.paren,
 			fmt.Sprintf("Expected %d arguments but got %d.", callee2.arity(), len(args)))
 	}
+	// fmt.Printf("calling %v with %v\n", callee2, args)
 	return callee2.call(i, args)
 }
 
@@ -313,7 +314,14 @@ func (i interpreter) visitGetIndexExpr(e eGetIndex) (any, error) {
 	case *loxList:
 		return obj2.getAtIndex(index), nil
 	case string:
-		return obj2[index], nil
+		if index < 0 {
+			index = len(obj2) + index
+		}
+		if index >= len(obj2) {
+			logRuntimeError(e.bracket, "Index out of bounds")
+			return nil, errors.New("unreachable")
+		}
+		return string(obj2[index]), nil
 	default:
 		logRuntimeError(e.bracket, "Only lists and strings can be accessed by index.")
 		return nil, errors.New("unreachable")

@@ -1,74 +1,11 @@
-// Linked List implementation first
-class Node {
-  init(val, nextNode) {
-    this.value = val;
-    this.next = nextNode;
-  }
-}
-
-// Array-like class built on top of linked list
-class Array {
-  init() {
-    this.head = nil;
-    this.size = 0;
-  }
-
-  // Add an element to the end of the array
-  push(val) {
-    if (this.head == nil) {
-      this.head = Node(val, nil);
-    } else {
-      var current = this.head;
-      while (current.next != nil) {
-        current = current.next;
-      }
-      current.next = Node(val, nil);
-    }
-    this.size = this.size + 1;
-    return this;
-  }
-
-  // Get element at a specific index
-  get(index) {
-    if (index < 0 or index >= this.size) {
-      print "Index out of bounds";
-      return nil;
-    }
-
-    var current = this.head;
-    var count = 0;
-    while (count < index) {
-      current = current.next;
-      count = count + 1;
-    }
-    return current.value;
-  }
-
-  toString() {
-    var s="[";
-    var current = this.head;
-    var first = true;
-    while (current != nil) {
-      if (!first) {
-          s = s + ", ";
-      }
-      s = s + current.value;
-      current = current.next;
-      first = false;
-    }
-    s = s + "]";
-    return s;
-  }
-}
-
 // Binary search implementation
 fun binary_search(arr, target) {
   var left = 0;
-  var right = arr.size - 1;
+  var right = len(arr) - 1;
 
   while (left <= right) {
     var mid = floor((left + right) / 2);
-    var midValue = arr.get(mid);
+    var midValue = arr[mid];
 
     if (midValue == target) {
       return mid;
@@ -87,14 +24,9 @@ fun binary_search(arr, target) {
 // Demonstration
 fun main() {
   // Create a sorted array
-  var arr = Array()
-    .push(2)
-    .push(3)
-    .push(4)
-    .push(10)
-    .push(40);
+  var arr = [2,3,4,10,50];
 
-  print("Array contents: " + arr.toString());
+  print("Array contents: " + arr);
 
   // Should print 3
   var num = 10;
