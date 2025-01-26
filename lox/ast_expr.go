@@ -41,6 +41,8 @@ type exprVisitor interface {
 	// myVariable (accessing variable)
 	// a + b;
 	visitVariableExpr(eVariable) (any, error)
+	// [1, 2, 3]
+	visitListExpr(eList) (any, error)
 }
 
 type eAssign struct {
@@ -106,6 +108,10 @@ type eVariable struct {
 	name token
 }
 
+type eList struct {
+	elements []expr
+}
+
 // define accept methods for each type of expression
 
 func (e eAssign) accept(v exprVisitor) (any, error) {
@@ -154,4 +160,8 @@ func (e eUnary) accept(v exprVisitor) (any, error) {
 
 func (e eVariable) accept(v exprVisitor) (any, error) {
 	return v.visitVariableExpr(e)
+}
+
+func (e eList) accept(v exprVisitor) (any, error) {
+	return v.visitListExpr(e)
 }

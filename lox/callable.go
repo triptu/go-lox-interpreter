@@ -1,6 +1,7 @@
 package lox
 
 import (
+	"errors"
 	"fmt"
 	"math"
 	"math/rand/v2"
@@ -140,6 +141,23 @@ func defineNativeFunctions(globals *environment) {
 		arityCnt: 1,
 		fn: func(i interpreter, a []any) (any, error) {
 			return math.Floor(a[0].(float64)), nil
+		},
+	})
+	globals.define("ord", nativeFunction{ // gives the ascii value of a character
+		arityCnt: 1,
+		fn: func(i interpreter, a []any) (any, error) {
+			return int(a[0].(string)[0]), nil
+		},
+	})
+	globals.define("len", nativeFunction{
+		arityCnt: 1,
+		fn: func(i interpreter, a []any) (any, error) {
+			asList, ok := a[0].(*LoxList)
+			if !ok {
+				logRuntimeError(token{}, "len() can only be called on iterables.")
+				return nil, errors.New("len() can only be called on iterables")
+			}
+			return len(asList.elements), nil
 		},
 	})
 }

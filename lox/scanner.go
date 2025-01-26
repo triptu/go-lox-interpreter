@@ -54,6 +54,10 @@ func (s *scanner) scanNextToken() {
 		s.addSimpleToken(tLeftBrace)
 	case '}':
 		s.addSimpleToken(tRightBrace)
+	case '[':
+		s.addSimpleToken(tLeftBracket)
+	case ']':
+		s.addSimpleToken(tRightBracket)
 	case ',':
 		s.addSimpleToken(tComma)
 	case '.':

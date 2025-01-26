@@ -171,6 +171,8 @@ def populate_go_tests():
             **earlyChapters,
             **noNaNEquality,
             **noLanguageLimits,
+            # extensions
+            "test/extensions/array_init.lox": "pass",
         },
     )
 

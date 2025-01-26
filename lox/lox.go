@@ -133,6 +133,8 @@ func getLiteralStr(literal interface{}) string {
 		return strconv.FormatFloat(literal, 'f', -1, 64)
 	case string:
 		return literal
+	case *LoxList:
+		return literal.String()
 	default:
 		return fmt.Sprintf("%v", literal)
 	}

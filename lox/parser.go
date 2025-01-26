@@ -589,6 +589,20 @@ func (p *parser) finishCall(callee expr) (expr, *parseError) {
 	}, nil
 }
 
+func (p *parser) list_display() ([]expr, *parseError) {
+	var exprList []expr
+	for !p.peekMatch(tRightBracket) {
+		expr, err := p.expression()
+		if err != nil {
+			return nil, err
+		}
+		exprList = append(exprList, expr)
+		p.matchIncrement(tComma)
+	}
+	err := p.eatToken(tRightBracket, "Expect ']' after list.")
+	return exprList, err
+}
+
 func (p *parser) primary() (expr, *parseError) {
 	token := p.tokens[p.curr]
 	p.curr++
@@ -612,6 +626,12 @@ func (p *parser) primary() (expr, *parseError) {
 			p.curr++ // consume the right paren
 			return eGrouping{expression: expr}, nil
 		}
+	case tLeftBracket:
+		exprList, err := p.list_display()
+		if err != nil {
+			return nil, err
+		}
+		return eList{elements: exprList}, nil
 	case tThis:
 		return eThis{keyword: token}, nil
 	case tSuper:

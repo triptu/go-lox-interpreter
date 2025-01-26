@@ -204,6 +204,8 @@ func (i interpreter) visitBinaryExpr(e eBinary) (any, error) {
 			return getLiteralStr(left) + getLiteralStr(right), nil
 		} else if isNumber(left) && isNumber(right) {
 			return left.(float64) + right.(float64), nil
+		} else if isList(left) && isList(right) {
+			return left.(*LoxList).concat(right.(*LoxList)), nil
 		} else {
 			logRuntimeError(e.operator, "Operands must be two numbers or two strings.")
 		}
@@ -277,6 +279,19 @@ func (i interpreter) visitCallExpr(e eCall) (any, error) {
 			fmt.Sprintf("Expected %d arguments but got %d.", callee2.arity(), len(args)))
 	}
 	return callee2.call(i, args)
+}
+
+// creating a list - [1,2,3]
+func (i interpreter) visitListExpr(e eList) (any, error) {
+	list := getLoxList(nil)
+	for _, arg := range e.elements {
+		val, err := i.evaluate(arg)
+		if err != nil {
+			return nil, err
+		}
+		list.elements = append(list.elements, val)
+	}
+	return list, nil
 }
 
 func (i interpreter) visitReturnStmt(s sReturn) error {
@@ -417,6 +432,11 @@ func isString(value any) bool {
 
 func isNumber(value any) bool {
 	_, ok := value.(float64)
+	return ok
+}
+
+func isList(value any) bool {
+	_, ok := value.(*LoxList)
 	return ok
 }
 

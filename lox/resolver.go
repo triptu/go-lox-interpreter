@@ -144,6 +144,15 @@ func (r *resolver) visitCallExpr(expr eCall) (any, error) {
 	return nil, nil
 }
 
+func (r *resolver) visitListExpr(expr eList) (any, error) {
+	for _, arg := range expr.elements {
+		if _, err := r.resolveExpr(arg); err != nil {
+			return nil, err
+		}
+	}
+	return nil, nil
+}
+
 func (r *resolver) visitGroupingExpr(expr eGrouping) (any, error) {
 	return r.resolveExpr(expr.expression)
 }

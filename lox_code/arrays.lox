@@ -1,0 +1,2 @@
+var arr = [1,2,3, "tushar", sleep, [4,5,6],];
+print(arr);

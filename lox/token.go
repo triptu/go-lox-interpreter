@@ -16,6 +16,8 @@ const (
 	tRightParen
 	tLeftBrace
 	tRightBrace
+	tLeftBracket
+	tRightBracket
 	tComma
 	tDot
 	tMinus
@@ -66,6 +68,8 @@ var tokenNames = map[TokenType]string{
 	tRightParen:   "RIGHT_PAREN",
 	tLeftBrace:    "LEFT_BRACE",
 	tRightBrace:   "RIGHT_BRACE",
+	tLeftBracket:  "LEFT_BRACKET",
+	tRightBracket: "RIGHT_BRACKET",
 	tComma:        "COMMA",
 	tDot:          "DOT",
 	tMinus:        "MINUS",

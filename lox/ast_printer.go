@@ -68,6 +68,18 @@ func (p astPrinter) visitVariableExpr(e eVariable) (any, error) {
 	return e.name.lexeme, nil
 }
 
+func (p astPrinter) visitListExpr(e eList) (any, error) {
+	var sb strings.Builder
+	sb.WriteString("[")
+	for _, expr := range e.elements {
+		sb.WriteString(" ")
+		evald, _ := expr.accept(p)
+		sb.WriteString(evald.(string))
+	}
+	sb.WriteString("]")
+	return sb.String(), nil
+}
+
 func (p astPrinter) parenthesize(name string, exprs ...expr) (any, error) {
 	var sb strings.Builder
 	sb.WriteString("(")

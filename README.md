@@ -130,6 +130,8 @@ expression     → assignment ;
 (* a = 2 or breakfast.milk.sugar = 4 *)
 assignment     → ( call "." )? IDENTIFIER "=" assignment
                | logic_or ;
+(* for dynamic lists, supports optional trailing comma *)
+list_display   → logic_or ( "," logic_or )* ( "," )? ;
 logic_or       → logic_and ( "or" logic_and )* ;
 logic_and      → equality ( "and" equality )* ;
 equality       → comparison ( ( "!=" | "==" ) comparison )* ;
@@ -145,7 +147,8 @@ call           → primary ( "(" arguments? ")" | "." IDENTIFIER )* ;
 primary        → NUMBER | STRING | "true" | "false" | "nil"
                | "(" expression ")"
                | IDENTIFIER 
-               | this | "super" "." IDENTIFIER ;
+               | this | "super" "." IDENTIFIER 
+               | "[" list_display? "]" ;
 
 (* helper rules *)
 arguments      → expression ( "," expression )* ;

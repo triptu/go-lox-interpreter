@@ -226,6 +226,10 @@ func (v *visualiseTreeVisitor) visitVariableExpr(e eVariable) (any, error) {
 	return nodeID, nil
 }
 
+func (v *visualiseTreeVisitor) visitListExpr(e eList) (any, error) {
+	panic("not implemented")
+}
+
 func getVal(val any, _ error) any {
 	return val
 }

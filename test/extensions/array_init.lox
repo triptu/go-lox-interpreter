@@ -1,0 +1,7 @@
+var arr = [1,2,3, "tushar", sleep, [4,5,6],];
+print(arr); // expect: [1, 2, 3, "tushar", "<native fn>", [4, 5, 6]]
+print(len(arr)); // expect: 6
+var arr1 = [1,2,3];
+var arr2 = [4,5,6];
+var arr3 = arr1 + arr2;
+print(arr3); // expect: [1, 2, 3, 4, 5, 6]
